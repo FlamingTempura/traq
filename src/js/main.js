@@ -36,7 +36,12 @@ angular.module('traq', [ngMaterial, uiRouter])
 			})
 			.state('table-edit', {
 				url: '/table/:tid/edit',
-				templateUrl: 'table-edit.html'
+				templateUrl: 'table-edit.html',
+				controller: function ($scope) {
+					$scope.table = {
+						columns: []
+					};
+				}
 			})
 			.state('table-row-edit', {
 				url: '/table/:tid/row/:rid/edit',

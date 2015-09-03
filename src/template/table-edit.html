@@ -1,1 +1,66 @@
-Create/edit table: preset (if new), title, description, time precision, columns and units, reminders, delete (if edit)
+<form flex layout="column">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<md-button class="md-icon-button" aria-label="Close" ui-back>
+				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+			</md-button>
+			<h2>New table</h2>
+			<span flex></span>
+			<md-button type="submit">
+				Save
+			</md-button>
+		</div>
+	</md-toolbar>
+
+	<md-content flex layout-padding layout="column">
+		<div flex>
+			<md-input-container>
+				<label>Title</label>
+				<input type="text" ng-model="table.title" required>
+			</md-input-container>
+
+			<md-input-container>
+				<label>Description</label>
+				<textarea ng-model="table.description" columns="1"></textarea>
+			</md-input-container>
+
+			<!-- <md-input-container>
+				<label>Interval</label>
+				<md-select ng-model="table.interval">
+					<md-option>Once a day</md-option>
+					<md-option>Once a week</md-option>
+				</md-select>
+			</md-input-container> -->
+
+				<!-- preset (if new) -->
+				<!-- <md-divider></md-divider> -->
+
+			<h3>Columns</h3>
+
+			<div ng-repeat="column in table.columns" layout="row">
+
+				<md-input-container flex>
+					<label>Name</label>
+					<input type="text" ng-model="column.name" required>
+				</md-input-container>
+
+				<md-input-container style="width: 120px">
+					<label>Unit</label>
+					<input type="text" ng-model="column.unit" required>
+				</md-input-container>
+				
+				<md-button type="submit" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
+					<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+				</md-button>
+
+			</div>
+
+			
+			<md-button class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
+		
+		</div>
+		
+		<md-button class="md-raised md-warn">Delete</md-button>
+
+	</md-content>
+</form>
