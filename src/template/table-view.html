@@ -1,1 +1,17 @@
+
 View table [tb1]: data table with ability to edit/delete existing rows
+
+<table>
+	<thead>
+		<tr>
+			<th>Date/Time</th>
+			<th ng-repeat="column in table.columns">
+				{{ column.name }}
+			</th>
+		</tr>
+	</thead>
+</table>
+
+<md-button class="md-fab md-primary md-fab-bottom-right" aria-label="Add" ui-sref="table-row-edit({ tid: table._id })">
+	<md-icon md-font-icon="mi mi-24 mi-add"></md-icon>
+</md-button>

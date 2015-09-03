@@ -1,0 +1,21 @@
+<md-toolbar layout="row" class="md-tall">
+	<div flex layout="column">
+		<div class="md-toolbar-tools">
+			<md-button ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
+				<md-icon aria-label="Menu" md-font-icon="mi mi-24 mi-menu"></md-icon>
+			</md-button>
+			<h2>{{ table.title }}</h2>
+			<div flex></div>
+			<md-button ui-sref="table-edit({ tid: table._id })">
+				<md-icon md-font-icon="mi mi-24 mi-settings"></md-icon>
+			</md-button>
+		</div>
+		<div flex></div>
+		<md-tabs md-stretch-tabs="always" class="md-primary">
+			<md-tab>Data</md-tab>
+			<md-tab>Chart 1</md-tab>
+		</md-tabs>
+	</div>
+</md-toolbar>
+
+<md-content layout="column" flex ui-view></md-content>

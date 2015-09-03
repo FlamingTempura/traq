@@ -1,45 +1,89 @@
 'use strict';
 
-var angular = require('angular'),
+var _ = require('lodash'),
+	angular = require('angular'),
 	ngMaterial = require('angular-material'),
-	uiRouter = require('ui-router');
+	uiRouter = require('ui-router'),
+	mdDataTable = require('md-data-table'),
+	PouchDB = require('pouchdb');
 
-angular.module('traq', [ngMaterial, uiRouter])
-	.controller('AppCtrl', function ($scope, $mdSidenav, $state) {
-		$scope.toggleSidenav = function (menuId) {
-			$mdSidenav(menuId).toggle();
-		};
-		$scope.go = function (to, params) {
-			$state.go(to, params);
-		};
+angular.module('traq', [ngMaterial, uiRouter, mdDataTable])
+	.controller('AppCtrl', function () {
+
+	})
+	.service('table', function () {
+		return new PouchDB('traq-table');
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
 		$urlRouterProvider.otherwise('/');
 		$stateProvider
 			.state('main', {
 				abstract: true,
-				templateUrl: 'main.html'
+				templateUrl: 'main.html',
+				controller: function ($scope, $state, $mdSidenav, table) {
+					$scope.toggleSidenav = function (menuId) {
+						$mdSidenav(menuId).toggle();
+					};
+
+					$scope.go = function (to, params) {
+						$state.go(to, params);
+						$mdSidenav('left').close();
+					};
+
+					table.allDocs({ include_docs: true }).then(function (result) {
+						$scope.tables = _.chain(result.rows).pluck('doc').reject(function (table) {
+							return !table.title;
+						}).value();
+						console.log('got tables', $scope.tables);
+					}).catch(function (err) {
+						console.error('failed', err);
+					});
+				}
 			})
 			.state('home', {
 				parent: 'main',
 				url: '/',
-				templateUrl: 'home.html'
+				templateUrl: 'home.html',
+				controller: function ($scope) {
+					$scope.$root.title = 'Traq';
+				}
 			})
 			.state('table', {
+				parent: 'main',
+				url: '/table/:tid',
 				abstract: true,
-				templateUrl: 'table.html'
+				templateUrl: 'table.html',
+				controller: function ($scope, $state, table) {
+					table.get($state.params.tid).then(function (table) {
+						console.log('got table', table);
+						$scope.table = table;
+						$scope.$root.title = table.title;
+					}).catch(function (err) {
+						console.error('failed', err);
+					});
+				}
 			})
 			.state('table-view', {
 				parent: 'table',
-				url: '/table/:tid',
+				url: '/',
 				templateUrl: 'table-view.html'
 			})
 			.state('table-edit', {
 				url: '/table/:tid/edit',
 				templateUrl: 'table-edit.html',
-				controller: function ($scope) {
+				controller: function ($scope, $state, table) {
 					$scope.table = {
 						columns: []
+					};
+					$scope.save = function () {
+						$scope.table._id = String(Math.ceil(Math.random() * 1000000000000));
+						console.log('saving...', $scope.table);
+						table.put($scope.table).then(function () {
+							console.log('saved!');
+							$state.go('table-view', { tid: $scope.table._id });
+						}).catch(function (err) {
+							console.error('failed', err);
+						});
 					};
 				}
 			})
@@ -53,7 +97,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 			})
 			.state('table-chart-view', {
 				parent: 'table',
-				url: '/table/:tid/chart/:cid',
+				url: '/chart/:cid',
 				templateUrl: 'chart-view.html'
 			})
 			.state('table-chart-edit', {

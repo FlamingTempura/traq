@@ -16,9 +16,7 @@ gulp.task('browserify', function () {
 	return gulp.src('./src/js/main.js')
 		.pipe(through2.obj(function (file, enc, next) {
 			browserify(file.path, {
-				debug: devMode,
-				insertGlobals: devMode,
-				detectGlobals: !devMode
+				debug: devMode
 			}).bundle(function (err, res) {
 				file.contents = res;
 				next(null, file);
