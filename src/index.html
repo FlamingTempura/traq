@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" ng-app="traq">
+<head>
+	<title>Traq</title>
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link href="main.css" rel="stylesheet">
+</head>
+
+<body layout="column" ng-controller="AppCtrl">
+	<md-toolbar layout="row">
+		<div class="md-toolbar-tools">
+			<md-button ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
+				<md-icon aria-label="Menu" md-svg-icon="https://s3-us-west-2.amazonaws.com/s.cdpn.io/68133/menu.svg"></md-icon>
+			</md-button>
+			<h1>Traq</h1>
+		</div>
+	</md-toolbar>
+	<div layout="row" flex>
+		<md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')">
+			<!-- <md-menu-content>
+				<md-menu-item> -->
+					<md-button ui-sref-active="active" ui-sref="home">
+
+					<md-icon md-font-icon="mi mi-home"></md-icon> Home</md-button>
+				<!-- </md-menu-item>
+			</md-menu-content> -->
+<!-- 
+			<md-list>
+				<div ui-sref="home"><md-list-item>
+					<md-icon md-font-icon="mi mi-home"></md-icon>
+					<p>Home</p>
+				</md-list-item></div>
+				<md-list-item>
+					<md-button ui-sref-active="active" ui-sref="home">
+
+					<md-icon md-font-icon="mi mi-home"></md-icon> Home</md-button>
+				</md-list-item>
+				<!- all tables -
+				<md-list-item ui-sref="table.edit({ tid: 'new' })">
+					<md-icon md-font-icon="mi mi-add"></md-icon>
+					<p>Create table</p>
+				</md-list-item>
+				<md-divider></md-divider>
+				<md-list-item ui-sref="export">
+					<md-icon md-font-icon="mi mi-file-download"></md-icon>
+					<p>Export</p>
+				</md-list-item>
+				<md-list-item ui-sref="settings">
+					<md-icon md-font-icon="mi mi-settings"></md-icon>
+					<p>Settings</p>
+				</md-list-item>
+				<md-list-item ui-sref="feedback">
+					<md-icon md-font-icon="mi mi-feedback"></md-icon>
+					<p>Feedback</p>
+				</md-list-item>
+			</md-list> -->
+		</md-sidenav>
+		<div layout="column" flex id="content">
+			<md-content layout="column" flex class="md-padding" ui-view></md-content>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="templates.js"></script>
+</body>
+</html>

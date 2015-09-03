@@ -1,0 +1,38 @@
+{
+  "name": "traq",
+  "version": "0.0.1",
+  "description": "An app for recording and plotting data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "GPL-3.0 ",
+  "dependencies": {
+    "angular": "^1.4.5",
+    "angular-animate": "^1.4.5",
+    "angular-aria": "^1.4.5",
+    "angular-material": "^0.10.1",
+    "angular-touch": "^1.4.5",
+    "d3": "^3.5.6",
+    "jquery": "^2.1.4",
+    "lodash": "^3.10.1",
+    "material-design-icons-iconfont": "^2.0.3",
+    "material-icons": "^0.1.0",
+    "moment": "^2.10.6",
+    "pouchdb": "^4.0.1",
+    "roboto-fontface": "^0.4.2",
+    "ui-router": "0.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.1",
+    "gulp": "^3.9.0",
+    "gulp-batch": "^1.0.5",
+    "gulp-filter": "^3.0.1",
+    "gulp-newer": "^0.5.1",
+    "gulp-ng-templates": "0.0.6",
+    "gulp-sass": "^2.0.4",
+    "gulp-watch": "^4.3.5",
+    "through2": "^2.0.0"
+  }
+}
