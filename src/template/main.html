@@ -1,0 +1,38 @@
+<md-toolbar layout="row">
+	<div class="md-toolbar-tools">
+		<md-button ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
+			<md-icon aria-label="Menu" md-font-icon="mi mi-24 mi-menu"></md-icon>
+		</md-button>
+		<h2>Traq</h2>
+	</div>
+</md-toolbar>
+<div layout="row" flex>
+	<md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')">
+		<md-list>
+			<md-list-item ng-click="go('home')">
+				<md-icon md-font-icon="mi mi-24 mi-home"></md-icon> 
+				<p>Home</p>
+			</md-list-item>
+			<md-divider></md-divider>
+			<md-subheader>Tables</md-subheader>
+			<md-list-item ng-click="go('table.edit', { id: 'new' })">
+				<md-icon md-font-icon="mi mi-24 mi-add"></md-icon> 
+				<p>Create table</p>
+			</md-list-item>
+			<md-divider></md-divider>
+			<md-list-item ng-click="go('export')">
+				<md-icon md-font-icon="mi mi-24 mi-file-download"></md-icon> 
+				<p>Export</p>
+			</md-list-item>
+			<md-list-item ng-click="go('settings')">
+				<md-icon md-font-icon="mi mi-24 mi-settings"></md-icon> 
+				<p>Settings</p>
+			</md-list-item>
+			<md-list-item ng-click="go('feedback')">
+				<md-icon md-font-icon="mi mi-24 mi-feedback"></md-icon> 
+				<p>Feedback</p>
+			</md-list-item>
+		</md-list>
+	</md-sidenav>
+	<md-content layout="column" flex ui-view></md-content>
+</div>

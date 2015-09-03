@@ -7,3 +7,17 @@ $material-design-icons-font-path: 'fonts/';
 @import 'node_modules/material-design-icons-iconfont/dist/material-design-icons';
 @import 'node_modules/material-icons/css/material-icons';
 
+md-toolbar {
+	box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+	&.toolbar-gray {
+		background: #f0f0f0;
+		color: #555;
+		md-icon {
+			color: #555;
+		}
+	}
+}
+
+.mi {
+	top: -1px;
+}

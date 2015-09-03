@@ -1,20 +1,27 @@
 'use strict';
 
-var lodash = require('lodash'),
-	angular = require('angular'),
+var angular = require('angular'),
 	ngMaterial = require('angular-material'),
 	uiRouter = require('ui-router');
 
 angular.module('traq', [ngMaterial, uiRouter])
-	.controller('AppCtrl', function ($scope, $mdSidenav) {
+	.controller('AppCtrl', function ($scope, $mdSidenav, $state) {
 		$scope.toggleSidenav = function (menuId) {
 			$mdSidenav(menuId).toggle();
+		};
+		$scope.go = function (to, params) {
+			$state.go(to, params);
 		};
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
 		$urlRouterProvider.otherwise('/');
 		$stateProvider
+			.state('main', {
+				abstract: true,
+				templateUrl: 'main.html'
+			})
 			.state('home', {
+				parent: 'main',
 				url: '/',
 				templateUrl: 'home.html'
 			})
@@ -64,4 +71,14 @@ angular.module('traq', [ngMaterial, uiRouter])
 				url: '/export',
 				templateUrl: 'export.html'
 			});
+	})
+	.directive('uiBack', function () {
+		return {
+			restrict: 'A',
+			link: function (scope, element) {
+				element.on('click', function () {
+					window.history.back();
+				});
+			}
+		};
 	});

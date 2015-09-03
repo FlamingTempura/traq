@@ -1,0 +1,28 @@
+<md-toolbar class="toolbar-gray">
+	<div class="md-toolbar-tools">
+		<md-button class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>Send Feedback</h2>
+		<span flex></span>
+		<md-button class="md-icon-button" aria-label="Send">
+			<md-icon md-font-icon="mi mi-24 mi-send"></md-icon>
+		</md-button>
+	</div>
+</md-toolbar>
+
+<md-content layout-padding layout="row" layout-sm="column">
+	<form>
+		<md-input-container>
+			<label>Your feedback, suggestions or comments</label>
+			<textarea ng-model="feedback.message" required columns="1" md-maxlength="500"></textarea>
+		</md-input-container>
+		
+		<md-checkbox ng-model="feedback.sendEmail" class="md-align-top-left">Include your email address so Traq can respond to you</md-checkbox>
+		
+		<md-input-container ng-if="feedback.sendEmail">
+			<label>Your email address</label>
+			<input type="email" ng-model="feedback.email">
+		</md-input-container>
+	</form>
+</md-content>
