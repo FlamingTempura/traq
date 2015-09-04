@@ -16,7 +16,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 		var db = new PouchDB('traq-row');
 		return _.extend({}, db, {
 			put: function (obj) {
-				obj.date = obj.date.getTime();
+				obj = _.extend({}, obj, { date: obj.date.getTime() });
 				return db.put.apply(db, arguments);
 			},
 			get: function () {
@@ -28,7 +28,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 			allDocs: function () {
 				return db.allDocs.apply(db, arguments).then(function (result) {
 					_.forEach(result.rows, function (row) {
-						if (row.doc) { row.date = new Date(row.date); }
+						if (row.doc) { row.doc.date = new Date(row.doc.date); }
 					});
 					return result;
 				});
@@ -87,7 +87,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 						console.error('failed', err);
 					}).then(function () {
 						dbRow.allDocs({ include_docs: true }).then(function (result) {
-							$scope.rows = _.chain(result.rows).pluck('doc').where({ table: $scope.table._id }).value();
+							$scope.rows = _.chain(result.rows).pluck('doc').where({ table: $scope.table._id }).sortBy('date').value();
 							console.log('got rows', $scope.rows);
 							$scope.$apply();
 						});
@@ -236,6 +236,25 @@ angular.module('traq', [ngMaterial, uiRouter])
 						{ hex: '#446CB3', name: 'San Marino' },
 						{ hex: '#6C7A89', name: 'Lynch' }
 					];
+					var colorDefault = [2, 1, 7, 8, 5, 4, 3, 9, 0, 6];
+					var defaults = function (table, chart) {
+						chart = _.extend({
+							_id: String(Math.ceil(Math.random() * 1000000000000)),
+							table: table._id,
+							columns: {}
+						}, chart);
+						_.each(table.columns, function (column, i) {
+							if (!chart.columns[column.id]) {
+								chart.columns[column.id] = {};
+							}
+							_.defaults(chart.columns[column.id], {
+								color: $scope.colors[colorDefault[i]].hex,
+								axis: i === 0 ? 'left' : 'right',
+								show: i === 0
+							});
+						});
+						return chart;
+					};
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('get table', table);
 						$scope.table = table;
@@ -245,15 +264,12 @@ angular.module('traq', [ngMaterial, uiRouter])
 					}).then(function () {
 						$scope.isNew = $state.params.cid === 'new';
 						if ($scope.isNew) {
-							$scope.chart = {
-								_id: String(Math.ceil(Math.random() * 1000000000000)),
-								table: $scope.table._id
-							};
+							$scope.chart = defaults($scope.table);
 							$scope.$apply();
 						} else {
 							dbChart.get($state.params.cid).then(function (chart) {
 								console.log('got chart', chart);
-								$scope.chart = chart;
+								$scope.chart = defaults($scope.table, chart);
 								$scope.$apply();
 							}).catch(function (err) {
 								console.error('failed', err);
@@ -298,6 +314,28 @@ angular.module('traq', [ngMaterial, uiRouter])
 			}
 		};
 	})
+	.constant('charts', [
+		{
+			id: 'line',
+			name: 'Line'
+		}
+	])
+	.directive('lineChartOptions', function () {
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				table: '=',
+				chart: '=',
+				rows: '='
+			},
+			link: function (scope, element) {
+				// smooth
+				// points
+				// 
+			}
+		};
+	})
 	.directive('lineChart', function () {
 		return {
 			restrict: 'E',
@@ -309,9 +347,13 @@ angular.module('traq', [ngMaterial, uiRouter])
 			},
 			link: function (scope, element) {
 				setTimeout(function () {
-					var columns = scope.table.columns,
-						rows = _.sortBy(scope.rows, 'date'),
-						chart = scope.chart;
+					var rows = _.sortBy(scope.rows, 'date'),
+						chart = scope.chart,
+						columns = _.chain(scope.table.columns).map(function (column) {
+							return _.extend({}, column, chart.columns[column.id]);
+						}).where({ show: true }).value(),
+						leftColumns = _.where(columns, { axis: 'left' }),
+						rightColumns = _.where(columns, { axis: 'right' });
 
 					var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 						width = 400 - margin.left - margin.right,
@@ -322,31 +364,23 @@ angular.module('traq', [ngMaterial, uiRouter])
 
 					var xAxis = d3.svg.axis()
 						.scale(x)
+						.ticks(d3.time.day)
+						.tickFormat(d3.time.format('%a'))
 						.orient('bottom');
 
-					var ys = [];
+					var yLeft = d3.scale.linear()
+						.range([height, 0]);
 
-					ys.push(d3.scale.linear()
-						.range([height, 0]));
-					// todo if chart option
-					ys.push(d3.scale.linear()
-						.range([height, 0]));
+					var yRight = d3.scale.linear()
+						.range([height, 0]);
 
-					var yAxes = [];
+					var yAxisLeft = d3.svg.axis()
+						.scale(yLeft)
+						.orient('left');
 
-					yAxes.push(d3.svg.axis()
-						.scale(ys[0])
-						.orient('left'));
-
-					yAxes.push(d3.svg.axis()
-						.scale(ys[1])
-						.orient('right'));
-
-					var lines = _.map(columns, function (column, i) {
-						return d3.svg.line()
-							.x(function (d) { return x(d.date); })
-							.y(function (d) { return ys[i](d[column.id]); });
-					});
+					var yAxisRight = d3.svg.axis()
+						.scale(yRight)
+						.orient('right');
 
 					var svg = d3.select(element[0]).append('svg')
 						.attr('width', width + margin.left + margin.right)
@@ -355,66 +389,73 @@ angular.module('traq', [ngMaterial, uiRouter])
 						.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 					x.domain(d3.extent(rows, function (d) { return d.date; }));
-					ys[0].domain(d3.extent(rows, function (d) { return d[columns[0].id]; }));
-					ys[1].domain(d3.extent(rows, function (d) { return d[columns[1].id]; }));
+
+					var allYLeft = _.chain(leftColumns).map(function (column) {
+						return _.pluck(rows, column.id);
+					}).flatten().value();
+					var allYRight = _.chain(rightColumns).map(function (column) {
+						return _.pluck(rows, column.id);
+					}).flatten().value();
+
+					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
+					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
 
 					svg.append('g')
 						.attr('class', 'x axis')
 						.attr('transform', 'translate(0,' + height + ')')
 						.call(xAxis);
 
-					svg.append('g')
-						.attr('class', 'y axis')
-						.call(yAxes[0])
-						.append('text')
-						.attr('transform', 'rotate(-90)')
-						.attr('y', 6)
-						.attr('dy', '.71em')
-						.style('text-anchor', 'end')
-						.text(columns[0].name);
+					if (leftColumns.length > 0) {
+						svg.append('g')
+							.attr('class', 'y axis')
+							.call(yAxisLeft)
+							.append('text')
+							.attr('transform', 'rotate(-90)')
+							.attr('y', 6)
+							.attr('dy', '.71em')
+							.style('text-anchor', 'end')
+							.text(leftColumns[0].name + ' (' + leftColumns[0].unit + ')');
+					}
 
-					svg.append('g')
-						.attr('class', 'y axis')
-						.attr('transform', 'translate(' + width + ' ,0)')
-						.call(yAxes[1])
-						.append('text')
-						.attr('transform', 'rotate(-90)')
-						.attr('y', 6)
-						.attr('dy', '.71em')
-						.style('text-anchor', 'end')
-						.text(columns[1].name);
+					if (rightColumns.length > 0) {
+						svg.append('g')
+							.attr('class', 'y axis')
+							.attr('transform', 'translate(' + width + ' ,0)')
+							.call(yAxisRight)
+							.append('text')
+							.attr('transform', 'rotate(-90)')
+							.attr('y', 6)
+							.attr('dy', '-.71em')
+							.style('text-anchor', 'end')
+							.text(rightColumns[0].name + ' (' + rightColumns[0].unit + ')');
+					}
 
-					svg.append('path')
-						.datum(rows)
-						.attr('class', 'line')
-						.attr('stroke', chart.colors[columns[0].id])
-						.attr('d', lines[0]);
+					_.each(columns, function (column) {
+						var y = column.axis === 'left' ? yLeft : yRight;
 
-					svg.selectAll('.point.a')
-						.data(rows)
-						.enter()
-						.append('svg:circle')
-						.attr('class', 'point a')
-						.attr('fill', chart.colors[columns[0].id])
-						.attr('cx', function (d) { return x(d.date); })
-						.attr('cy', function (d) { return ys[0](d[columns[0].id]); })
-						.attr('r', 4);
+						var line = d3.svg.line()
+							.interpolate('monotone')
+							.x(function (d) { return x(d.date); })
+							.y(function (d) { return y(d[column.id]); });
 
-					svg.append('path')
-						.datum(rows)
-						.attr('class', 'line')
-						.attr('stroke', chart.colors[columns[1].id])
-						.attr('d', lines[1]);
+						svg.append('path')
+							.datum(rows)
+							.attr('class', 'line')
+							.attr('stroke', column.color)
+							.attr('d', line);
 
-					svg.selectAll('.point.b')
-						.data(rows)
-						.enter()
-						.append('svg:circle')
-						.attr('class', 'point b')
-						.attr('fill', chart.colors[columns[1].id])
-						.attr('cx', function (d) { return x(d.date); })
-						.attr('cy', function (d) { return ys[1](d[columns[1].id]); })
-						.attr('r', 4);
+						svg.selectAll('.point.a')
+							.data(rows)
+							.enter()
+							.append('svg:circle')
+							.attr('class', 'point a')
+							.attr('fill', column.color)
+							.attr('cx', function (d) { return x(d.date); })
+							.attr('cy', function (d) { return y(d[column.id]); })
+							.attr('r', 4);
+					});
+
+					// TODO label lines
 
 				}, 300);
 			}
