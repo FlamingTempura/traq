@@ -8,11 +8,31 @@ var _ = require('lodash'),
 
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function () { })
-	.service('table', function () {
+	.service('dbTable', function () {
 		return new PouchDB('traq-table');
 	})
-	.service('row', function () {
-		return new PouchDB('traq-row');
+	.service('dbRow', function () {
+		var db = new PouchDB('traq-row');
+		return _.extend({}, db, {
+			put: function (obj) {
+				obj.date = obj.date.getTime();
+				return db.put.apply(db, arguments);
+			},
+			get: function () {
+				return db.get.apply(db, arguments).then(function (row) {
+					row.date = new Date(row.date);
+					return row;
+				});
+			},
+			allDocs: function () {
+				return db.allDocs.apply(db, arguments).then(function (result) {
+					_.forEach(result.rows, function (row) {
+						if (row.doc) { row.date = new Date(row.date); }
+					});
+					return result;
+				});
+			}
+		});
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
 		$urlRouterProvider.otherwise('/');
@@ -20,7 +40,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 			.state('main', {
 				abstract: true,
 				templateUrl: 'main.html',
-				controller: function ($scope, $state, $mdSidenav, table) {
+				controller: function ($scope, $state, $mdSidenav, dbTable) {
 					$scope.toggleSidenav = function (menuId) {
 						$mdSidenav(menuId).toggle();
 					};
@@ -30,7 +50,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 						$mdSidenav('left').close();
 					};
 
-					table.allDocs({ include_docs: true }).then(function (result) {
+					dbTable.allDocs({ include_docs: true }).then(function (result) {
 						$scope.tables = _.chain(result.rows).pluck('doc').reject(function (table) {
 							return !table.title;
 						}).value();
@@ -54,15 +74,15 @@ angular.module('traq', [ngMaterial, uiRouter])
 				url: '/table/:tid',
 				abstract: true,
 				templateUrl: 'table.html',
-				controller: function ($scope, $state, table, row) {
-					table.get($state.params.tid).then(function (table) {
+				controller: function ($scope, $state, dbTable, dbRow) {
+					dbTable.get($state.params.tid).then(function (table) {
 						console.log('got table', table);
 						$scope.table = table;
 						$scope.$apply();
 					}).catch(function (err) {
 						console.error('failed', err);
 					}).then(function () {
-						return row.allDocs({ include_docs: true });
+						return dbRow.allDocs({ include_docs: true });
 					}).then(function (result) {
 						console.log('all rows', result.rows);
 						$scope.rows = _.chain(result.rows).pluck('doc').where({ table: $scope.table._id }).value();
@@ -91,7 +111,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 			.state('table-edit', {
 				url: '/table/:tid/edit',
 				templateUrl: 'table-edit.html',
-				controller: function ($scope, $state, table) {
+				controller: function ($scope, $state, dbTable) {
 					$scope.isNew = $state.params.tid === 'new';
 					if ($scope.isNew) {
 						$scope.table = {
@@ -99,7 +119,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 							columns: []
 						};
 					} else {
-						table.get($state.params.tid).then(function (table) {
+						dbTable.get($state.params.tid).then(function (table) {
 							console.log('get table', table);
 							$scope.table = table;
 							$scope.$apply();
@@ -115,7 +135,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 								column.id = String(Math.ceil(Math.random() * 1000000000000));
 							}
 						});
-						table.put($scope.table).then(function () {
+						dbTable.put($scope.table).then(function () {
 							console.log('saved!');
 							$state.go('table-view', { tid: $scope.table._id });
 						}).catch(function (err) {
@@ -127,9 +147,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 			.state('table-row-edit', {
 				url: '/table/:tid/row/:rid/edit',
 				templateUrl: 'row-edit.html',
-				controller: function ($scope, $state, table, row) {
+				controller: function ($scope, $state, dbTable, dbRow) {
 
-					table.get($state.params.tid).then(function (table) {
+					dbTable.get($state.params.tid).then(function (table) {
 						console.log('get table', table);
 						$scope.table = table;
 						$scope.$apply();
@@ -143,8 +163,10 @@ angular.module('traq', [ngMaterial, uiRouter])
 								date: new Date(),
 								table: $scope.table._id
 							};
+							$scope.row.date.setMilliseconds(0);
+							$scope.$apply();
 						} else {
-							row.get($state.params.rid).then(function (row) {
+							dbRow.get($state.params.rid).then(function (row) {
 								console.log('got row', row);
 								$scope.row = row;
 								$scope.$apply();
@@ -155,7 +177,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					});
 
 					$scope.save = function () {
-						row.put($scope.row).then(function () {
+						dbRow.put($scope.row).then(function () {
 							console.log('saved!', $scope.row);
 							history.back();
 						}).catch(function (err) {
