@@ -18,8 +18,12 @@ gulp.task('browserify', function () {
 			browserify(file.path, {
 				debug: devMode
 			}).bundle(function (err, res) {
-				file.contents = res;
-				next(null, file);
+				if (err) {
+					next(err);
+				} else {
+					file.contents = res;
+					next(null, file);
+				}
 			});
 		}))
 		.pipe(gulp.dest('./dist'));

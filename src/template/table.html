@@ -6,7 +6,10 @@
 			</md-button>
 			<h2>{{ table.title }}</h2>
 			<div flex></div>
-			<md-button ui-sref="table-edit({ tid: table._id })">
+			<md-button ui-sref="table-chart.edit({ tid: table._id, cid: 'new' })" class="md-icon-button" aria-label="Create chart">
+				<md-icon md-font-icon="mi mi-24 mi-insert-chart"></md-icon>
+			</md-button>
+			<md-button ui-sref="table-edit({ tid: table._id })" class="md-icon-button" aria-label="Settings">
 				<md-icon md-font-icon="mi mi-24 mi-settings"></md-icon>
 			</md-button>
 		</div>

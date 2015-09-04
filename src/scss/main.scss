@@ -21,3 +21,51 @@ md-toolbar {
 .mi {
 	top: -1px;
 }
+
+table {
+	border-spacing: 0;
+	width: 100%;
+	thead {
+		tr {
+			
+			th {
+				font-size: 12px;
+				font-weight: 500;
+				color: hsl(0, 0, 46%);
+				height: 56px;
+				border-bottom: 2px solid #eee;
+				text-align: left;
+			}
+		}
+	}
+	tbody {
+		font-size: 13px;
+		
+		tr {
+			border-bottom: 1px solid #eee;
+			&:hover {
+				background: #eee;
+			}
+			&.selected {
+				background: #f5f5f5;
+			}
+			td {
+				height: 48px;
+				font-size: 13px;
+				color: hsl(0, 0, 13%);
+				min-width: 76px;
+			}
+		}
+	}
+	.numeric {
+		text-align: right !important;
+	}
+	.check {
+		padding-left: 10px;
+		max-width: 40px;
+	}
+	.control {
+		padding-right: 10px;
+		max-width: 40px;
+	}
+}

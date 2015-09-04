@@ -1,4 +1,4 @@
-<form ng-submit="save()">
+<form flex layout="column" ng-submit="save()">
 	<md-toolbar>
 		<div class="md-toolbar-tools">
 			<md-button class="md-icon-button" aria-label="Close" ui-back>
@@ -10,19 +10,34 @@
 		</div>
 	</md-toolbar>
 
-	Create/edit row: time, values for each column, note, delete (if edit)
+	<md-content flex layout-padding layout="column">
+		<div flex>
 
-	<md-content layout-padding layout="row" layout-sm="column">
-		<md-input-container>
-			<label>Your feedback, suggestions or comments</label>
-			<textarea ng-model="feedback.message" required columns="1" md-maxlength="500"></textarea>
-		</md-input-container>
-		
-		<md-checkbox ng-model="feedback.sendEmail" class="md-align-top-left">Include your email address so Traq can respond to you</md-checkbox>
-		
-		<md-input-container ng-if="feedback.sendEmail">
-			<label>Your email address</label>
-			<input type="email" ng-model="feedback.email">
-		</md-input-container>
+			<div layout="row">
+				<md-input-container flex>
+					<label>Date</label>
+					<input type="date" ng-model="row.date" required>
+				</md-input-container>
+
+				<md-input-container flex>
+					<label>Time</label>
+					<input type="time" ng-model="row.date" required>
+				</md-input-container>
+			</div>
+			
+			<md-input-container ng-repeat="column in table.columns">
+				<label>{{ column.name }} ({{ column.unit }})</label>
+				<input type="number" ng-model="row[column.id]">
+			</md-input-container>
+
+			<md-input-container>
+				<label>Note</label>
+				<textarea ng-model="row.note"></textarea>
+			</md-input-container>
+
+		</div>
+
+		<md-button class="md-raised md-warn">Delete</md-button>
+
 	</md-content>
 </form>
