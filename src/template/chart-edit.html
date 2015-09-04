@@ -1,1 +1,57 @@
-Create/edit chart: preset (if new), title, type, chart type options, colours, delete (if edit)
+<form flex layout="column" ng-submit="save()">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<md-button class="md-icon-button" aria-label="Close" ui-back>
+				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+			</md-button>
+			<h2><span ng-if="isNew">New chart</span>
+				<span ng-if="!isNew">Edit {{ chart.title }}</span></h2>
+			<span flex></span>
+			<md-button type="submit">Save</md-button>
+		</div>
+	</md-toolbar>
+
+	<md-content flex layout-padding layout="column">
+		<div flex>
+			<md-input-container>
+				<label>Title</label>
+				<input type="text" ng-model="chart.title" required>
+			</md-input-container>
+
+			<md-input-container>
+				<label>Description</label>
+				<textarea ng-model="chart.description" columns="1"></textarea>
+			</md-input-container>
+
+				<!-- preset (if new) -->
+				<!-- <md-divider></md-divider> -->
+
+			<md-input-container>
+				<label>Type</label>
+				<md-select ng-model="chart.type">
+					<md-option>Line</md-option>
+					<md-option>Bar</md-option>
+					<md-option>Pie</md-option>
+				</md-select>
+			</md-input-container>
+
+			<!-- chart options -->
+
+			<h3>Colours</h3>
+
+			<md-input-container ng-repeat="column in table.columns">
+				<label>{{ column.name }}</label>
+				<md-select ng-model="chart.colors[column.id]">
+					<md-option ng-repeat="color in colors" value="{{ color.hex }}">
+						<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{color.hex}}"></md-icon>
+						&nbsp; {{ color.name }}
+					</md-option>
+				</md-select>
+			</md-input-container>
+			
+		</div>
+		
+		<md-button ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
+
+	</md-content>
+</form>

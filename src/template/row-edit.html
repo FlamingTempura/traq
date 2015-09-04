@@ -28,7 +28,7 @@
 			
 			<md-input-container ng-repeat="column in table.columns">
 				<label>{{ column.name }} ({{ column.unit }})</label>
-				<input type="number" ng-model="row[column.id]">
+				<input type="number" ng-model="row[column.id]" step="any">
 			</md-input-container>
 
 			<md-input-container>
@@ -38,7 +38,7 @@
 
 		</div>
 
-		<md-button class="md-raised md-warn">Delete</md-button>
+		<md-button ng-if="isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>

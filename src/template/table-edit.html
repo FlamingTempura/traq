@@ -48,7 +48,7 @@
 					<input type="text" ng-model="column.unit" required>
 				</md-input-container>
 				
-				<md-button type="submit" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
+				<md-button class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
 					<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 				</md-button>
 
@@ -59,7 +59,7 @@
 		
 		</div>
 		
-		<md-button class="md-raised md-warn">Delete</md-button>
+		<md-button ng-if="isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>
