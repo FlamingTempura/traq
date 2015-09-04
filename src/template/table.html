@@ -1,6 +1,6 @@
-<md-toolbar layout="row" class="md-tall">
+<md-toolbar layout="row" class="md-tall" ng-class="{ 'toolbar-gray': showSelectedToolbar }">
 	<div flex layout="column">
-		<div class="md-toolbar-tools">
+		<div class="md-toolbar-tools" ng-if="!showSelectedToolbar">
 			<md-button ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
 				<md-icon aria-label="Menu" md-font-icon="mi mi-24 mi-menu"></md-icon>
 			</md-button>
@@ -14,7 +14,7 @@
 			</md-button>
 		</div>
 		<div flex></div>
-		<md-tabs md-stretch-tabs="always" class="md-primary" md-selected="tabIndex">
+		<md-tabs md-stretch-tabs="always" class="md-primary" md-selected="tabIndex"  ng-if="!showSelectedToolbar">
 			<md-tab ng-click="go('table-view', { tid: table._id })">
 				Data
 			</md-tab>
@@ -22,6 +22,12 @@
 				{{ chart.title }}
 			</md-tab>
 		</md-tabs>
+
+		<div class="md-toolbar-tools" ng-if="showSelectedToolbar">
+			<md-button class="md-icon-button" aria-label="Delete selected">
+				<md-icon md-font-icon="mi mi-24 mi-delete"></md-icon>
+			</md-button>
+		</div>
 	</div>
 </md-toolbar>
 

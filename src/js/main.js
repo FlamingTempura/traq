@@ -78,7 +78,13 @@ angular.module('traq', [ngMaterial, uiRouter])
 				url: '/table/:tid',
 				abstract: true,
 				templateUrl: 'table.html',
-				controller: function ($scope, $state, dbTable, dbRow, dbChart) {
+				controller: function ($scope, $state, dbTable, dbRow, dbChart, rowsSelected) {
+					$scope.rowsSelected = rowsSelected;
+					$scope.$watch('rowsSelected', function (rowsSelected) {
+						$scope.showSelectedToolbar = _.keys(rowsSelected).length > 0 && _.reduce(rowsSelected, function (memo, rowSelected) {
+							return memo && rowSelected;
+						}, true);
+					}, true);
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('got table', table);
 						$scope.table = table;
@@ -111,15 +117,16 @@ angular.module('traq', [ngMaterial, uiRouter])
 				parent: 'table',
 				url: '/',
 				templateUrl: 'table-view.html',
-				controller: function ($scope) {
-					$scope.selected = [];
+				controller: function ($scope, rowsSelected) {
+					$scope.rowsSelected = rowsSelected;
+					$scope.selectAll = false;
 					$scope.$watch('selectAll', function (selectAll) {
 						if (selectAll) {
-							_.each($scope.$parent.rows, function (row) {
-								$scope.selected[row._id] = true;
+							_.each($scope.rows, function (row) {
+								rowsSelected[row._id] = true;
 							});
 						} else {
-							$scope.selected = [];
+							rowsSelected = [];
 						}
 					});
 				}
@@ -304,6 +311,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 				templateUrl: 'export.html'
 			});
 	})
+	.service('rowsSelected', function () { return {}; })
 	.directive('uiBack', function () {
 		return {
 			restrict: 'A',
