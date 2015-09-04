@@ -20,8 +20,10 @@
     "material-design-icons-iconfont": "^2.0.3",
     "material-icons": "^0.1.0",
     "moment": "^2.10.6",
+    "node-uuid": "^1.4.3",
     "pouchdb": "^4.0.1",
     "roboto-fontface": "^0.4.2",
+    "transform-pouch": "^1.0.2",
     "ui-router": "0.0.1"
   },
   "devDependencies": {

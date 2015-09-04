@@ -5,38 +5,60 @@ var _ = require('lodash'),
 	ngMaterial = require('angular-material'),
 	uiRouter = require('ui-router'),
 	PouchDB = require('pouchdb'),
-	d3 = require('d3');
+	d3 = require('d3'),
+	uuid = require('node-uuid');
+
+PouchDB.plugin(require('transform-pouch'));
+PouchDB.plugin({
+	getAll: function (options) {
+		return this.allDocs(_.extend({ include_docs: true }, options)).then(function (result) {
+			return _.pluck(result.rows, 'doc');
+		});
+	}
+});
 
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function () { })
 	.service('dbTable', function () {
-		return new PouchDB('traq-table');
-	})
-	.service('dbRow', function () {
-		var db = new PouchDB('traq-row');
-		return _.extend({}, db, {
-			put: function (obj) {
-				obj = _.extend({}, obj, { date: obj.date.getTime() });
-				return db.put.apply(db, arguments);
-			},
-			get: function () {
-				return db.get.apply(db, arguments).then(function (row) {
-					row.date = new Date(row.date);
-					return row;
-				});
-			},
-			allDocs: function () {
-				return db.allDocs.apply(db, arguments).then(function (result) {
-					_.forEach(result.rows, function (row) {
-						if (row.doc) { row.doc.date = new Date(row.doc.date); }
-					});
-					return result;
+		var db = new PouchDB('traq-table');
+		db.transform({
+			incoming: function (doc) {
+				return _.extend({}, doc, {
+					columns: _.map(doc.columns, function (column) {
+						return {
+							id: column.id || 'col[' + uuid.v4() + ']',
+							name: column.name,
+							unit: column.unit
+						};
+					})
 				});
 			}
 		});
+		return db;
+	})
+	.service('dbRow', function () {
+		var db = new PouchDB('traq-row');
+		db.transform({
+			incoming: function (doc) {
+				return _.extend({}, doc, {
+					date: new Date(doc.date).getTime()
+				});
+			},
+			outgoing: function (doc) {
+				return _.extend({}, doc, { date: new Date(doc.date) });
+			}
+		});
+		return db;
 	})
 	.service('dbChart', function () {
-		return new PouchDB('traq-chart');
+		var db = new PouchDB('traq-chart');
+		/*db.transform({
+			incoming: function (doc) {
+				return _.extend({}, doc, {
+				});
+			}
+		});*/
+		return db;
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
 		$urlRouterProvider.otherwise('/');
@@ -54,10 +76,8 @@ angular.module('traq', [ngMaterial, uiRouter])
 						$mdSidenav('left').close();
 					};
 
-					dbTable.allDocs({ include_docs: true }).then(function (result) {
-						$scope.tables = _.chain(result.rows).pluck('doc').reject(function (table) {
-							return !table.title;
-						}).value();
+					dbTable.getAll().then(function (tables) {
+						$scope.tables = tables;
 						$scope.$apply();
 						console.log('got tables', $scope.tables);
 					}).catch(function (err) {
@@ -69,8 +89,11 @@ angular.module('traq', [ngMaterial, uiRouter])
 				parent: 'main',
 				url: '/',
 				templateUrl: 'home.html',
-				controller: function ($scope) {
+				controller: function ($scope, dbChart) {
 					$scope.$root.title = 'Traq';
+					dbChart.getAll().then(function (charts) {
+
+					});
 				}
 			})
 			.state('table', {
@@ -92,15 +115,20 @@ angular.module('traq', [ngMaterial, uiRouter])
 					}).catch(function (err) {
 						console.error('failed', err);
 					}).then(function () {
-						dbRow.allDocs({ include_docs: true }).then(function (result) {
-							$scope.rows = _.chain(result.rows).pluck('doc').where({ table: $scope.table._id }).sortBy('date').value();
+						dbRow.getAll({
+							startkey: $scope.table._id + ':',
+							endkey: $scope.table._id + ':\uffff'
+						}).then(function (rows) {
+							$scope.rows = _.sortBy(rows, 'date');
 							console.log('got rows', $scope.rows);
 							$scope.$apply();
 						});
-						dbChart.allDocs({ include_docs: true }).then(function (result) {
-							$scope.charts = _.chain(result.rows).pluck('doc').where({ table: $scope.table._id }).value();
+						dbChart.getAll({
+							startkey: $scope.table._id + ':',
+							endkey: $scope.table._id + ':\uffff'
+						}).then(function (charts) {
+							$scope.charts = charts;
 							console.log('got charts', $scope.charts);
-
 							if ($state.params.cid) {
 								$scope.tabIndex = _.findIndex($scope.charts, function (chart) {
 									return chart._id === $state.params.cid;
@@ -138,7 +166,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					$scope.isNew = $state.params.tid === 'new';
 					if ($scope.isNew) {
 						$scope.table = {
-							_id: String(Math.ceil(Math.random() * 1000000000000)),
+							_id: 'tbl[' + uuid.v4() + ']',
 							columns: []
 						};
 					} else {
@@ -153,11 +181,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 
 					$scope.save = function () {
 						console.log('saving...', $scope.table);
-						_.each($scope.table.columns, function (column) {
-							if (!column.hasOwnProperty('id')) {
-								column.id = String(Math.ceil(Math.random() * 1000000000000));
-							}
-						});
 						dbTable.put($scope.table).then(function () {
 							console.log('saved!');
 							$state.go('table-view', { tid: $scope.table._id });
@@ -182,9 +205,8 @@ angular.module('traq', [ngMaterial, uiRouter])
 						$scope.isNew = $state.params.rid === 'new';
 						if ($scope.isNew) {
 							$scope.row = {
-								_id: String(Math.ceil(Math.random() * 1000000000000)),
-								date: new Date(),
-								table: $scope.table._id
+								_id: $scope.table._id + ':row[' + uuid.v4() + ']',
+								date: new Date()
 							};
 							$scope.row.date.setMilliseconds(0);
 							$scope.$apply();
@@ -200,6 +222,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					});
 
 					$scope.save = function () {
+						console.log('putting', $scope.row);
 						dbRow.put($scope.row).then(function () {
 							console.log('saved!', $scope.row);
 							history.back();
@@ -246,8 +269,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					var colorDefault = [2, 1, 7, 8, 5, 4, 3, 9, 0, 6];
 					var defaults = function (table, chart) {
 						chart = _.extend({
-							_id: String(Math.ceil(Math.random() * 1000000000000)),
-							table: table._id,
 							columns: {}
 						}, chart);
 						_.each(table.columns, function (column, i) {
@@ -271,7 +292,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 					}).then(function () {
 						$scope.isNew = $state.params.cid === 'new';
 						if ($scope.isNew) {
-							$scope.chart = defaults($scope.table);
+							$scope.chart = defaults($scope.table, {
+								_id: $scope.table._id + ':cht[' + uuid.v4() + ']'
+							});
 							$scope.$apply();
 						} else {
 							dbChart.get($state.params.cid).then(function (chart) {
