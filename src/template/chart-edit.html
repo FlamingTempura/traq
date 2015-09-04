@@ -29,9 +29,9 @@
 			<md-input-container>
 				<label>Type</label>
 				<md-select ng-model="chart.type">
-					<md-option>Line</md-option>
-					<md-option>Bar</md-option>
-					<md-option>Pie</md-option>
+					<md-option value="line">Line</md-option>
+					<md-option value="bar">Bar</md-option>
+					<md-option value="pie">Pie</md-option>
 				</md-select>
 			</md-input-container>
 
@@ -61,7 +61,7 @@
 
 					<md-menu>
 						<md-button type="button" aria-label="Choose color" ng-click="$mdOpenMenu($event)" ng-disabled="!chart.columns[column.id].show" class="md-icon-button">
-							<md-icon md-menu-align-target md-font-icon="mi mi-24 mi-lens" style="color: {{chart.columns[column.id].color}}"></md-icon>
+							<md-icon md-menu-align-target md-font-icon="mi mi-24 mi-lens" ng-style="{ color: chart.columns[column.id].show && chart.columns[column.id].color }"></md-icon>
 						</md-button>
 						<md-menu-content width="4">
 							<md-menu-item ng-repeat="color in colors" value="{{ color.hex }}">
@@ -72,7 +72,8 @@
 							</md-menu-item>
 						</md-menu-content>
 					</md-menu>
-			</md-input-container>
+				</md-list-item>
+			</md-list>
 			
 		</div>
 		

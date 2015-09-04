@@ -345,119 +345,302 @@ angular.module('traq', [ngMaterial, uiRouter])
 				chart: '=',
 				rows: '='
 			},
+			template: '<div flex layout="row"><div flex></div></div>',
 			link: function (scope, element) {
-				setTimeout(function () {
-					var rows = _.sortBy(scope.rows, 'date'),
-						chart = scope.chart,
-						columns = _.chain(scope.table.columns).map(function (column) {
-							return _.extend({}, column, chart.columns[column.id]);
-						}).where({ show: true }).value(),
-						leftColumns = _.where(columns, { axis: 'left' }),
-						rightColumns = _.where(columns, { axis: 'right' });
+				var chart, columns, rows;
 
-					var margin = { top: 20, right: 50, bottom: 30, left: 50 },
-						width = 400 - margin.left - margin.right,
-						height = 300 - margin.top - margin.bottom;
+				var container = element.children()[0];
 
-					var x = d3.time.scale()
-						.range([0, width]);
+				var margin = { top: 20, right: 50, bottom: 30, left: 50 };
 
-					var xAxis = d3.svg.axis()
-						.scale(x)
-						.ticks(d3.time.day)
-						.tickFormat(d3.time.format('%a'))
-						.orient('bottom');
+				var x = d3.time.scale();
+				var yLeft = d3.scale.linear();
+				var yRight = d3.scale.linear();
 
-					var yLeft = d3.scale.linear()
-						.range([height, 0]);
+				var xAxis = d3.svg.axis()
+					.scale(x)
+					.ticks(d3.time.day)
+					.tickFormat(d3.time.format('%a'))
+					.orient('bottom');
 
-					var yRight = d3.scale.linear()
-						.range([height, 0]);
+				var yAxisLeft = d3.svg.axis()
+					.scale(yLeft)
+					.orient('left');
 
-					var yAxisLeft = d3.svg.axis()
-						.scale(yLeft)
-						.orient('left');
+				var yAxisRight = d3.svg.axis()
+					.scale(yRight)
+					.orient('right');
 
-					var yAxisRight = d3.svg.axis()
-						.scale(yRight)
-						.orient('right');
+				var svg = d3.select(container).append('svg');
+				var cht = svg.append('g');
 
-					var svg = d3.select(element[0]).append('svg')
-						.attr('width', width + margin.left + margin.right)
-						.attr('height', height + margin.top + margin.bottom)
-						.append('g')
-						.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+				cht.append('g')
+					.attr('class', 'x axis');
 
-					x.domain(d3.extent(rows, function (d) { return d.date; }));
+				cht.append('g')
+					.attr('class', 'y axis left')
+					.append('text')
+					.attr('transform', 'rotate(-90)')
+					.attr('y', 6)
+					.attr('dy', '.71em')
+					.style('text-anchor', 'end');
 
-					var allYLeft = _.chain(leftColumns).map(function (column) {
-						return _.pluck(rows, column.id);
-					}).flatten().value();
-					var allYRight = _.chain(rightColumns).map(function (column) {
-						return _.pluck(rows, column.id);
-					}).flatten().value();
+				cht.append('g')
+					.attr('class', 'y axis right')
+					.append('text')
+					.attr('transform', 'rotate(-90)')
+					.attr('y', 6)
+					.attr('dy', '-.71em')
+					.style('text-anchor', 'end');
 
-					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
-					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
+				var resize = function () {
+					var width = container.offsetWidth - margin.left - margin.right,
+						height = container.offsetHeight - margin.top - margin.bottom - 10;
 
-					svg.append('g')
-						.attr('class', 'x axis')
+					console.log('w', width, 'h', height);
+
+					x.range([0, width]);
+					yLeft.range([height, 0]);
+					yRight.range([height, 0]);
+
+					svg.attr('width', width + margin.left + margin.right)
+						.attr('height', height + margin.top + margin.bottom);
+
+					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+					cht.selectAll('.x.axis')
 						.attr('transform', 'translate(0,' + height + ')')
 						.call(xAxis);
 
-					if (leftColumns.length > 0) {
-						svg.append('g')
-							.attr('class', 'y axis')
-							.call(yAxisLeft)
-							.append('text')
-							.attr('transform', 'rotate(-90)')
-							.attr('y', 6)
-							.attr('dy', '.71em')
-							.style('text-anchor', 'end')
-							.text(leftColumns[0].name + ' (' + leftColumns[0].unit + ')');
-					}
+					cht.selectAll('.y.axis.right')
+						.attr('transform', 'translate(' + width + ' ,0)')
+						.call(yAxisRight);
 
-					if (rightColumns.length > 0) {
-						svg.append('g')
-							.attr('class', 'y axis')
-							.attr('transform', 'translate(' + width + ' ,0)')
-							.call(yAxisRight)
-							.append('text')
-							.attr('transform', 'rotate(-90)')
-							.attr('y', 6)
-							.attr('dy', '-.71em')
-							.style('text-anchor', 'end')
-							.text(rightColumns[0].name + ' (' + rightColumns[0].unit + ')');
-					}
+					cht.selectAll('.y.axis.left')
+						.call(yAxisLeft);
+
+					cht.selectAll('.line')
+						.remove();
 
 					_.each(columns, function (column) {
 						var y = column.axis === 'left' ? yLeft : yRight;
+
+						cht.selectAll('.point.p' + column.id)
+							.attr('cx', function (d) { return x(d.date); })
+							.attr('cy', function (d) { return y(d[column.id]); });
 
 						var line = d3.svg.line()
 							.interpolate('monotone')
 							.x(function (d) { return x(d.date); })
 							.y(function (d) { return y(d[column.id]); });
 
-						svg.append('path')
+						cht.append('path')
 							.datum(rows)
 							.attr('class', 'line')
 							.attr('stroke', column.color)
 							.attr('d', line);
+					});
+				};
 
-						svg.selectAll('.point.a')
+				var plot = function () {
+					if (!scope.chart || !scope.table || !scope.rows) { return; }
+					rows = _.sortBy(scope.rows, 'date');
+					chart = scope.chart;
+					columns = _.chain(scope.table.columns).map(function (column) {
+						return _.extend({}, column, chart.columns[column.id]);
+					}).where({ show: true }).value();
+
+					var leftColumns = _.where(columns, { axis: 'left' }),
+						rightColumns = _.where(columns, { axis: 'right' }),
+						leftLabel = leftColumns[0] || {},
+						rightLabel = rightColumns[0] || {},
+						allYLeft = _.chain(leftColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).flatten().value(),
+						allYRight = _.chain(rightColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).flatten().value();
+
+					x.domain(d3.extent(rows, function (d) { return d.date; }));
+					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
+					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
+
+					cht.selectAll('.y.axis.left')
+						.style('visibility', leftColumns.length > 0)
+						.text(leftLabel.name + ' (' + leftLabel.unit + ')');
+
+					cht.selectAll('.y.axis.right')
+						.style('visibility', rightColumns.length > 0)
+						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
+
+					_.each(columns, function (column) {
+						cht.selectAll('.point.p' + column.id)
 							.data(rows)
 							.enter()
 							.append('svg:circle')
-							.attr('class', 'point a')
+							.attr('class', 'point p' + column.id)
 							.attr('fill', column.color)
-							.attr('cx', function (d) { return x(d.date); })
-							.attr('cy', function (d) { return y(d[column.id]); })
 							.attr('r', 4);
+
+						// TODO label lines
 					});
 
-					// TODO label lines
+					resize();
+				};
 
-				}, 300);
+				angular.element(window).on('resize', resize);
+				scope.$watch('table + chart + rows', plot);
+
+			}
+		};
+	})
+	.directive('barChart', function () {
+		return {
+			restrict: 'E',
+			replace: true,
+			scope: {
+				table: '=',
+				chart: '=',
+				rows: '='
+			},
+			template: '<div flex layout="row"><div flex></div></div>',
+			link: function (scope, element) {
+				var chart, columns, rows;
+
+				var container = element.children()[0];
+
+				var margin = { top: 20, right: 50, bottom: 30, left: 50 };
+
+				var x = d3.time.scale();
+				var yLeft = d3.scale.linear();
+				var yRight = d3.scale.linear();
+
+				var xAxis = d3.svg.axis()
+					.scale(x)
+					.ticks(d3.time.day)
+					.tickFormat(d3.time.format('%a'))
+					.orient('bottom');
+
+				var yAxisLeft = d3.svg.axis()
+					.scale(yLeft)
+					.orient('left');
+
+				var yAxisRight = d3.svg.axis()
+					.scale(yRight)
+					.orient('right');
+
+				var svg = d3.select(container).append('svg');
+				var cht = svg.append('g');
+
+				cht.append('g')
+					.attr('class', 'x axis');
+
+				cht.append('g')
+					.attr('class', 'y axis left')
+					.append('text')
+					.attr('transform', 'rotate(-90)')
+					.attr('y', 6)
+					.attr('dy', '.71em')
+					.style('text-anchor', 'end');
+
+				cht.append('g')
+					.attr('class', 'y axis right')
+					.append('text')
+					.attr('transform', 'rotate(-90)')
+					.attr('y', 6)
+					.attr('dy', '-.71em')
+					.style('text-anchor', 'end');
+
+				var resize = function () {
+					var width = container.offsetWidth - margin.left - margin.right,
+						height = container.offsetHeight - margin.top - margin.bottom - 10;
+
+					console.log('w', width, 'h', height);
+
+					x.range([0, width]);
+					yLeft.range([height, 0]);
+					yRight.range([height, 0]);
+
+					var barPad = 1,
+						barWidth = width / rows.length - barPad;
+
+					svg.attr('width', width + margin.left + margin.right)
+						.attr('height', height + margin.top + margin.bottom);
+
+					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+					cht.selectAll('.x.axis')
+						.attr('transform', 'translate(0,' + height + ')')
+						.call(xAxis);
+
+					cht.selectAll('.y.axis.right')
+						.attr('transform', 'translate(' + width + ' ,0)')
+						.call(yAxisRight);
+
+					cht.selectAll('.y.axis.left')
+						.call(yAxisLeft);
+
+					cht.selectAll('.line')
+						.remove();
+
+					_.each(columns, function (column) {
+						var y = column.axis === 'left' ? yLeft : yRight;
+
+						cht.selectAll('.bar.r' + column.id)
+							.attr('x', function (d) { return barPad + x(d.date) - barWidth / 2; })
+							.attr('width', barWidth)
+							.attr('y', function (d) { return y(d[column.id]); })
+							.attr('height', function (d) { return height - y(d[column.id]); });
+					});
+				};
+
+				var plot = function () {
+					if (!scope.chart || !scope.table || !scope.rows) { return; }
+					rows = _.sortBy(scope.rows, 'date');
+					chart = scope.chart;
+					columns = _.chain(scope.table.columns).map(function (column) {
+						return _.extend({}, column, chart.columns[column.id]);
+					}).where({ show: true }).value();
+
+					var leftColumns = _.where(columns, { axis: 'left' }),
+						rightColumns = _.where(columns, { axis: 'right' }),
+						leftLabel = leftColumns[0] || {},
+						rightLabel = rightColumns[0] || {},
+						allYLeft = _.chain(leftColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).flatten().value(),
+						allYRight = _.chain(rightColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).flatten().value();
+
+					x.domain(d3.extent(rows, function (d) { return d.date; }));
+					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
+					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
+
+					cht.selectAll('.y.axis.left')
+						.style('visibility', leftColumns.length > 0)
+						.text(leftLabel.name + ' (' + leftLabel.unit + ')');
+
+					cht.selectAll('.y.axis.right')
+						.style('visibility', rightColumns.length > 0)
+						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
+
+					_.each(columns, function (column) {
+						cht.selectAll('.bar.r' + column.id)
+							.data(rows)
+							.enter()
+							.append('svg:rect')
+							.attr('class', 'bar r' + column.id)
+							.attr('fill', column.color);
+
+					});
+
+					resize();
+				};
+
+				angular.element(window).on('resize', resize);
+				scope.$watch('table + chart + rows', plot);
+
 			}
 		};
 	});
