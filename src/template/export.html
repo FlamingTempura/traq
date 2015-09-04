@@ -13,3 +13,8 @@
 
 Export: tables (if not specified in url), format [csv (if one table), xlsx], method [email/download]
 
+
+
+<md-radio-group ng-model="export.tables">
+	<md-radio-button ng-repeat="table in tables" value="{{ table._id }}">{{ table.title }}</md-radio-button>
+</md-radio-group>

@@ -14,13 +14,26 @@ PouchDB.plugin({
 		return this.allDocs(_.extend({ include_docs: true }, options)).then(function (result) {
 			return _.pluck(result.rows, 'doc');
 		});
+	},
+	// use angular promises ($q) to avoid need for $scope.$apply
+	observe: function ($q) {
+		var that = this,
+			methods = ['destroy', 'put', 'post', 'get', 'remove', 'bulkDocs', 'allDocs',
+				'changes', 'putAttachment', 'getAttachment', 'removeAttachment',
+				'query', 'viewCleanup', 'info', 'compact', 'revsDiff'];
+		methods.forEach(function (method) {
+			that[method] = function () {
+				return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
+			};
+		});
 	}
 });
 
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function () { })
-	.service('dbTable', function () {
+	.service('dbTable', function ($q) {
 		var db = new PouchDB('traq-table');
+		db.observe($q);
 		db.transform({
 			incoming: function (doc) {
 				return _.extend({}, doc, {
@@ -36,8 +49,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 		});
 		return db;
 	})
-	.service('dbRow', function () {
+	.service('dbRow', function ($q) {
 		var db = new PouchDB('traq-row');
+		db.observe($q);
 		db.transform({
 			incoming: function (doc) {
 				return _.extend({}, doc, {
@@ -50,14 +64,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 		});
 		return db;
 	})
-	.service('dbChart', function () {
+	.service('dbChart', function ($q) {
 		var db = new PouchDB('traq-chart');
-		/*db.transform({
-			incoming: function (doc) {
-				return _.extend({}, doc, {
-				});
-			}
-		});*/
+		db.observe($q);
 		return db;
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
@@ -78,7 +87,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 
 					dbTable.getAll().then(function (tables) {
 						$scope.tables = tables;
-						$scope.$apply();
 						console.log('got tables', $scope.tables);
 					}).catch(function (err) {
 						console.error('failed', err);
@@ -111,7 +119,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('got table', table);
 						$scope.table = table;
-						$scope.$apply();
 					}).catch(function (err) {
 						console.error('failed', err);
 					}).then(function () {
@@ -121,7 +128,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 						}).then(function (rows) {
 							$scope.rows = _.sortBy(rows, 'date');
 							console.log('got rows', $scope.rows);
-							$scope.$apply();
 						});
 						dbChart.getAll({
 							startkey: $scope.table._id + ':',
@@ -136,7 +142,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 							} else {
 								$scope.tabIndex = 0;
 							}
-							$scope.$apply();
 						});
 					});
 				}
@@ -173,7 +178,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 						dbTable.get($state.params.tid).then(function (table) {
 							console.log('get table', table);
 							$scope.table = table;
-							$scope.$apply();
 						}).catch(function (err) {
 							console.log('failed', err);
 						});
@@ -198,7 +202,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('get table', table);
 						$scope.table = table;
-						$scope.$apply();
 					}).catch(function (err) {
 						console.log('failed', err);
 					}).then(function () {
@@ -209,12 +212,10 @@ angular.module('traq', [ngMaterial, uiRouter])
 								date: new Date()
 							};
 							$scope.row.date.setMilliseconds(0);
-							$scope.$apply();
 						} else {
 							dbRow.get($state.params.rid).then(function (row) {
 								console.log('got row', row);
 								$scope.row = row;
-								$scope.$apply();
 							}).catch(function (err) {
 								console.error('failed', err);
 							});
@@ -244,7 +245,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					dbChart.get($state.params.cid).then(function (chart) {
 						console.log('got chart', chart);
 						$scope.chart = chart;
-						$scope.$apply();
 					}).catch(function (err) {
 						console.error('failed', err);
 					});
@@ -286,7 +286,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('get table', table);
 						$scope.table = table;
-						$scope.$apply();
 					}).catch(function (err) {
 						console.log('failed', err);
 					}).then(function () {
@@ -295,12 +294,10 @@ angular.module('traq', [ngMaterial, uiRouter])
 							$scope.chart = defaults($scope.table, {
 								_id: $scope.table._id + ':cht[' + uuid.v4() + ']'
 							});
-							$scope.$apply();
 						} else {
 							dbChart.get($state.params.cid).then(function (chart) {
 								console.log('got chart', chart);
 								$scope.chart = defaults($scope.table, chart);
-								$scope.$apply();
 							}).catch(function (err) {
 								console.error('failed', err);
 							});
@@ -331,7 +328,12 @@ angular.module('traq', [ngMaterial, uiRouter])
 			})
 			.state('export', {
 				url: '/export',
-				templateUrl: 'export.html'
+				templateUrl: 'export.html',
+				controller: function ($scope, $timeout, dbTable) {
+					dbTable.getAll().then(function (tables) {
+						$scope.tables = tables;
+					});
+				}
 			});
 	})
 	.service('rowsSelected', function () { return {}; })
