@@ -1,20 +1,40 @@
-<md-toolbar class="toolbar-gray">
-	<div class="md-toolbar-tools">
-		<md-button class="md-icon-button" aria-label="Close" ui-back>
-			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
-		</md-button>
-		<h2>Export</h2>
-		<span flex></span>
-		<md-button class="md-icon-button" aria-label="Send">
-			<md-icon md-font-icon="mi mi-24 mi-send"></md-icon>
-		</md-button>
-	</div>
-</md-toolbar>
+<form ng-submit="export()">
+	<md-toolbar class="toolbar-gray">
+		<div class="md-toolbar-tools">
+			<md-button class="md-icon-button" aria-label="Close" ui-back>
+				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+			</md-button>
+			<h2>Export</h2>
+			<span flex></span>
+			<md-button class="md-icon-button" aria-label="Export">
+				<md-icon md-font-icon="mi mi-24 mi-file-download"></md-icon>
+			</md-button>
+		</div>
+	</md-toolbar>
 
-Export: tables (if not specified in url), format [csv (if one table), xlsx], method [email/download]
+	<md-content layout-padding>
+		<md-subheader>Tables to export</md-subheader>
 
+		<md-checkbox ng-repeat="table in tables" ng-checked="options.selectedTables.indexOf(table._id) > -1" ng-click="toggleTable(table._id)">{{ table.title }}</md-checkbox>	
 
+		<md-subheader>Format</md-subheader>
 
-<md-radio-group ng-model="export.tables">
-	<md-radio-button ng-repeat="table in tables" value="{{ table._id }}">{{ table.title }}</md-radio-button>
-</md-radio-group>
+		<md-radio-group ng-model="options.format">
+			<md-radio-button value="csv" ng-disabled="options.selectedTables.length !== 1">Comma separated (.csv) - only for individual tables</md-radio-button>
+			<md-radio-button value="xlsx" ng-disabled="options.selectedTables.length < 1">Excel spreadsheet (.xlsx)</md-radio-button>
+		</md-radio-group>
+
+		<md-subheader>Export method</md-subheader>
+
+		<md-radio-group ng-model="options.method">
+			<md-radio-button value="file">Save as file</md-radio-button>
+			<md-radio-button value="email">Send via email</md-radio-button>
+		</md-radio-group>
+
+		<md-input-container ng-if="options.method === 'email'">
+			<label>Your email address</label>
+			<input type="email" ng-model="options.email">
+		</md-input-container>
+	</md-content>
+
+</form>

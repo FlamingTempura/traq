@@ -116,6 +116,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 							return memo && rowSelected;
 						}, true);
 					}, true);
+
 					dbTable.get($state.params.tid).then(function (table) {
 						console.log('got table', table);
 						$scope.table = table;
@@ -329,12 +330,64 @@ angular.module('traq', [ngMaterial, uiRouter])
 			.state('export', {
 				url: '/export',
 				templateUrl: 'export.html',
-				controller: function ($scope, $timeout, dbTable) {
+				controller: function ($scope, $timeout, dbTable, dbRow, download) {
 					dbTable.getAll().then(function (tables) {
 						$scope.tables = tables;
 					});
+					$scope.options = {
+						format: 'csv',
+						method: 'file',
+						selectedTables: []
+					};
+					$scope.toggleTable = function (id) {
+						var i = $scope.options.selectedTables.indexOf(id);
+						if (i > -1) {
+							$scope.options.selectedTables.splice(i, 1);
+						} else {
+							$scope.options.selectedTables.push(id);
+						}
+					};
+					$scope.export = function () {
+						exporters['csv']();
+					};
+
+					var exporters = {
+						csv: function () {
+							var options = $scope.options,
+								table = _.findWhere($scope.tables, { _id: options.selectedTables[0] });
+							dbRow.getAll({
+								startkey: table._id + ':',
+								endkey: table._id + ':\uffff'
+							}).then(function (_rows) {
+								var rows = _.map(_rows, function (_row) {
+									var row = { date: _row.date.toISOString() };
+									_.each(table.columns, function (column) {
+										row[column.name] = _row[column.id];
+									});
+									return row;
+								});
+
+								download(table.title + '.csv', d3.csv.format(rows));
+							});
+						}
+					};
 				}
 			});
+	})
+	.service('download', function () {
+		// http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
+		return function (filename, text) {
+			var element = document.createElement('a');
+			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+			element.setAttribute('download', filename);
+
+			element.style.display = 'none';
+			document.body.appendChild(element);
+
+			element.click();
+
+			document.body.removeChild(element);
+		};
 	})
 	.service('rowsSelected', function () { return {}; })
 	.directive('uiBack', function () {
