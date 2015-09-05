@@ -37,7 +37,7 @@
 
 			<!-- chart options -->
 
-			<h3>Columns</h3>
+			<md-subheader>Columns</md-subheader>
 
 			<md-list>
 				<md-list-item ng-repeat="column in table.columns">
@@ -74,6 +74,10 @@
 					</md-menu>
 				</md-list-item>
 			</md-list>
+
+			<md-subheader>Options</md-subheader>
+
+			<md-checkbox ng-model="chart.plotZeros">Plot 0's</md-checkbox>
 			
 		</div>
 		

@@ -280,6 +280,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					var colorDefault = [2, 1, 7, 8, 5, 4, 3, 9, 0, 6];
 					var defaults = function (table, chart) {
 						chart = _.extend({
+							plotZeros: true,
 							columns: {}
 						}, chart);
 						_.each(table.columns, function (column, i) {
@@ -629,7 +630,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 							.y(function (d) { return y(d[column.id]); });
 
 						cht.append('path')
-							.datum(rows)
+							.datum(_.reject(rows, function (row) {
+								return !chart.plotZeros && row[column.id] === 0;
+							}))
 							.attr('class', 'line')
 							.attr('stroke', column.color)
 							.attr('d', line);
@@ -650,9 +653,13 @@ angular.module('traq', [ngMaterial, uiRouter])
 						rightLabel = rightColumns[0] || {},
 						allYLeft = _.chain(leftColumns).map(function (column) {
 							return _.pluck(rows, column.id);
+						}).reject(function (val) {
+							return !chart.plotZeros && val === 0;
 						}).flatten().value(),
 						allYRight = _.chain(rightColumns).map(function (column) {
 							return _.pluck(rows, column.id);
+						}).reject(function (val) {
+							return !chart.plotZeros && val === 0;
 						}).flatten().value();
 
 					x.domain(d3.extent(rows, function (d) { return d.date; }));
@@ -669,7 +676,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 
 					_.each(columns, function (column) {
 						cht.selectAll('.point.p' + classSafe(column.id))
-							.data(rows)
+							.data(_.reject(rows, function (row) {
+								return !chart.plotZeros && row[column.id] === 0;
+							}))
 							.enter()
 							.append('svg:circle')
 							.attr('class', 'point p' + classSafe(column.id))
