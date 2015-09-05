@@ -11,8 +11,17 @@ md-toolbar {
 	box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
 	&.toolbar-gray {
 		background: #f0f0f0;
-		color: #555;
-		md-icon { color: #555; }
+		color: hsl(0, 0, 13%);
+		md-icon { color: hsl(0, 0, 13%); }
+	}
+	&.toolbar-pages {
+		box-shadow: none;
+		background: transparent;
+		color: hsl(0, 0, 46%);
+		.md-toolbar-tools {
+			font-size: 12px;
+		}
+		md-icon { color: hsl(0, 0, 46%); }
 	}
 }
 

@@ -161,6 +161,8 @@ angular.module('traq', [ngMaterial, uiRouter])
 				controller: function ($scope, rowsSelected) {
 					$scope.rowsSelected = rowsSelected;
 					$scope.selectAll = false;
+					$scope.start = 0;
+					$scope.limit = 10;
 					$scope.$watch('selectAll', function (selectAll) {
 						if (selectAll) {
 							_.each($scope.rows, function (row) {
@@ -920,5 +922,9 @@ angular.module('traq', [ngMaterial, uiRouter])
 				scope.$watch('table + chart + rows', plot);
 
 			}
+		};
+	}).filter('startFrom', function () {
+		return function (input, start) {
+			return input.slice(start);
 		};
 	});
