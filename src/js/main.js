@@ -3,7 +3,7 @@
 var _ = require('lodash'),
 	angular = require('angular'),
 	ngMaterial = require('angular-material'),
-	uiRouter = require('ui-router'),
+	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
 	d3 = require('d3'),
 	uuid = require('node-uuid');
@@ -168,13 +168,15 @@ angular.module('traq', [ngMaterial, uiRouter])
 			.state('table-edit', {
 				url: '/table/:tid/edit',
 				templateUrl: 'table-edit.html',
+				params: { table: null, rows: null },
 				controller: function ($scope, $state, dbTable) {
 					$scope.isNew = $state.params.tid === 'new';
 					if ($scope.isNew) {
-						$scope.table = {
+						$scope.table = $state.params.table || {
 							_id: 'tbl[' + uuid.v4() + ']',
 							columns: []
 						};
+						console.log('new --', $scope.table, $state.params)
 					} else {
 						dbTable.get($state.params.tid).then(function (table) {
 							console.log('get table', table);
@@ -362,7 +364,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 								var rows = _.map(_rows, function (_row) {
 									var row = { date: _row.date.toISOString() };
 									_.each(table.columns, function (column) {
-										row[column.name] = _row[column.id];
+										row[column.name + ' (' + column.unit + ')'] = _row[column.id];
 									});
 									return row;
 								});
@@ -372,7 +374,72 @@ angular.module('traq', [ngMaterial, uiRouter])
 						}
 					};
 				}
+			})
+			.state('import', {
+				url: '/import',
+				templateUrl: 'import.html',
+				controller: function ($scope, $state) {
+					$scope.import = {};
+					$scope.$watch('import.contents', function (contents) {
+						if (!contents) { return; }
+						var data = d3.csv.parse(contents);
+						$scope.table = {
+							id: 'tbl[' + uuid.v4() + ']',
+							title: 'meh',
+							columns: _.chain(data[0]).map(function (val, key) {
+								var parts = key.match(/^(.*?)\s*(?:\(([^()]*)\))?\s*$/);
+								return {
+									id: 'col[' + uuid.v4() + ']',
+									name: parts[1],
+									unit: parts[2],
+									originalKey: key
+								};
+							}).reject(function (column) {
+								return column.name === 'date';
+							}).value()
+						};
+						$scope.rows = _.map(data, function (_row) {
+							var row = {
+								id: $scope.table.id + ':row[' + uuid.v4() + ']',
+								date: new Date(_row.date)
+							};
+							_.each($scope.table.columns, function (column) {
+								row[column.id] = _row[column.originalKey];
+							});
+							return row;
+						});
+						console.log($scope.table, $scope.rows);
+						
+					});
+					$scope.import = function () {
+						$state.go('table-edit', { tid: 'new', table: $scope.table, rows: $scope.rows });
+					};
+				}
 			});
+	})
+	.directive('fileReader', function () {
+		return {
+			restrict: 'E',
+			replace: true,
+			template: '<input type="file">',
+			scope: { contents: '=' },
+			link: function (scope, element) {
+				element.on('change', function () {
+					var reader = new FileReader(),
+						file = element[0].files[0];
+
+					if (file.type.indexOf('text') !== 0) {
+						console.error('File type not supported');
+						return;
+					}
+					reader.onload = function () {
+						scope.contents = reader.result;
+						scope.$apply();
+					};
+					reader.readAsText(file);
+				});
+			}
+		};
 	})
 	.service('download', function () {
 		// http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
