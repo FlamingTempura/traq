@@ -34,7 +34,7 @@
 				<!-- preset (if new) -->
 				<!-- <md-divider></md-divider> -->
 
-			<h3>Columns</h3>
+			<md-subheader>Columns</md-subheader>
 
 			<div ng-repeat="column in table.columns" layout="row">
 
@@ -45,7 +45,7 @@
 
 				<md-input-container style="width: 120px">
 					<label>Unit</label>
-					<input type="text" ng-model="column.unit" required>
+					<input type="text" ng-model="column.unit">
 				</md-input-container>
 				
 				<md-button class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
@@ -57,8 +57,12 @@
 			<md-button class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
 		
 		</div>
+
+		<p ng-if="rows">
+			By clicking SAVE, this will import {{ rows.length }} rows.
+		</p>
 		
-		<md-button ng-if="isNew" class="md-raised md-warn">Delete</md-button>
+		<md-button ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>

@@ -29,6 +29,11 @@ PouchDB.plugin({
 	}
 });
 
+var classSafe = function (str) {
+	// made id's safe for use in classnames
+	return str.replace(/\W/g, '');
+};
+
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function () { })
 	.service('dbTable', function ($q) {
@@ -169,13 +174,14 @@ angular.module('traq', [ngMaterial, uiRouter])
 				url: '/table/:tid/edit',
 				templateUrl: 'table-edit.html',
 				params: { table: null, rows: null },
-				controller: function ($scope, $state, dbTable) {
+				controller: function ($scope, $state, dbTable, dbRow) {
 					$scope.isNew = $state.params.tid === 'new';
 					if ($scope.isNew) {
 						$scope.table = $state.params.table || {
 							_id: 'tbl[' + uuid.v4() + ']',
 							columns: []
 						};
+						$scope.rows = $state.params.rows;
 						console.log('new --', $scope.table, $state.params)
 					} else {
 						dbTable.get($state.params.tid).then(function (table) {
@@ -190,6 +196,12 @@ angular.module('traq', [ngMaterial, uiRouter])
 						console.log('saving...', $scope.table);
 						dbTable.put($scope.table).then(function () {
 							console.log('saved!');
+							if ($scope.rows) {
+								return dbRow.bulkDocs($scope.rows).then(function () {
+									console.log('put all rows');
+								});
+							}
+						}).then(function () {
 							$state.go('table-view', { tid: $scope.table._id });
 						}).catch(function (err) {
 							console.error('failed', err);
@@ -236,10 +248,6 @@ angular.module('traq', [ngMaterial, uiRouter])
 					};
 				}
 			})
-			.state('table-import', {
-				url: '/table/:tid/import',
-				templateUrl: 'import.html'
-			})
 			.state('table-chart-view', {
 				parent: 'table',
 				url: '/chart/:cid',
@@ -279,7 +287,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 								chart.columns[column.id] = {};
 							}
 							_.defaults(chart.columns[column.id], {
-								color: $scope.colors[colorDefault[i]].hex,
+								color: $scope.colors[colorDefault[i % colorDefault.length]].hex,
 								axis: i === 0 ? 'left' : 'right',
 								show: i === 0
 							});
@@ -379,14 +387,42 @@ angular.module('traq', [ngMaterial, uiRouter])
 				url: '/import',
 				templateUrl: 'import.html',
 				controller: function ($scope, $state) {
+					var dateColumnNames = ['date'];
 					$scope.import = {};
 					$scope.$watch('import.contents', function (contents) {
 						if (!contents) { return; }
-						var data = d3.csv.parse(contents);
+						// fix: remove fitbit header
+						var lines = contents.split('\n');
+						if (lines[0].split(',').length === 1 && lines[1].split(',').length > 1) {
+							contents = lines.slice(1).join('\n');
+						}
+						// end fix
+						// fix: remove blank lines at end
+						contents = contents.trim();
+						// end fix
+						var data = d3.csv.parse(contents),
+							keys = _.keys(data[0]),
+							dateKey = _.find(keys, function (key) {
+								return dateColumnNames.indexOf(key.trim().toLocaleLowerCase()) > -1;
+							});
+						if (!dateKey) {
+							throw 'Date key not found';
+						}
+						// fix: try to normalise dates to MM-dd-YYYY :(
+						var isDDMMYYYY = _.reduce(data, function (memo, row) {
+							return memo || Number(row[dateKey].slice(0, 2)) > 12;
+						}, false);
+						if (isDDMMYYYY) {
+							_.each(data, function (row) {
+								row[dateKey] = row[dateKey].split(/[-\\\/ ]/).reverse().join('-');
+								console.log(row[dateKey])
+							});
+						}
+						// end fix
 						$scope.table = {
-							id: 'tbl[' + uuid.v4() + ']',
-							title: 'meh',
-							columns: _.chain(data[0]).map(function (val, key) {
+							_id: 'tbl[' + uuid.v4() + ']',
+							title: $scope.import.title,
+							columns: _.chain(keys).map(function (key) {
 								var parts = key.match(/^(.*?)\s*(?:\(([^()]*)\))?\s*$/);
 								return {
 									id: 'col[' + uuid.v4() + ']',
@@ -395,21 +431,22 @@ angular.module('traq', [ngMaterial, uiRouter])
 									originalKey: key
 								};
 							}).reject(function (column) {
-								return column.name === 'date';
+								return column.originalKey === dateKey;
 							}).value()
 						};
+
 						$scope.rows = _.map(data, function (_row) {
 							var row = {
-								id: $scope.table.id + ':row[' + uuid.v4() + ']',
-								date: new Date(_row.date)
+								_id: $scope.table._id + ':row[' + uuid.v4() + ']',
+								date: Date.parse(_row[dateKey])
 							};
 							_.each($scope.table.columns, function (column) {
-								row[column.id] = _row[column.originalKey];
+								row[column.id] = Number(_row[column.originalKey]);
 							});
 							return row;
 						});
 						console.log($scope.table, $scope.rows);
-						
+
 					});
 					$scope.import = function () {
 						$state.go('table-edit', { tid: 'new', table: $scope.table, rows: $scope.rows });
@@ -422,7 +459,10 @@ angular.module('traq', [ngMaterial, uiRouter])
 			restrict: 'E',
 			replace: true,
 			template: '<input type="file">',
-			scope: { contents: '=' },
+			scope: {
+				contents: '=',
+				name: '='
+			},
 			link: function (scope, element) {
 				element.on('change', function () {
 					var reader = new FileReader(),
@@ -433,6 +473,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 						return;
 					}
 					reader.onload = function () {
+						scope.name = file.name.replace(/\.[^.\/]+$/, ''); // remove extension
 						scope.contents = reader.result;
 						scope.$apply();
 					};
@@ -578,7 +619,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					_.each(columns, function (column) {
 						var y = column.axis === 'left' ? yLeft : yRight;
 
-						cht.selectAll('.point.p' + column.id)
+						cht.selectAll('.point.p' + classSafe(column.id))
 							.attr('cx', function (d) { return x(d.date); })
 							.attr('cy', function (d) { return y(d[column.id]); });
 
@@ -627,11 +668,11 @@ angular.module('traq', [ngMaterial, uiRouter])
 						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
 
 					_.each(columns, function (column) {
-						cht.selectAll('.point.p' + column.id)
+						cht.selectAll('.point.p' + classSafe(column.id))
 							.data(rows)
 							.enter()
 							.append('svg:circle')
-							.attr('class', 'point p' + column.id)
+							.attr('class', 'point p' + classSafe(column.id))
 							.attr('fill', column.color)
 							.attr('r', 4);
 
@@ -739,7 +780,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 					_.each(columns, function (column) {
 						var y = column.axis === 'left' ? yLeft : yRight;
 
-						cht.selectAll('.bar.r' + column.id)
+						cht.selectAll('.bar.r' + classSafe(column.id))
 							.attr('x', function (d) { return barPad + x(d.date) - barWidth / 2; })
 							.attr('width', barWidth)
 							.attr('y', function (d) { return y(d[column.id]); })
@@ -779,11 +820,11 @@ angular.module('traq', [ngMaterial, uiRouter])
 						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
 
 					_.each(columns, function (column) {
-						cht.selectAll('.bar.r' + column.id)
+						cht.selectAll('.bar.r' + classSafe(column.id))
 							.data(rows)
 							.enter()
 							.append('svg:rect')
-							.attr('class', 'bar r' + column.id)
+							.attr('class', 'bar r' + classSafe(column.id))
 							.attr('fill', column.color);
 
 					});
