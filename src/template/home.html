@@ -7,6 +7,19 @@
 	</div>
 </md-toolbar>
 
-<md-grid-list md-cols="2">
-	<md-grid-tile>A grid of graphs</md-grid-tile>
-</md-grid-list>
+<md-content flex class="md-padding gray">
+	<md-card ng-repeat="chart in charts">
+		<div class="md-card-image" style="height: 300px;" ui-sref="chart-view({ tid: chart.table, cid: chart._id })">
+			<chart chart="chart"></chart>
+		</div>
+		<div class="md-actions" layout="row" layout-align="end center">
+			<md-button type="button" ui-sref="table-view({ tid: chart.table })" class="md-icon-button" aria-label="View table">
+				<md-icon md-font-icon="mi mi-24 mi-grid-on"></md-icon>
+			</md-button>
+
+			<md-button type="button" ui-sref="row-edit({ tid: chart.table, rid: 'new' })" class="md-icon-button"aria-label="New row">
+				<md-icon md-font-icon="mi mi-24 mi-add"></md-icon>
+			</md-button>
+		</div>
+	</md-card>
+</md-content>

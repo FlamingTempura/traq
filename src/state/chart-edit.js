@@ -48,7 +48,7 @@ angular.module('traq').config(function ($stateProvider) {
 				$scope.isNew = $state.params.cid === 'new';
 				if ($scope.isNew) {
 					$scope.chart = defaults($scope.table, {
-						_id: $scope.table._id + ':cht[' + uuid.v4() + ']'
+						_id: $scope.table._id + ':cht' + uuid.v4()
 					});
 				} else {
 					dbChart.get($state.params.cid).then(function (chart) {
@@ -63,7 +63,7 @@ angular.module('traq').config(function ($stateProvider) {
 			$scope.save = function () {
 				dbChart.put($scope.chart).then(function () {
 					console.log('saved!', $scope.chart);
-					$state.go('chart-view', { tid: $scope.chart.table, cid: $scope.chart._id });
+					$state.go('chart-view', { tid: $scope.table._id, cid: $scope.chart._id });
 				}).catch(function (err) {
 					console.error('failed', err);
 				});

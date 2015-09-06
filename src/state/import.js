@@ -35,13 +35,13 @@ angular.module('traq').config(function ($stateProvider) {
 			};
 
 			var parseNameUnit = function (name) {
-				var searchUnits = ['meters', 'metres', 'bpm', 'km'],
+				var searchUnits = ['meters', 'metres', 'bpm', 'km', 'minutes', 'hours', 'milliseconds', 'seconds', 'calories'],
 					unit = _.find(searchUnits, function (unit) {
 						return name.toLocaleLowerCase().indexOf(unit) > -1;
 					});
 				if (unit) {
 					var i = name.toLocaleLowerCase().indexOf(unit);
-					name = name.slice(0, i) + name.slice(i + unit.length);
+					name = name.slice(0, i).trim() + name.slice(i + unit.length).trim();
 				} else {
 					// brackets
 					var parts = name.match(/^(.*?)\s*(?:\(([^()]*)\))?\s*$/);
@@ -103,12 +103,12 @@ angular.module('traq').config(function ($stateProvider) {
 				}
 				// end fix
 				$scope.table = {
-					_id: 'tbl[' + uuid.v4() + ']',
+					_id: 'tbl' + uuid.v4(),
 					title: $scope.import.title,
 					columns: _.chain(keys).map(function (key) {
 						var parts = parseNameUnit(key);
 						return {
-							id: 'col[' + uuid.v4() + ']',
+							id: 'col' + uuid.v4(),
 							name: parts.name,
 							unit: parts.unit,
 							originalKey: key
@@ -120,7 +120,7 @@ angular.module('traq').config(function ($stateProvider) {
 
 				$scope.rows = _.map(data, function (_row) {
 					var row = {
-						_id: $scope.table._id + ':row[' + uuid.v4() + ']',
+						_id: $scope.table._id + ':row' + uuid.v4(),
 						date: Date.parse(_row[dateKey])
 					};
 					_.each($scope.table.columns, function (column) {

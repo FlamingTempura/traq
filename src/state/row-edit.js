@@ -18,7 +18,7 @@ angular.module('traq').config(function ($stateProvider) {
 				$scope.isNew = $state.params.rid === 'new';
 				if ($scope.isNew) {
 					$scope.row = {
-						_id: $scope.table._id + ':row[' + uuid.v4() + ']',
+						_id: $scope.table._id + ':row' + uuid.v4(),
 						date: new Date()
 					};
 					$scope.row.date.setMilliseconds(0);

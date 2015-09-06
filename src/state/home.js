@@ -10,7 +10,8 @@ angular.module('traq').config(function ($stateProvider) {
 		controller: function ($scope, dbChart) {
 			$scope.$root.title = 'Traq';
 			dbChart.getAll().then(function (charts) {
-
+				console.log('got charts', charts);
+				$scope.charts = charts;
 			});
 		}
 	});

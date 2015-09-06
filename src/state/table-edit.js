@@ -12,7 +12,7 @@ angular.module('traq').config(function ($stateProvider) {
 			$scope.isNew = $state.params.tid === 'new';
 			if ($scope.isNew) {
 				$scope.table = $state.params.table || {
-					_id: 'tbl[' + uuid.v4() + ']',
+					_id: 'tbl' + uuid.v4(),
 					columns: []
 				};
 				$scope.rows = $state.params.rows;

@@ -5,13 +5,19 @@ var _ = require('lodash'),
 	ngMaterial = require('angular-material'),
 	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
-	d3 = require('d3'),
 	uuid = require('node-uuid');
 
 PouchDB.plugin(require('transform-pouch'));
 PouchDB.plugin({
 	getAll: function (options) {
-		return this.allDocs(_.extend({ include_docs: true }, options)).then(function (result) {
+		options = _.extend({ include_docs: true }, options);
+		if (options.startWith) {
+			_.extend(options, {
+				startkey: options.startWith + ':',
+				endkey: options.startWith + ':\uffff'
+			});
+		}
+		return this.allDocs(options).then(function (result) {
 			return _.pluck(result.rows, 'doc');
 		});
 	},
@@ -29,11 +35,6 @@ PouchDB.plugin({
 	}
 });
 
-var classSafe = function (str) {
-	// made id's safe for use in classnames
-	return str.replace(/\W/g, '');
-};
-
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function ($scope, snack) {
 		$scope.snack = snack;
@@ -46,7 +47,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 				return _.extend({}, doc, {
 					columns: _.map(doc.columns, function (column) {
 						return {
-							id: column.id || 'col[' + uuid.v4() + ']',
+							id: column.id || 'col' + uuid.v4(),
 							name: column.name,
 							unit: column.unit
 						};
@@ -74,6 +75,18 @@ angular.module('traq', [ngMaterial, uiRouter])
 	.service('dbChart', function ($q) {
 		var db = new PouchDB('traq-chart');
 		db.observe($q);
+		db.transform({
+			incoming: function (doc) {
+				doc = _.extend({}, doc);
+				delete doc.table;
+				return doc;
+			},
+			outgoing: function (doc) {
+				return _.extend({}, doc, {
+					table: doc._id.split(':')[0]
+				});
+			}
+		});
 		return db;
 	})
 	.config(function ($stateProvider, $urlRouterProvider) {
@@ -148,347 +161,12 @@ angular.module('traq', [ngMaterial, uiRouter])
 			}
 		};
 	})
-	.constant('charts', [
-		{
-			id: 'line',
-			name: 'Line'
-		}
-	])
-	.directive('lineChartOptions', function () {
-		return {
-			restrict: 'E',
-			replace: true,
-			scope: {
-				table: '=',
-				chart: '=',
-				rows: '='
-			},
-			link: function (scope, element) {
-				// smooth
-				// points
-				// 
-			}
-		};
-	})
-	.directive('lineChart', function () {
-		return {
-			restrict: 'E',
-			replace: true,
-			scope: {
-				table: '=',
-				chart: '=',
-				rows: '='
-			},
-			template: '<div flex layout="row"><div flex></div></div>',
-			link: function (scope, element) {
-				var chart, columns, rows;
-
-				var container = element.children()[0];
-
-				var margin = { top: 20, right: 50, bottom: 30, left: 50 };
-
-				var x = d3.time.scale();
-				var yLeft = d3.scale.linear();
-				var yRight = d3.scale.linear();
-
-				var xAxis = d3.svg.axis()
-					.scale(x)
-					.ticks(d3.time.day)
-					.tickFormat(d3.time.format('%a'))
-					.orient('bottom');
-
-				var yAxisLeft = d3.svg.axis()
-					.scale(yLeft)
-					.orient('left');
-
-				var yAxisRight = d3.svg.axis()
-					.scale(yRight)
-					.orient('right');
-
-				var svg = d3.select(container).append('svg');
-				var cht = svg.append('g');
-
-				cht.append('g')
-					.attr('class', 'x axis');
-
-				cht.append('g')
-					.attr('class', 'y axis left')
-					.append('text')
-					.attr('transform', 'rotate(-90)')
-					.attr('y', 6)
-					.attr('dy', '.71em')
-					.style('text-anchor', 'end');
-
-				cht.append('g')
-					.attr('class', 'y axis right')
-					.append('text')
-					.attr('transform', 'rotate(-90)')
-					.attr('y', 6)
-					.attr('dy', '-.71em')
-					.style('text-anchor', 'end');
-
-				var resize = function () {
-					var width = container.offsetWidth - margin.left - margin.right,
-						height = container.offsetHeight - margin.top - margin.bottom - 10;
-
-					console.log('w', width, 'h', height);
-
-					x.range([0, width]);
-					yLeft.range([height, 0]);
-					yRight.range([height, 0]);
-
-					svg.attr('width', width + margin.left + margin.right)
-						.attr('height', height + margin.top + margin.bottom);
-
-					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-					cht.selectAll('.x.axis')
-						.attr('transform', 'translate(0,' + height + ')')
-						.call(xAxis);
-
-					cht.selectAll('.y.axis.right')
-						.attr('transform', 'translate(' + width + ' ,0)')
-						.call(yAxisRight);
-
-					cht.selectAll('.y.axis.left')
-						.call(yAxisLeft);
-
-					cht.selectAll('.line')
-						.remove();
-
-					_.each(columns, function (column) {
-						var y = column.axis === 'left' ? yLeft : yRight;
-
-						cht.selectAll('.point.p' + classSafe(column.id))
-							.attr('cx', function (d) { return x(d.date); })
-							.attr('cy', function (d) { return y(d[column.id]); });
-
-						var line = d3.svg.line()
-							.interpolate('monotone')
-							.x(function (d) { return x(d.date); })
-							.y(function (d) { return y(d[column.id]); });
-
-						cht.append('path')
-							.datum(_.reject(rows, function (row) {
-								return !chart.plotZeros && row[column.id] === 0;
-							}))
-							.attr('class', 'line')
-							.attr('stroke', column.color)
-							.attr('d', line);
-					});
-				};
-
-				var plot = function () {
-					if (!scope.chart || !scope.table || !scope.rows) { return; }
-					rows = _.sortBy(scope.rows, 'date');
-					chart = scope.chart;
-					columns = _.chain(scope.table.columns).map(function (column) {
-						return _.extend({}, column, chart.columns[column.id]);
-					}).where({ show: true }).value();
-
-					var leftColumns = _.where(columns, { axis: 'left' }),
-						rightColumns = _.where(columns, { axis: 'right' }),
-						leftLabel = leftColumns[0] || {},
-						rightLabel = rightColumns[0] || {},
-						allYLeft = _.chain(leftColumns).map(function (column) {
-							return _.pluck(rows, column.id);
-						}).reject(function (val) {
-							return !chart.plotZeros && val === 0;
-						}).flatten().value(),
-						allYRight = _.chain(rightColumns).map(function (column) {
-							return _.pluck(rows, column.id);
-						}).reject(function (val) {
-							return !chart.plotZeros && val === 0;
-						}).flatten().value();
-
-					x.domain(d3.extent(rows, function (d) { return d.date; }));
-					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
-					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
-
-					cht.selectAll('.y.axis.left')
-						.style('visibility', leftColumns.length > 0)
-						.text(leftLabel.name + ' (' + leftLabel.unit + ')');
-
-					cht.selectAll('.y.axis.right')
-						.style('visibility', rightColumns.length > 0)
-						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
-
-					_.each(columns, function (column) {
-						cht.selectAll('.point.p' + classSafe(column.id))
-							.data(_.reject(rows, function (row) {
-								return !chart.plotZeros && row[column.id] === 0;
-							}))
-							.enter()
-							.append('svg:circle')
-							.attr('class', 'point p' + classSafe(column.id))
-							.attr('fill', column.color)
-							.attr('r', 4);
-
-						// TODO label lines
-					});
-
-					resize();
-				};
-
-				angular.element(window).on('resize', resize);
-				scope.$watch('table + chart + rows', plot);
-
-			}
-		};
-	})
-	.directive('barChart', function () {
-		return {
-			restrict: 'E',
-			replace: true,
-			scope: {
-				table: '=',
-				chart: '=',
-				rows: '='
-			},
-			template: '<div flex layout="row"><div flex></div></div>',
-			link: function (scope, element) {
-				var chart, columns, rows;
-
-				var container = element.children()[0];
-
-				var margin = { top: 20, right: 50, bottom: 30, left: 50 };
-
-				var x = d3.time.scale();
-				var yLeft = d3.scale.linear();
-				var yRight = d3.scale.linear();
-
-				var xAxis = d3.svg.axis()
-					.scale(x)
-					.ticks(d3.time.day)
-					.tickFormat(d3.time.format('%a'))
-					.orient('bottom');
-
-				var yAxisLeft = d3.svg.axis()
-					.scale(yLeft)
-					.orient('left');
-
-				var yAxisRight = d3.svg.axis()
-					.scale(yRight)
-					.orient('right');
-
-				var svg = d3.select(container).append('svg');
-				var cht = svg.append('g');
-
-				cht.append('g')
-					.attr('class', 'x axis');
-
-				cht.append('g')
-					.attr('class', 'y axis left')
-					.append('text')
-					.attr('transform', 'rotate(-90)')
-					.attr('y', 6)
-					.attr('dy', '.71em')
-					.style('text-anchor', 'end');
-
-				cht.append('g')
-					.attr('class', 'y axis right')
-					.append('text')
-					.attr('transform', 'rotate(-90)')
-					.attr('y', 6)
-					.attr('dy', '-.71em')
-					.style('text-anchor', 'end');
-
-				var resize = function () {
-					var width = container.offsetWidth - margin.left - margin.right,
-						height = container.offsetHeight - margin.top - margin.bottom - 10;
-
-					console.log('w', width, 'h', height);
-
-					x.range([0, width]);
-					yLeft.range([height, 0]);
-					yRight.range([height, 0]);
-
-					var barPad = 1,
-						barWidth = width / rows.length - barPad;
-
-					svg.attr('width', width + margin.left + margin.right)
-						.attr('height', height + margin.top + margin.bottom);
-
-					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-					cht.selectAll('.x.axis')
-						.attr('transform', 'translate(0,' + height + ')')
-						.call(xAxis);
-
-					cht.selectAll('.y.axis.right')
-						.attr('transform', 'translate(' + width + ' ,0)')
-						.call(yAxisRight);
-
-					cht.selectAll('.y.axis.left')
-						.call(yAxisLeft);
-
-					cht.selectAll('.line')
-						.remove();
-
-					_.each(columns, function (column) {
-						var y = column.axis === 'left' ? yLeft : yRight;
-
-						cht.selectAll('.bar.r' + classSafe(column.id))
-							.attr('x', function (d) { return barPad + x(d.date) - barWidth / 2; })
-							.attr('width', barWidth)
-							.attr('y', function (d) { return y(d[column.id]); })
-							.attr('height', function (d) { return height - y(d[column.id]); });
-					});
-				};
-
-				var plot = function () {
-					if (!scope.chart || !scope.table || !scope.rows) { return; }
-					rows = _.sortBy(scope.rows, 'date');
-					chart = scope.chart;
-					columns = _.chain(scope.table.columns).map(function (column) {
-						return _.extend({}, column, chart.columns[column.id]);
-					}).where({ show: true }).value();
-
-					var leftColumns = _.where(columns, { axis: 'left' }),
-						rightColumns = _.where(columns, { axis: 'right' }),
-						leftLabel = leftColumns[0] || {},
-						rightLabel = rightColumns[0] || {},
-						allYLeft = _.chain(leftColumns).map(function (column) {
-							return _.pluck(rows, column.id);
-						}).flatten().value(),
-						allYRight = _.chain(rightColumns).map(function (column) {
-							return _.pluck(rows, column.id);
-						}).flatten().value();
-
-					x.domain(d3.extent(rows, function (d) { return d.date; }));
-					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
-					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
-
-					cht.selectAll('.y.axis.left')
-						.style('visibility', leftColumns.length > 0)
-						.text(leftLabel.name + ' (' + leftLabel.unit + ')');
-
-					cht.selectAll('.y.axis.right')
-						.style('visibility', rightColumns.length > 0)
-						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
-
-					_.each(columns, function (column) {
-						cht.selectAll('.bar.r' + classSafe(column.id))
-							.data(rows)
-							.enter()
-							.append('svg:rect')
-							.attr('class', 'bar r' + classSafe(column.id))
-							.attr('fill', column.color);
-
-					});
-
-					resize();
-				};
-
-				angular.element(window).on('resize', resize);
-				scope.$watch('table + chart + rows', plot);
-			}
-		};
-	}).filter('startFrom', function () {
+	.filter('startFrom', function () {
 		return function (input, start) {
-			return input.slice(start);
+			return input && input.slice(start);
 		};
-	}).service('snack', function ($timeout) {
+	})
+	.service('snack', function ($timeout) {
 		var snack = function (message, buttonText, buttonFn) {
 			snack.message = message;
 			snack.buttonText = buttonText;
@@ -513,3 +191,6 @@ require('./state/settings.js');
 require('./state/table-edit.js');
 require('./state/table-view.js');
 require('./state/table.js');
+require('./charts/chart.js');
+require('./charts/line.js');
+require('./charts/bar.js');
