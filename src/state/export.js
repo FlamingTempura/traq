@@ -40,7 +40,7 @@ angular.module('traq').config(function ($stateProvider) {
 						var rows = _.map(_rows, function (_row) {
 							var row = { date: _row.date.toISOString() };
 							_.each(table.columns, function (column) {
-								row[column.name + ' (' + column.unit + ')'] = _row[column.id];
+								row[column.name + (column.unit ? ' (' + column.unit + ')' : '')] = _row[column.id];
 							});
 							return row;
 						});
