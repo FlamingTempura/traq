@@ -2,7 +2,6 @@
 
 var gulp = require('gulp'),
 	browserify = require('browserify'),
-	through2 = require('through2'),
 	sass = require('gulp-sass'),
 	newer = require('gulp-newer'),
 	filter = require('gulp-filter'),
@@ -10,24 +9,38 @@ var gulp = require('gulp'),
 	watch = require('gulp-watch'),
 	batch = require('gulp-batch'),
 	tap = require('gulp-tap'),
-	_ = require('lodash');
+	resolve = require('resolve'),
+	source = require('vinyl-source-stream'),
+	_ = require('lodash'),
+	deps = _.keys(require('./package.json').dependencies);
 
 var devMode = true;
 
-gulp.task('browserify', function () {
-	return gulp.src('./src/index.js')
-		.pipe(through2.obj(function (file, enc, next) {
-			browserify(file.path, {
-				debug: devMode
-			}).bundle(function (err, res) {
-				if (err) {
-					next(err);
-				} else {
-					file.contents = res;
-					next(null, file);
-				}
-			});
-		}))
+gulp.task('browserify-vendor', function () {
+	var b = browserify({ debug: false });
+
+	_.each(deps, function (id) {
+		try {
+			var path = resolve.sync(id);
+			if (path.indexOf('.js') !== path.length - 3) { throw 'not js'; }
+			b.require(path, { expose: id });
+		} catch (e) {}
+	});
+
+	return b.bundle()
+		.pipe(source('vendor.js'))
+		.pipe(gulp.dest('./dist'));
+});
+
+gulp.task('browserify-app', function () {
+	var b = browserify('./src/index.js', { debug: devMode });
+
+	_.each(deps, function (id) {
+		b.external(id);
+	});
+
+	return b.bundle()
+		.pipe(source('index.js'))
 		.pipe(gulp.dest('./dist'));
 });
 
@@ -73,11 +86,14 @@ gulp.task('button-warn', function () {
 		}));
 });
 
-gulp.task('default', ['browserify', 'sass', 'index', 'fonts', 'templates']);
+gulp.task('default', ['browserify-vendor', 'browserify-app', 'sass', 'index', 'fonts', 'templates']);
 
 gulp.task('watch', function () {
 	watch('./src/**/*.js', batch(function (events, done) {
-		gulp.start('browserify', done);
+		gulp.start('browserify-app', done);
+	}));
+	watch('./package.json', batch(function (events, done) {
+		gulp.start('browserify-vendor', done);
 	}));
 	watch('./src/**/*.scss', batch(function (events, done) {
 		gulp.start('sass', done);
