@@ -172,6 +172,24 @@ angular.module('traq', [ngMaterial, uiRouter])
 							rowsSelected = [];
 						}
 					});
+
+					$scope.dateFormat = 'dd MMM yyyy h:mma';
+
+					$scope.$parent.$watch('table', function (table) {
+						if (!table) { return; }
+						var precision = table.precision || 'any';
+
+						if (precision === 'month') {
+							$scope.dateFormat = 'MMM yyyy';
+						} else if (precision === 'week') {
+							$scope.dateFormat = '"Week" w, yyyy';
+						} else {
+							$scope.dateFormat = 'dd MMM yyyy';
+							if (precision === 'any' || precision === 'hour') {
+								$scope.dateFormat += ' h:mma';
+							}
+						}
+					});
 				}
 			})
 			.state('table-edit', {

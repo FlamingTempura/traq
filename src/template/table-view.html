@@ -10,7 +10,7 @@
 	<tbody>
 		<tr ng-repeat="row in rows | startFrom: start | limitTo: limit" ng-class="{ selected: rowsSelected[row._id] }">
 			<td class="check"><md-checkbox ng-model="rowsSelected[row._id]" aria-label="Select"></md-checkbox></td>
-			<td>{{ row.date | date:"dd/MM/yyyy h:mma" }}</td>
+			<td>{{ row.date | date:dateFormat }}</td>
 			<td ng-repeat="column in table.columns" class="numeric">{{ row[column.id] | number }}</td>
 			<td class="control">
 				<md-button class="md-icon-button" aria-label="Edit" ui-sref="table-row-edit({ tid: table._id, rid: row._id })">

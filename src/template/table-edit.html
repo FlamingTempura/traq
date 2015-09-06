@@ -23,13 +23,16 @@
 				<textarea ng-model="table.description" columns="1"></textarea>
 			</md-input-container>
 
-			<!-- <md-input-container>
-				<label>Interval</label>
-				<md-select ng-model="table.interval">
-					<md-option>Once a day</md-option>
-					<md-option>Once a week</md-option>
+			<md-input-container>
+				<label>Time precision</label>
+				<md-select ng-model="table.precision">
+					<md-option value="any">Any</md-option>
+					<md-option value="hour">Hourly</md-option>
+					<md-option value="day">Daily</md-option>
+					<md-option value="week">Weekly</md-option>
+					<md-option value="month">Monthly</md-option>
 				</md-select>
-			</md-input-container> -->
+			</md-input-container>
 
 				<!-- preset (if new) -->
 				<!-- <md-divider></md-divider> -->
