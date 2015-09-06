@@ -1,7 +1,7 @@
 <form flex layout="column" ng-submit="save()">
 	<md-toolbar>
 		<div class="md-toolbar-tools">
-			<md-button class="md-icon-button" aria-label="Close" ui-back>
+			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
 				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 			</md-button>
 			<h2><span ng-if="isNew">New chart</span>
@@ -51,10 +51,10 @@
 						</md-button>
 						<md-menu-content width="4">
 							<md-menu-item value="{{ color.hex }}">
-								<md-button ng-click="chart.columns[column.id].axis = 'left'">Left axis</md-button>
+								<md-button type="button" ng-click="chart.columns[column.id].axis = 'left'">Left axis</md-button>
 							</md-menu-item>
 							<md-menu-item value="{{ color.hex }}">
-								<md-button ng-click="chart.columns[column.id].axis = 'right'">Right axis</md-button>
+								<md-button type="button" ng-click="chart.columns[column.id].axis = 'right'">Right axis</md-button>
 							</md-menu-item>
 						</md-menu-content>
 					</md-menu>
@@ -65,7 +65,7 @@
 						</md-button>
 						<md-menu-content width="4">
 							<md-menu-item ng-repeat="color in colors" value="{{ color.hex }}">
-								<md-button ng-click="chart.columns[column.id].color = color.hex">
+								<md-button type="button" ng-click="chart.columns[column.id].color = color.hex">
 									<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{color.hex}}"></md-icon>
 									&nbsp; {{ color.name }}
 								</md-button>
@@ -81,7 +81,7 @@
 			
 		</div>
 		
-		<md-button ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>

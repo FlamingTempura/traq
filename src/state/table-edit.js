@@ -8,7 +8,7 @@ angular.module('traq').config(function ($stateProvider) {
 		url: '/table/:tid/edit',
 		templateUrl: 'table-edit.html',
 		params: { table: null, rows: null },
-		controller: function ($scope, $state, dbTable, dbRow) {
+		controller: function ($scope, $state, dbTable, dbRow, snack) {
 			$scope.isNew = $state.params.tid === 'new';
 			if ($scope.isNew) {
 				$scope.table = $state.params.table || {
@@ -39,6 +39,21 @@ angular.module('traq').config(function ($stateProvider) {
 					$state.go('table-view', { tid: $scope.table._id });
 				}).catch(function (err) {
 					console.error('failed', err);
+				});
+			};
+
+			var table;
+			$scope.$parent.$watch('table', function (_table) {
+				table = _table;
+			});
+
+			$scope.remove = function () {
+				dbTable.remove(table).then(function () {
+					// TODO: delete all rows and charts
+					$state.go('home');
+					snack('The table has been deleted', 'Undo', function () {
+						dbTable.put(table);
+					});
 				});
 			};
 		}

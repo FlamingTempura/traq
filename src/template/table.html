@@ -1,15 +1,15 @@
 <md-toolbar layout="row" class="md-tall" ng-class="{ 'toolbar-gray': showSelectedToolbar }">
 	<div flex layout="column">
 		<div class="md-toolbar-tools" ng-if="!showSelectedToolbar">
-			<md-button ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
+			<md-button type="button" ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
 				<md-icon aria-label="Menu" md-font-icon="mi mi-24 mi-menu"></md-icon>
 			</md-button>
 			<h2>{{ table.title }}</h2>
 			<div flex></div>
-			<md-button ui-sref="chart-edit({ tid: table._id, cid: 'new' })" class="md-icon-button" aria-label="Create chart">
+			<md-button type="button" ui-sref="chart-edit({ tid: table._id, cid: 'new' })" class="md-icon-button" aria-label="Create chart">
 				<md-icon md-font-icon="mi mi-24 mi-insert-chart"></md-icon>
 			</md-button>
-			<md-button ui-sref="table-edit({ tid: table._id })" class="md-icon-button" aria-label="Settings">
+			<md-button type="button" ui-sref="table-edit({ tid: table._id })" class="md-icon-button" aria-label="Settings">
 				<md-icon md-font-icon="mi mi-24 mi-settings"></md-icon>
 			</md-button>
 		</div>
@@ -24,7 +24,7 @@
 		</md-tabs>
 
 		<div class="md-toolbar-tools" ng-if="showSelectedToolbar">
-			<md-button class="md-icon-button" aria-label="Delete selected">
+			<md-button type="button" class="md-icon-button" aria-label="Delete selected">
 				<md-icon md-font-icon="mi mi-24 mi-delete"></md-icon>
 			</md-button>
 		</div>
@@ -33,6 +33,6 @@
 
 <md-content layout="column" flex ui-view></md-content>
 
-<md-button class="md-fab md-primary md-fab-bottom-right" aria-label="Add" ui-sref="row-edit({ tid: table._id, rid: 'new' })">
+<md-button type="button" class="md-fab md-primary md-fab-bottom-right" aria-label="Add" ui-sref="row-edit({ tid: table._id, rid: 'new' })">
 	<md-icon md-font-icon="mi mi-24 mi-add"></md-icon>
 </md-button>

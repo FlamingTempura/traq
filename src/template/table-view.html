@@ -13,7 +13,7 @@
 			<td>{{ row.date | date:dateFormat }}</td>
 			<td ng-repeat="column in table.columns" class="numeric">{{ row[column.id] | number }}</td>
 			<td class="control">
-				<md-button class="md-icon-button" aria-label="Edit" ui-sref="row-edit({ tid: table._id, rid: row._id })">
+				<md-button type="button" class="md-icon-button" aria-label="Edit" ui-sref="row-edit({ tid: table._id, rid: row._id })">
 					<md-icon md-font-icon="mi mi-24 mi-edit"></md-icon>
 				</md-button>
 			</td>
@@ -27,10 +27,10 @@
 		<div flex></div>
 		<div>{{ start }}-{{ start + limit }}</div>
 
-		<md-button class="md-icon-button" aria-label="Previous page" ng-disabled="start === 0" ng-click="start = start - limit">
+		<md-button type="button" class="md-icon-button" aria-label="Previous page" ng-disabled="start === 0" ng-click="start = start - limit">
 			<md-icon md-font-icon="mi mi-24 mi-chevron-left"></md-icon>
 		</md-button>
-		<md-button class="md-icon-button" aria-label="Next page" ng-click="start = start + limit">
+		<md-button type="button" class="md-icon-button" aria-label="Next page" ng-click="start = start + limit">
 			<md-icon md-font-icon="mi mi-24 mi-chevron-right"></md-icon>
 		</md-button>
 	</div>

@@ -1,7 +1,7 @@
 <form flex layout="column" ng-submit="save()">
 	<md-toolbar>
 		<div class="md-toolbar-tools">
-			<md-button class="md-icon-button" aria-label="Close" ui-back>
+			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
 				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 			</md-button>
 			<h2><span ng-if="isNew">New table</span>
@@ -51,13 +51,13 @@
 					<input type="text" ng-model="column.unit">
 				</md-input-container>
 				
-				<md-button class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
+				<md-button type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
 					<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 				</md-button>
 
 			</div>
 
-			<md-button class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
+			<md-button type="button" class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
 		
 		</div>
 
@@ -65,7 +65,7 @@
 			By clicking SAVE, this will import {{ rows.length }} rows.
 		</p>
 		
-		<md-button ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>

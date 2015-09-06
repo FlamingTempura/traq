@@ -35,7 +35,9 @@ var classSafe = function (str) {
 };
 
 angular.module('traq', [ngMaterial, uiRouter])
-	.controller('AppCtrl', function () { })
+	.controller('AppCtrl', function ($scope, snack) {
+		$scope.snack = snack;
+	})
 	.service('dbTable', function ($q) {
 		var db = new PouchDB('traq-table');
 		db.observe($q);
@@ -480,13 +482,22 @@ angular.module('traq', [ngMaterial, uiRouter])
 
 				angular.element(window).on('resize', resize);
 				scope.$watch('table + chart + rows', plot);
-
 			}
 		};
 	}).filter('startFrom', function () {
 		return function (input, start) {
 			return input.slice(start);
 		};
+	}).service('snack', function ($timeout) {
+		var snack = function (message, buttonText, buttonFn) {
+			snack.message = message;
+			snack.buttonText = buttonText;
+			snack.buttonFn = buttonFn;
+			$timeout(function () {
+				delete snack.message;
+			}, 2000);
+		};
+		return snack;
 	});
 
 require('./state/chart-edit.js');
