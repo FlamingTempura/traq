@@ -65,7 +65,7 @@
 			By clicking SAVE, this will import {{ rows.length }} rows.
 		</p>
 		
-		<md-button type="button" ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete</md-button>
 
 	</md-content>
 </form>

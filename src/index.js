@@ -495,7 +495,7 @@ angular.module('traq', [ngMaterial, uiRouter])
 			snack.buttonFn = buttonFn;
 			$timeout(function () {
 				delete snack.message;
-			}, 2000);
+			}, 5000);
 		};
 		return snack;
 	});

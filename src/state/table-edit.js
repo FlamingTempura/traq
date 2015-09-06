@@ -42,17 +42,13 @@ angular.module('traq').config(function ($stateProvider) {
 				});
 			};
 
-			var table;
-			$scope.$parent.$watch('table', function (_table) {
-				table = _table;
-			});
-
 			$scope.remove = function () {
-				dbTable.remove(table).then(function () {
+				console.log('attempting to remove', $scope.table)
+				dbTable.remove($scope.table).then(function () {
 					// TODO: delete all rows and charts
 					$state.go('home');
 					snack('The table has been deleted', 'Undo', function () {
-						dbTable.put(table);
+						dbTable.put($scope.table);
 					});
 				});
 			};
