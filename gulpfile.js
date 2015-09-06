@@ -13,7 +13,7 @@ var gulp = require('gulp'),
 var devMode = true;
 
 gulp.task('browserify', function () {
-	return gulp.src('./src/js/main.js')
+	return gulp.src('./src/index.js')
 		.pipe(through2.obj(function (file, enc, next) {
 			browserify(file.path, {
 				debug: devMode
@@ -30,7 +30,7 @@ gulp.task('browserify', function () {
 });
 
 gulp.task('sass', function () {
-	return gulp.src('./src/scss/main.scss')
+	return gulp.src('./src/style/main.scss')
 		.pipe(sass().on('error', sass.logError))
 		.pipe(gulp.dest('./dist'));
 });

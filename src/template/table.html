@@ -6,7 +6,7 @@
 			</md-button>
 			<h2>{{ table.title }}</h2>
 			<div flex></div>
-			<md-button ui-sref="table-chart-edit({ tid: table._id, cid: 'new' })" class="md-icon-button" aria-label="Create chart">
+			<md-button ui-sref="chart-edit({ tid: table._id, cid: 'new' })" class="md-icon-button" aria-label="Create chart">
 				<md-icon md-font-icon="mi mi-24 mi-insert-chart"></md-icon>
 			</md-button>
 			<md-button ui-sref="table-edit({ tid: table._id })" class="md-icon-button" aria-label="Settings">
@@ -18,7 +18,7 @@
 			<md-tab ng-click="go('table-view', { tid: table._id })">
 				Data
 			</md-tab>
-			<md-tab ng-repeat="chart in charts" ng-click="go('table-chart-view', { tid: table._id, cid: chart._id })">
+			<md-tab ng-repeat="chart in charts" ng-click="go('chart-view', { tid: table._id, cid: chart._id })">
 				{{ chart.title }}
 			</md-tab>
 		</md-tabs>
@@ -33,6 +33,6 @@
 
 <md-content layout="column" flex ui-view></md-content>
 
-<md-button class="md-fab md-primary md-fab-bottom-right" aria-label="Add" ui-sref="table-row-edit({ tid: table._id, rid: 'new' })">
+<md-button class="md-fab md-primary md-fab-bottom-right" aria-label="Add" ui-sref="row-edit({ tid: table._id, rid: 'new' })">
 	<md-icon md-font-icon="mi mi-24 mi-add"></md-icon>
 </md-button>
