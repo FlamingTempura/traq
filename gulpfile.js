@@ -8,7 +8,9 @@ var gulp = require('gulp'),
 	filter = require('gulp-filter'),
 	ngTemplates = require('gulp-ng-templates'),
 	watch = require('gulp-watch'),
-	batch = require('gulp-batch');
+	batch = require('gulp-batch'),
+	tap = require('gulp-tap'),
+	_ = require('lodash');
 
 var devMode = true;
 
@@ -35,7 +37,7 @@ gulp.task('sass', function () {
 		.pipe(gulp.dest('./dist'));
 });
 
-gulp.task('index', function () {
+gulp.task('index', ['button-warn'], function () {
 	return gulp.src('./src/index.html')
 		.pipe(gulp.dest('./dist'));
 });
@@ -49,7 +51,7 @@ gulp.task('fonts', function () {
 		.pipe(gulp.dest('./dist/fonts'));
 });
 
-gulp.task('templates', function () {
+gulp.task('templates', ['button-warn'], function () {
 	return gulp.src('./src/template/*')
 		.pipe(ngTemplates({
 			module: 'traq',
@@ -59,13 +61,25 @@ gulp.task('templates', function () {
 		.pipe(gulp.dest('./dist'));
 });
 
+gulp.task('button-warn', function () {
+	// warn about any md-buttons which do not specify a type (since they are automatically submits)
+	return gulp.src('./src/**/*.html')
+		.pipe(tap(function (file) {
+			file.contents.toString().replace(/<md-button [^>]+>/, function (match) {
+				if (match.indexOf('type=') === -1) {
+					console.warn('Warning: ' + _.last(file.path.split('/')) + ' untyped md-button\n ' + match);
+				}
+			});
+		}));
+});
+
 gulp.task('default', ['browserify', 'sass', 'index', 'fonts', 'templates']);
 
 gulp.task('watch', function () {
-	watch('./src/js/**/*.js', batch(function (events, done) {
+	watch('./src/**/*.js', batch(function (events, done) {
 		gulp.start('browserify', done);
 	}));
-	watch('./src/scss/**/*.scss', batch(function (events, done) {
+	watch('./src/**/*.scss', batch(function (events, done) {
 		gulp.start('sass', done);
 	}));
 	watch('./src/template/**/*.html', batch(function (events, done) {
