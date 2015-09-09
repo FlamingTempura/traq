@@ -21,5 +21,6 @@
   "unused": true,
   "node": true,
   "indent": 1,
-  "browserify": true
+  "browserify": true,
+  "node": true
 }
