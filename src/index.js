@@ -7,37 +7,60 @@ var _ = require('lodash'),
 	PouchDB = require('pouchdb'),
 	uuid = require('node-uuid');
 
-PouchDB.plugin(require('transform-pouch'));
-PouchDB.plugin({
-	getAll: function (options) {
-		options = _.extend({ include_docs: true }, options);
-		if (options.startWith) {
-			_.extend(options, {
-				startkey: options.startWith + ':',
-				endkey: options.startWith + ':\uffff'
-			});
-		}
-		return this.allDocs(options).then(function (result) {
-			return _.pluck(result.rows, 'doc');
-		});
-	},
-	// use angular promises ($q) to avoid need for $scope.$apply
-	observe: function ($q) {
-		var that = this,
-			methods = ['destroy', 'put', 'post', 'get', 'remove', 'bulkDocs', 'allDocs',
-				'changes', 'putAttachment', 'getAttachment', 'removeAttachment',
-				'query', 'viewCleanup', 'info', 'compact', 'revsDiff'];
-		methods.forEach(function (method) {
-			that[method] = function () {
-				return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
-			};
-		});
-	}
-});
-
 angular.module('traq', [ngMaterial, uiRouter])
 	.controller('AppCtrl', function ($scope, snack) {
 		$scope.snack = snack;
+	})
+	.run(function ($q) {
+		PouchDB.plugin(require('transform-pouch'));
+		PouchDB.plugin({
+			getAll: function (options) {
+				var that = this;
+				options = _.extend({ include_docs: true }, options);
+				if (options.startWith) {
+					_.extend(options, {
+						startkey: options.startWith + ':',
+						endkey: options.startWith + ':\uffff'
+					});
+				}
+				return this.allDocs(options).then(function (result) {
+					return _.pluck(result.rows, 'doc');
+				}).then(function (docs) {
+					if (that.filterFn) {
+						return $q.all(_.map(docs, that.filterFn)).then(function (results) {
+							return _.select(docs, function (doc, i) {
+								return results[i];
+							});
+						});
+					} else {
+						return docs;
+					}
+				});
+			},
+			exists: function (id) {
+				return this.allDocs({
+					startkey: id,
+					endkey: id
+				}).then(function (result) {
+					return result.rows.length > 0;
+				});
+			},
+			// use angular promises ($q) to avoid need for $scope.$apply
+			observe: function ($q) {
+				var that = this,
+					methods = ['destroy', 'put', 'post', 'get', 'remove', 'bulkDocs', 'allDocs',
+						'changes', 'putAttachment', 'getAttachment', 'removeAttachment',
+						'query', 'viewCleanup', 'info', 'compact', 'revsDiff'];
+				methods.forEach(function (method) {
+					that[method] = function () {
+						return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
+					};
+				});
+			},
+			filter: function (fn) {
+				this.filterFn = fn;
+			}
+		});
 	})
 	.service('dbTable', function ($q) {
 		var db = new PouchDB('traq-table');
@@ -72,9 +95,13 @@ angular.module('traq', [ngMaterial, uiRouter])
 		});
 		return db;
 	})
-	.service('dbChart', function ($q) {
+	.service('dbChart', function ($q, dbTable) {
 		var db = new PouchDB('traq-chart');
 		db.observe($q);
+		db.filter(function (chart) {
+			var tableId = chart._id.split(':')[0];
+			return dbTable.exists(tableId);
+		});
 		db.transform({
 			incoming: function (doc) {
 				doc = _.extend({}, doc);
