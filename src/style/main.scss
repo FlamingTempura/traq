@@ -9,6 +9,9 @@ $material-design-icons-font-path: 'fonts/';
 
 md-toolbar {
 	box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+	background: #ffcc00;
+	color: hsl(0, 0, 23%);
+	md-icon { color: hsl(0, 0, 23%); }
 	&.toolbar-gray {
 		background: #f0f0f0;
 		color: hsl(0, 0, 13%);
@@ -98,3 +101,6 @@ text {
 .gray {
 	background: #e0e0e0;
 }
+
+.fixed { position: fixed; }
+.pad-toolbar { padding-top: 64px; }

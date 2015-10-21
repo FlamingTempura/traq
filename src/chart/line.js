@@ -62,7 +62,18 @@ angular.module('traq')
 				var that = this;
 
 				this.chart = chart;
-				rows = this.rows = _.sortBy(rows, 'date');
+				rows = _.sortBy(rows, 'date');
+
+				var start = this.options.span === 'day' ? Date.now() - 24 * 60 * 60 * 1000 :
+							this.options.span === 'week' ? Date.now() - 7 * 24 * 60 * 60 * 1000 :
+							null;
+				if (start) {
+					rows = _.select(rows, function (row) {
+						return row.date.getTime() > start;
+					});
+				}
+
+				this.rows = rows;
 
 				var columns = this.columns = _.chain(table.columns).map(function (column) {
 					return _.extend({}, column, chart.columns[column.id]);

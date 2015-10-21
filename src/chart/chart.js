@@ -6,9 +6,9 @@ var angular = require('angular'),
 angular.module('traq')
 	.constant('chartTypes', [])
 	.factory('Chart', function (chartTypes) {
-		console.log('a', chartTypes)
-		var Chart = function (element) {
+		var Chart = function (element, options) {
 			this.element = element;
+			this.options = options;
 		};
 
 		_.extend(Chart.prototype, {
@@ -30,10 +30,13 @@ angular.module('traq')
 		return {
 			restrict: 'E',
 			replace: true,
-			scope: { chart: '=' },
+			scope: {
+				chart: '=',
+				span: '@'
+			},
 			template: '<div flex layout="row"><div flex></div></div>',
 			link: function (scope, element) {
-				var chartView = new Chart(element);
+				var chartView = new Chart(element, { span: scope.span });
 
 				angular.element(window).on('resize', chartView.resize);
 

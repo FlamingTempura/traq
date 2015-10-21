@@ -9,7 +9,7 @@
 <body layout="column" ng-controller="AppCtrl">
 	<md-content layout="column" flex ui-view></md-content>
 	<md-toast ng-if="snack.message">
-		<span flex>Hello</span>
+		<span flex>{{ snack.message }}</span>
 		<md-button type="button" ng-if="snack.buttonText" ng-click="snack.buttonFn()">{{ snack.buttonText }}</md-button>
 	</md-toast>
 

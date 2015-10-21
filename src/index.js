@@ -203,6 +203,121 @@ angular.module('traq', [ngMaterial, uiRouter])
 			}, 5000);
 		};
 		return snack;
+	})
+	.service('presets', function () {
+		return [
+			{
+				title: 'Weight',
+				category: 'Health & Wellbeing',
+				icon: 'filter-frames',
+				options: {
+					unit: {
+						label: 'Unit',
+						type: 'radio',
+						options: ['kg', 'lbs', 'st']
+					}
+				},
+				generate: function (options) {
+					return {
+						table: {
+							title: 'Weight',
+							precision: 'day',
+							columns: [
+								{ name: 'Weight', unit: options.unit }
+							]
+						}
+					};
+				}
+			},
+			{
+				title: 'Spending',
+				category: 'Budget',
+				icon: 'shopping-basket',
+				options: {
+					currency: {
+						label: 'Currency',
+						type: 'select',
+						options: ['GBP', 'USD'],
+						custom: true
+					}
+				}
+			},
+			{
+				title: 'Steps',
+				icon: 'directions-walk',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Hours worked',
+				icon: 'work',
+				category: 'Business'
+			},
+			{
+				title: 'Power usage',
+				icon: 'power',
+				category: 'Misc'
+			},
+			{
+				title: 'Milage',
+				icon: 'filter-hdr',
+				category: 'Misc'
+			},
+			{
+				title: 'Income',
+				icon: 'attach-money',
+				category: 'Business'
+			},
+			{
+				title: 'Miles ran',
+				icon: 'directions-run',
+				category: 'Sport'
+			},
+			{
+				title: 'Heart rate',
+				icon: 'favorite',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Temperature',
+				icon: 'wb-sunny',
+				category: 'Misc'
+			},
+			{
+				title: 'Hours slept',
+				icon: 'airline-seat-individual-suite',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Distance walked',
+				icon: 'directions-walk',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Mood',
+				icon: 'mood',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Height',
+				icon: 'straighten',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Calories',
+				icon: 'local-pizza',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Alcohol consumption',
+				icon: 'local-drink',
+				category: 'Health & Wellbeing'
+			},
+			{
+				title: 'Quarterly sales',
+				icon: 'attach-money',
+				category: 'Business'
+			}
+		];
 	});
 
 require('./state/chart-edit.js');

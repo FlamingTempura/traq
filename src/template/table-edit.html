@@ -1,71 +1,90 @@
-<form flex layout="column" ng-submit="save()">
-	<md-toolbar>
-		<div class="md-toolbar-tools">
-			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+<md-toolbar class="fixed">
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2><span ng-if="isNew">Create a table</span>
+			<span ng-if="!isNew">Edit {{ table.title }}</span></h2>
+		<span flex></span>
+		<md-button ng-if="!isNew || preset && presetOptions" type="button" ng-click="save()">Save</md-button>
+	</div>
+</md-toolbar>
+
+<!-- <md-content ng-if="isNew && !preset && !presetOptions" flex class="pad-toolbar">
+	<md-list-item>
+		<p>Custom</p>
+	</md-list-item>
+	<md-list>
+		<div ng-repeat="(category, presets) in presetCategories">
+			<md-subheader>{{ category }}</md-subheader>
+			<md-list-item ng-repeat="_preset in presets" ng-click="preset = _preset">
+				<md-icon md-font-icon="mi mi-24 mi-{{ _preset.icon }}"></md-icon>
+				<p>{{ _preset.title }}</p>
+			</md-list-item>
+			<md-divider></md-divider>
+		</div>
+	</md-list>
+</md-content> -->
+
+<!-- <md-content ng-if="isNew && preset && !presetOptions" layout-padding>
+	<div ng-repeat="option in preset.options">
+	</div>
+</md-content> -->
+<!--ng-if="!isNew || preset && presetOptions"-->
+<md-content flex layout-padding layout="column" class="pad-toolbar">
+	<form flex layout="column" ng-submit="save()">
+		<md-input-container>
+			<label>Title</label>
+			<input type="text" ng-model="table.title" required>
+		</md-input-container>
+
+		<md-input-container>
+			<label>Description</label>
+			<textarea ng-model="table.description" columns="1"></textarea>
+		</md-input-container>
+
+		<md-input-container>
+			<label>Time precision</label>
+			<md-select ng-model="table.precision">
+				<md-option value="any">Any</md-option>
+				<md-option value="hour">Hourly</md-option>
+				<md-option value="day">Daily</md-option>
+				<md-option value="week">Weekly</md-option>
+				<md-option value="month">Monthly</md-option>
+			</md-select>
+		</md-input-container>
+
+			<!-- preset (if new) -->
+			<!-- <md-divider></md-divider> -->
+
+		<md-subheader>Columns</md-subheader>
+
+		<div ng-repeat="column in table.columns" layout="row">
+
+			<md-input-container flex>
+				<label>Name</label>
+				<input type="text" ng-model="column.name" required>
+			</md-input-container>
+
+			<md-input-container style="width: 120px">
+				<label>Unit</label>
+				<input type="text" ng-model="column.unit">
+			</md-input-container>
+			
+			<md-button type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
 				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 			</md-button>
-			<h2><span ng-if="isNew">New table</span>
-				<span ng-if="!isNew">Edit {{ table.title }}</span></h2>
-			<span flex></span>
-			<md-button type="submit">Save</md-button>
-		</div>
-	</md-toolbar>
 
-	<md-content flex layout-padding layout="column">
-		<div flex>
-			<md-input-container>
-				<label>Title</label>
-				<input type="text" ng-model="table.title" required>
-			</md-input-container>
-
-			<md-input-container>
-				<label>Description</label>
-				<textarea ng-model="table.description" columns="1"></textarea>
-			</md-input-container>
-
-			<md-input-container>
-				<label>Time precision</label>
-				<md-select ng-model="table.precision">
-					<md-option value="any">Any</md-option>
-					<md-option value="hour">Hourly</md-option>
-					<md-option value="day">Daily</md-option>
-					<md-option value="week">Weekly</md-option>
-					<md-option value="month">Monthly</md-option>
-				</md-select>
-			</md-input-container>
-
-				<!-- preset (if new) -->
-				<!-- <md-divider></md-divider> -->
-
-			<md-subheader>Columns</md-subheader>
-
-			<div ng-repeat="column in table.columns" layout="row">
-
-				<md-input-container flex>
-					<label>Name</label>
-					<input type="text" ng-model="column.name" required>
-				</md-input-container>
-
-				<md-input-container style="width: 120px">
-					<label>Unit</label>
-					<input type="text" ng-model="column.unit">
-				</md-input-container>
-				
-				<md-button type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="table.columns.splice(table.columns.indexOf(column), 1)">
-					<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
-				</md-button>
-
-			</div>
-
-			<md-button type="button" class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
-		
 		</div>
 
-		<p ng-if="rows">
-			By clicking SAVE, this will import {{ rows.length }} rows.
-		</p>
-		
-		<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete</md-button>
+		<md-button type="button" class="md-raised" ng-click="table.columns.push({})">Add column</md-button>
+	
+	</form>
 
-	</md-content>
-</form>
+	<p ng-if="rows">
+		By clicking SAVE, this will import {{ rows.length }} rows.
+	</p>
+	
+	<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete</md-button>
+
+</md-content>

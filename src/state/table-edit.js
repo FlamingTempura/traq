@@ -1,14 +1,15 @@
 'use strict';
 
 var angular = require('angular'),
-	uuid = require('node-uuid');
+	uuid = require('node-uuid'),
+	_ = require('lodash');
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('table-edit', {
 		url: '/table/:tid/edit',
 		templateUrl: 'table-edit.html',
 		params: { table: null, rows: null },
-		controller: function ($scope, $state, dbTable, dbRow, snack) {
+		controller: function ($scope, $state, dbTable, dbRow, snack, presets) {
 			$scope.isNew = $state.params.tid === 'new';
 			if ($scope.isNew) {
 				$scope.table = $state.params.table || {
@@ -52,6 +53,9 @@ angular.module('traq').config(function ($stateProvider) {
 					});
 				});
 			};
+
+			$scope.presetCategories = _.chain(presets).sortBy('title').groupBy('category').value();
+			$scope.preset = null;
 		}
 	});
 });
