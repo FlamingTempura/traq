@@ -11,8 +11,9 @@
 	</div>
 </md-toolbar>
 <md-content flex layout="column">
+	<md-subheader>What do you want to track?</md-subheader>
 	<div layout="row" flex="auto">
-		<md-content flex="33" layout="column">
+		<md-content style="width: 100px;" layout="column">
 			<md-list flex="grow">
 				<md-list-item 
 						ng-repeat="category in traqNew.categories" 
@@ -23,8 +24,8 @@
 				</md-list-item>
 			</md-list>
 		</md-content>
-		<md-content flex="67" layout="column">
-			<md-list flex="grow" style="background:#333">
+		<md-content flex layout="column">
+			<md-list flex="grow" ng-style="{ color: traqNew.selectedCategory.color }">
 				<div ui-sref="traq-edit({ id: 'new' })"><!-- HACK until this fix deployed https://github.com/angular/material/issues/2131 -->
 					<md-list-item ng-show="traqNew.selectedCategory.id === 'other'">
 						<md-icon md-font-icon="mi mi-24 mi-create"></md-icon>
@@ -33,23 +34,17 @@
 				</div>
 				<div ng-repeat="preset in traqNew.selectedCategory.presets">
 					
-					<md-list-item ng-click="traqNew.go('traq-edit', { tid: 'new', preset: preset.id })" ng-if="!preset.locked" ng-style="{ color: traqNew.selectedCategory.color }">
+					<md-list-item ng-click="traqNew.go('traq-edit', { tid: 'new', preset: preset.id })" ng-if="!preset.locked">
 						<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
 						<p>{{ preset.title }}</p>
 					</md-list-item>
 
-					<!-- <md-list-item ng-click="traqNew.go('traq-edit', { tid: 'new', preset: preset.id })" ng-if="!preset.locked" ng-style="{ color: traqNew.selectedCategory.color }">
+					<md-list-item ng-click="traqNew.go('traq-full')" ng-if="preset.locked">
 						<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
 						<p>{{ preset.title }}</p>
-					</md-list-item> -->
+						<md-icon md-font-icon="mi mi-24 mi-lock upgrade-icon"></md-icon>
+					</md-list-item>
 
-					<div ui-sref="traq-full" ng-if="preset.locked">
-						<md-list-item ng-style="{ color: traqNew.selectedCategory.color }">
-							<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
-							<p>{{ preset.title }}</p>
-							<md-icon md-font-icon="mi mi-24 mi-lock upgrade-icon"></md-icon>
-						</md-list-item>
-					</div>
 				</div>
 			</md-list>
 		</md-content>

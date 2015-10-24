@@ -12,17 +12,27 @@ angular.module('traq').config(function ($stateProvider) {
 		resolve: {
 			onboarded: function (dbConfig) { return dbConfig.exists('onboard'); },
 			traqs: function (dbTraq) { return dbTraq.getAll(); },
-			charts: function (dbChart) { return dbChart.getAll(); }
+			charts: function (dbChart) { return dbChart.getAll(); },
+			rows: function (dbRow) { return dbRow.getAll(); } // FIXME: this is bad
 		},
 		onEnter: function ($state, onboarded) {
 			console.log('onboarded?', onboarded);
 			if (!onboarded) { $state.go('welcome'); }
 		},
-		controller: function ($scope, $stateParams, dbTraq, traqs, charts) {
+		controller: function ($scope, $stateParams, dbTraq, traqs, charts, presets, rows) {
 			$scope.home = { selectedIndex: 0 };
 
 			$scope.traqs = traqs;
 			$scope.charts = charts;
+
+			$scope.traqFacts = _.map(traqs, function (traq) {
+				return _.findWhere(presets.presets, { id: traq.preset }).facts;
+			});
+			$scope.traqRows = _.map(traqs, function (traq) {
+				return _.filter(rows, function (row) {
+					return row._id.indexOf(traq._id) === 0;
+				});
+			});
 
 			if ($stateParams.tid) {
 				$scope.home.selectedIndex = _.findIndex(traqs, function (traq) {

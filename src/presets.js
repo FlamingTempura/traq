@@ -27,12 +27,18 @@ angular.module('traq')
 					options: [
 						{
 							id: 'unit',
-							label: 'Unit',
+							title: 'Unit',
 							type: 'radio',
 							options: [
 								{ title: 'kg', value: 'kg' },
 								{ title: 'lbs', value: 'lbs' },
 								{ title: 'st', value: 'st' }]
+						},
+						{
+							id: 'height',
+							title: 'Height',
+							type: 'number',
+							unit: 'm'
 						}
 					],
 					charts: [
@@ -41,8 +47,47 @@ angular.module('traq')
 							data: [{ column: 'weight', axis: 'left', color: '#663399' }]
 						}
 					],
+					facts: [
+						{
+							title: 'Change',
+							value: function (traq, rows) {
+								console.log('G', rows);
+								if (!rows) { return; }
+								var weightA = _.first(rows).weight,
+									weightB = _.last(rows).weight,
+									weightUnit = _.findWhere(traq.columns, { id: 'weight' }).unit;
+								return weightB - weightA + ' ' + weightUnit;
+							}
+						},
+						{
+							title: 'Weight',
+							value: function (traq, rows) {
+								console.log('H', rows);
+								if (!rows) { return; }
+								var weight = _.last(rows).weight,
+									weightUnit = _.findWhere(traq.columns, { id: 'weight' }).unit;
+								return weight + ' ' + weightUnit;
+							}
+						},
+						{
+							title: 'BMI',
+							value: function (traq, rows) {
+								if (!rows) { return; }
+								var heightM = traq.height,
+									weight = _.last(rows).weight,
+									weightUnit = _.findWhere(traq.columns, { id: 'weight' }).unit,
+									weightKg = weight; // TODO: unit conversion
+
+								return Math.round(weightKg / (heightM * heightM) * 10) / 10;
+							},
+							description: function (traq) {
+								return 'Body Mass Index (BMI)';
+							}
+						}
+					],
 					reconstructTraq: function (traq) {
 						console.log(traq)
+						// TODO: on unit change, convert all values
 						_.findWhere(traq.columns, { id: 'weight' }).unit = traq.unit;
 					}
 				},
@@ -88,7 +133,17 @@ angular.module('traq')
 					id: 'heart-rate',
 					title: 'Heart rate',
 					icon: 'favorite',
-					category: 'health'
+					category: 'health',
+					defaults: {
+						title: 'Heart rate',
+						columns: [{ id: 'heart-rate', name: 'Heart rate', unit: 'bpm' }]
+					}, // TODO - age as an option to auto calculate BPM ranges
+					charts: [
+						{
+							type: 'line',
+							date: [{ column: 'heart-rate', axis: 'left', color: '#663399' }]
+						}
+					]
 				}//,
 				/*{
 					id: 'temperature',

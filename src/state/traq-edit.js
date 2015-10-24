@@ -38,7 +38,7 @@ angular.module('traq').config(function ($stateProvider) {
 			$scope.charts = charts;
 
 			$scope.save = function (attrs) {
-				if ($scope.preset) {
+				if ($scope.preset && $scope.preset.reconstructTraq) {
 					$scope.preset.reconstructTraq(traq); // create columns from options etc
 				}
 				dbTraq.put(_.extend(traq, attrs)).then(function (res) {

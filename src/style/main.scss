@@ -8,14 +8,14 @@ $material-design-icons-font-path: 'fonts/';
 @import 'node_modules/material-icons/css/material-icons';
 
 md-toolbar:not(.md-menu-toolbar) {
-	box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
+	//box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.3);
 	//background: #ffcc00;
 	color: hsl(0, 0, 23%);
 	md-icon { color: hsl(0, 0, 23%); }
 	&.toolbar-gray {
-		background: #f0f0f0;
-		color: hsl(0, 0, 13%);
-		md-icon { color: hsl(0, 0, 13%); }
+		background: #333;
+		color: hsl(0, 0, 87%);
+		md-icon { color: hsl(0, 0, 87%); }
 	}
 	&.toolbar-pages {
 		box-shadow: none;
@@ -137,16 +137,14 @@ md-menu-content {
 md-list-item.active {
 	border-left-width: 4px;
 	border-left-style: solid;
-	background: #333;
-	button {
-		background: #333 !important;
-	}
+	//background: #333;
+	//button { background: #333 !important; }
 }
 
 md-list-item:not(.active) {
 	margin-left: 4px;
 }
-md-list md-list-item > md-icon {
+md-list md-list-item md-icon {
 	color: inherit;
 }
 md-list {
@@ -184,4 +182,18 @@ text {
 .upgrade-icon {
 	color: rgba(255, 255, 255, 0.3);
 	font-size: 13px;
+}
+
+
+.fact {
+	text-align: center;
+	.title {
+		font-size: 12px;
+		text-transform: uppercase;
+		display: block;
+	}
+	.value {
+		font-size: 26px;
+		display: block;
+	}
 }

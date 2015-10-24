@@ -28,6 +28,13 @@
 					<chart ng-repeat="chart in charts" ng-if="chart._id === traq.defaultChart" chart="chart" span="week"></chart>
 				</div>
 
+				<div layout="row">
+					<div class="fact" ng-repeat="fact in traqFacts[$index]" style="height: 80px" flex="33">
+						<div class="title">{{ fact.title }}</div>
+						<div class="value">{{ fact.value(traq, traqRows[$parent.$index]) }}</div>
+					</div>
+				</div>
+
 				<md-button flex="initial" type="button" ui-sref="row-edit({ tid: traq._id, rid: 'new' })" class="md-raised md-primary">
 					Add measurement
 				</md-button>
