@@ -8,8 +8,19 @@ var _ = require('lodash'),
 	uuid = require('node-uuid');
 
 angular.module('traq', [ngMaterial, uiRouter])
+	.config(function ($mdThemingProvider) {
+		$mdThemingProvider.theme('default')
+			.dark()
+			.primaryPalette('yellow');
+	})
 	.controller('AppCtrl', function ($scope, snack) {
 		$scope.snack = snack;
+	})
+	.run(function ($rootScope, snack) {
+		$rootScope.$on('$stateChangeError', function (event, to, toParams, from, fromParams, err) {
+			snack('An error occured. Try again.'); // TODO: a more user-friendly message
+			console.error('stateChangeError', err);
+		});
 	})
 	.run(function ($q) {
 		PouchDB.plugin(require('transform-pouch'));
@@ -62,8 +73,13 @@ angular.module('traq', [ngMaterial, uiRouter])
 			}
 		});
 	})
-	.service('dbTable', function ($q) {
-		var db = new PouchDB('traq-table');
+	.service('dbConfig', function ($q) {
+		var db = new PouchDB('track-config');
+		db.observe($q);
+		return db;
+	})
+	.service('dbTraq', function ($q) {
+		var db = new PouchDB('traq-traq');
 		db.observe($q);
 		db.transform({
 			incoming: function (doc) {
@@ -95,22 +111,22 @@ angular.module('traq', [ngMaterial, uiRouter])
 		});
 		return db;
 	})
-	.service('dbChart', function ($q, dbTable) {
+	.service('dbChart', function ($q, dbTraq) {
 		var db = new PouchDB('traq-chart');
 		db.observe($q);
 		db.filter(function (chart) {
-			var tableId = chart._id.split(':')[0];
-			return dbTable.exists(tableId);
+			var traqId = chart._id.split(':')[0];
+			return dbTraq.exists(traqId);
 		});
 		db.transform({
 			incoming: function (doc) {
 				doc = _.extend({}, doc);
-				delete doc.table;
+				delete doc.traq;
 				return doc;
 			},
 			outgoing: function (doc) {
 				return _.extend({}, doc, {
-					table: doc._id.split(':')[0]
+					traq: doc._id.split(':')[0]
 				});
 			}
 		});
@@ -203,136 +219,22 @@ angular.module('traq', [ngMaterial, uiRouter])
 			}, 5000);
 		};
 		return snack;
-	})
-	.service('presets', function () {
-		return [
-			{
-				title: 'Weight',
-				category: 'Health & Wellbeing',
-				icon: 'filter-frames',
-				options: {
-					unit: {
-						label: 'Unit',
-						type: 'radio',
-						options: ['kg', 'lbs', 'st']
-					}
-				},
-				generate: function (options) {
-					return {
-						table: {
-							title: 'Weight',
-							precision: 'day',
-							columns: [
-								{ name: 'Weight', unit: options.unit }
-							]
-						}
-					};
-				}
-			},
-			{
-				title: 'Spending',
-				category: 'Budget',
-				icon: 'shopping-basket',
-				options: {
-					currency: {
-						label: 'Currency',
-						type: 'select',
-						options: ['GBP', 'USD'],
-						custom: true
-					}
-				}
-			},
-			{
-				title: 'Steps',
-				icon: 'directions-walk',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Hours worked',
-				icon: 'work',
-				category: 'Business'
-			},
-			{
-				title: 'Power usage',
-				icon: 'power',
-				category: 'Misc'
-			},
-			{
-				title: 'Milage',
-				icon: 'filter-hdr',
-				category: 'Misc'
-			},
-			{
-				title: 'Income',
-				icon: 'attach-money',
-				category: 'Business'
-			},
-			{
-				title: 'Miles ran',
-				icon: 'directions-run',
-				category: 'Sport'
-			},
-			{
-				title: 'Heart rate',
-				icon: 'favorite',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Temperature',
-				icon: 'wb-sunny',
-				category: 'Misc'
-			},
-			{
-				title: 'Hours slept',
-				icon: 'airline-seat-individual-suite',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Distance walked',
-				icon: 'directions-walk',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Mood',
-				icon: 'mood',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Height',
-				icon: 'straighten',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Calories',
-				icon: 'local-pizza',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Alcohol consumption',
-				icon: 'local-drink',
-				category: 'Health & Wellbeing'
-			},
-			{
-				title: 'Quarterly sales',
-				icon: 'attach-money',
-				category: 'Business'
-			}
-		];
 	});
 
+require('./presets.js');
+require('./state/welcome.js');
 require('./state/chart-edit.js');
 require('./state/chart-view.js');
 require('./state/export.js');
 require('./state/feedback.js');
 require('./state/home.js');
 require('./state/import.js');
-require('./state/main.js');
 require('./state/row-edit.js');
 require('./state/settings-dropbox.js');
 require('./state/settings.js');
-require('./state/table-edit.js');
-require('./state/table-view.js');
-require('./state/table.js');
+require('./state/traq-new.js');
+require('./state/traq-edit.js');
+require('./state/traq-data.js');
 require('./chart/chart.js');
 require('./chart/line.js');
 //require('./chart/bar.js');

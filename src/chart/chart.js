@@ -26,7 +26,7 @@ angular.module('traq')
 
 		return Chart;
 	})
-	.directive('chart', function ($q, $compile, Chart, dbTable, dbRow) {
+	.directive('chart', function ($q, $compile, Chart, dbTraq, dbRow) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -44,10 +44,10 @@ angular.module('traq')
 					console.log('chart', chart)
 					if (!chart) { return; }
 					$q.all({
-						table: dbTable.get(chart.table),
-						rows: dbRow.getAll({ startWith: chart.table })
+						traq: dbTraq.get(chart.traq),
+						rows: dbRow.getAll({ startWith: chart.traq })
 					}).then(function (obj) {
-						chartView.update(chart, obj.table, obj.rows);
+						chartView.update(chart, obj.traq, obj.rows);
 					});
 				});
 			}

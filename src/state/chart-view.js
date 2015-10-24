@@ -4,7 +4,7 @@ var angular = require('angular');
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('chart-view', {
-		parent: 'table',
+		parent: 'traq',
 		url: '/chart/:cid',
 		templateUrl: 'chart-view.html',
 		controller: function ($scope, $state, dbChart) {

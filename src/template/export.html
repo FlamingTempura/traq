@@ -13,15 +13,15 @@
 	</md-toolbar>
 
 	<md-content layout-padding>
-		<md-subheader>Tables to export</md-subheader>
+		<md-subheader>Traqs to export</md-subheader>
 
-		<md-checkbox ng-repeat="table in tables" ng-checked="options.selectedTables.indexOf(table._id) > -1" ng-click="toggleTable(table._id)">{{ table.title }}</md-checkbox>	
+		<md-checkbox ng-repeat="traq in traqs" ng-checked="options.selectedTraqs.indexOf(traq._id) > -1" ng-click="toggleTraq(traq._id)">{{ traq.title }}</md-checkbox>	
 
 		<md-subheader>Format</md-subheader>
 
 		<md-radio-group ng-model="options.format">
-			<md-radio-button value="csv" ng-disabled="options.selectedTables.length !== 1">Comma separated (.csv) - only for individual tables</md-radio-button>
-			<md-radio-button value="xlsx" ng-disabled="options.selectedTables.length < 1">Excel spreadsheet (.xlsx)</md-radio-button>
+			<md-radio-button value="csv" ng-disabled="options.selectedTraqs.length !== 1">Comma separated (.csv) - only for individual traqs</md-radio-button>
+			<md-radio-button value="xlsx" ng-disabled="options.selectedTraqs.length < 1">Excel spreadsheet (.xlsx)</md-radio-button>
 		</md-radio-group>
 
 		<md-subheader>Export method</md-subheader>

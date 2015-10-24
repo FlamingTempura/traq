@@ -13,7 +13,7 @@
 
 	<md-content flex layout-padding layout="column">
 		<div flex>
-			<md-input-container>
+			<!-- <md-input-container>
 				<label>Title</label>
 				<input type="text" ng-model="chart.title" required>
 			</md-input-container>
@@ -21,7 +21,7 @@
 			<md-input-container>
 				<label>Description</label>
 				<textarea ng-model="chart.description" columns="1"></textarea>
-			</md-input-container>
+			</md-input-container> -->
 
 				<!-- preset (if new) -->
 				<!-- <md-divider></md-divider> -->
@@ -40,7 +40,7 @@
 			<md-subheader>Columns</md-subheader>
 
 			<md-list>
-				<md-list-item ng-repeat="column in table.columns">
+				<md-list-item ng-repeat="column in traq.columns">
 					<md-checkbox aria-label="Show" ng-model="chart.columns[column.id].show"></md-checkbox>
 					<p>{{ column.name }}</p>
 

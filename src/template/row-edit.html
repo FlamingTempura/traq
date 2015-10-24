@@ -4,8 +4,8 @@
 			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
 				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 			</md-button>
-			<h2>{{ table.title }}: <span ng-if="isNew">New row</span>
-				<span ng-if="!isNew">Edit row</span></h2>
+			<h2><span ng-if="isNew">Add measurement</span>
+				<span ng-if="!isNew">Edit measurement</span></h2>
 			<span flex></span>
 			<md-button type="submit" class="md-icon-button">Save</md-button>
 		</div>
@@ -26,9 +26,9 @@
 				</md-input-container>
 			</div>
 			
-			<md-input-container ng-repeat="column in table.columns">
+			<md-input-container ng-repeat="column in traq.columns">
 				<label>{{ column.name }} ({{ column.unit }})</label>
-				<input type="number" ng-model="row[column.id]" step="any">
+				<input type="number" ng-model="row[column.id]" step="any" ng-attr-autofocus="{{ $index === 0 }}">
 			</md-input-container>
 
 			<md-input-container>
@@ -38,7 +38,7 @@
 
 		</div>
 
-		<md-button type="button" ng-if="isNew" class="md-raised md-warn">Delete</md-button>
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
 
 	</md-content>
 </form>

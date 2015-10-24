@@ -1,36 +1,36 @@
 'use strict';
 
 var angular = require('angular'),
-	uuid = require('node-uuid');
+	uuid = require('node-uuid'),
+	resetMS = function (date) {
+		date.setMilliseconds(0);
+		return date;
+	};
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('row-edit', {
-		url: '/table/:tid/row/:rid/edit',
+		url: '/traq/:tid/row/:rid/edit',
 		templateUrl: 'row-edit.html',
-		controller: function ($scope, $state, dbTable, dbRow) {
-
-			dbTable.get($state.params.tid).then(function (table) {
-				console.log('get table', table);
-				$scope.table = table;
-			}).catch(function (err) {
-				console.log('failed', err);
-			}).then(function () {
-				$scope.isNew = $state.params.rid === 'new';
-				if ($scope.isNew) {
-					$scope.row = {
-						_id: $scope.table._id + ':row' + uuid.v4(),
-						date: new Date()
+		resolve: {
+			traq: function ($stateParams, dbTraq) {
+				return dbTraq.get($stateParams.tid); // TODO handle error
+			},
+			row: function ($stateParams, dbRow, traq) {
+				if ($stateParams.rid === 'new') {
+					return {
+						_id: traq._id + ':row' + uuid.v4(),
+						date: resetMS(new Date())
 					};
-					$scope.row.date.setMilliseconds(0);
 				} else {
-					dbRow.get($state.params.rid).then(function (row) {
-						console.log('got row', row);
-						$scope.row = row;
-					}).catch(function (err) {
-						console.error('failed', err);
-					});
+					return dbRow.get($stateParams.rid); // TODO handle error
 				}
-			});
+			}
+		},
+		controller: function ($scope, $state, dbTraq, dbRow, traq, row) {
+
+			$scope.traq = traq;
+			$scope.row = row;
+			$scope.isNew = $state.params.rid === 'new';
 
 			$scope.save = function () {
 				console.log('putting', $scope.row);

@@ -1,0 +1,95 @@
+<md-toolbar class="toolbar-gray" >
+	<div class="md-toolbar-tools">
+		<md-button ng-if="onboarded" type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<md-button ng-if="!onboarded" type="button" class="md-icon-button" aria-label="Back" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-arrow-back"></md-icon>
+		</md-button>
+		<h2><span ng-if="isNew">Create a traq</span>
+			<span ng-if="!isNew">Edit {{ traq.title }}</span></h2>
+		<span flex></span>
+		<md-button ng-if="!onboarded" type="button" ng-click="save()">Save</md-button>
+	</div>
+</md-toolbar>
+
+<md-content flex layout="column" style="background: #ccc">
+	<form flex layout="column" ng-submit="save()">
+		<md-card><md-card-content layout="column">
+			<h2 class="md-title">Options</h2>
+
+			<md-input-container>
+				<label>Title</label>
+				<input type="text" ng-model="traq.title" required>
+			</md-input-container>
+
+			<!-- <md-input-container>
+				<label>Time precision</label>
+				<md-select ng-model="traq.precision">
+					<md-option value="any">Any</md-option>
+					<md-option value="hour">Hourly</md-option>
+					<md-option value="day">Daily</md-option>
+					<md-option value="week">Weekly</md-option>
+					<md-option value="month">Monthly</md-option>
+				</md-select>
+			</md-input-container> -->
+
+
+			<!-- preset (if new) -->
+			<!-- <md-divider></md-divider> -->
+
+			<div ng-repeat="option in preset.options" ng-switch="option.type">
+				<div ng-swich-when="radio">
+					{{ option.label }}
+					<md-radio-group ng-model="traq[option.id]">
+						<md-radio-button ng-repeat="opt in option.options" value="{{ opt.value }}">
+							{{ opt.title }}
+						</md-radio-button>
+					</md-radio-group>
+				</div>
+			</div>
+		</md-card-content></md-card>
+
+		<md-card><md-card-content layout="column">
+			<h2 class="md-title">Columns</h2>
+
+			<div ng-repeat="column in traq.columns" layout="row">
+
+				<md-input-container flex>
+					<label>Name</label>
+					<input type="text" ng-model="column.name" required>
+				</md-input-container>
+
+				<md-input-container style="width: 120px">
+					<label>Unit</label>
+					<input type="text" ng-model="column.unit">
+				</md-input-container>
+				
+				<md-button type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="traq.columns.splice(traq.columns.indexOf(column), 1)">
+					<md-icon md-font-icon="mi mi-24 mi-cancel"></md-icon>
+				</md-button>
+
+			</div>
+			
+			<md-button type="button" class="md-raised md-primary" ng-click="traq.columns.push({})">New column</md-button>
+		</md-card-content></md-card>
+
+		<md-card><md-card-content layout="column">
+			<h2 class="md-title">Charts</h2>
+			<md-list>
+				<md-list-item ng-repeat="chart in charts">
+					<p>{{ chart.type }}</p>
+					<md-button type="button" ng-click="save({ defaultChart: chart._id })" md-aria="Set default">
+						<md-icon ng-if="traq.defaultChart !== chart._id" md-font-icon="mi mi-24 mi-star-border"></md-icon>
+						<md-icon ng-if="traq.defaultChart === chart._id" md-font-icon="mi mi-24 mi-star"></md-icon>
+					</md-button>
+				</md-list-item>
+			</md-list>
+			<md-button type="button" class="md-raised md-primary" ui-sref="chart-edit({ tid: traq._id, cid: 'new' })">New chart</md-button>
+		</md-card-content></md-card>
+	
+	</form>
+	
+	<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete this traq</md-button>
+
+</md-content>

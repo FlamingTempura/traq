@@ -1,25 +1,37 @@
-<md-toolbar layout="row">
-	<div class="md-toolbar-tools">
-		<md-button type="button" ng-click="toggleSidenav('left')" hide-gt-sm class="md-icon-button">
-			<md-icon aria-label="Menu" md-font-icon="mi mi-24 mi-menu"></md-icon>
-		</md-button>
-		<h2>Traq</h2>
-	</div>
-</md-toolbar>
+<md-content flex class="home" layout="column">
+	<md-content layout-padding ng-if="traqs.length === 0">
+		You haven't created any traqs. <a ui-sref="traq-edit({ tid: 'new' })">Create a traq</a>.
+	</md-content>
+	<md-tabs md-selected="home.selectedIndex" flex>
+		<md-tab ng-repeat="traq in traqs" label="{{ traq.title }}">
+			<md-content class="md-padding" style="height:100%" layout="column" flex>
+				<div class="menu-row" layout="row">
+					<div flex></div>
+					<md-menu md-position-mode="target-right target" flex="initial">
+						<md-button md-menu-origin type="button" ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
+							<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item><md-button ui-sref="traq-data({ tid: traq._id })">View data</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="traq-port({ tid: traq._id })">Import/export</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="traq-edit({ tid: traq._id })">Customise</md-button></md-menu-item>
+							<md-menu-divider></md-menu-divider>
+							<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
+						</md-menu-content>
+					</md-menu>
+				</div>
 
-<md-content flex class="md-padding gray">
-	<md-card ng-repeat="chart in charts">
-		<div class="md-card-image" style="height: 300px;" ui-sref="chart-view({ tid: chart.table, cid: chart._id })" layout="row">
-			<chart chart="chart" span="week"></chart>
-		</div>
-		<div class="md-actions" layout="row" layout-align="end center">
-			<md-button type="button" ui-sref="table-view({ tid: chart.table })" class="md-icon-button" aria-label="View table">
-				<md-icon md-font-icon="mi mi-24 mi-grid-on"></md-icon>
-			</md-button>
+				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traq.title }}</h2>
+				<div flex="auto" ui-sref="chart-view({ tid: chart.traq, cid: chart._id })" layout="row">
+					<chart ng-repeat="chart in charts" ng-if="chart._id === traq.defaultChart" chart="chart" span="week"></chart>
+				</div>
 
-			<md-button type="button" ui-sref="row-edit({ tid: chart.table, rid: 'new' })" class="md-icon-button"aria-label="New row">
-				<md-icon md-font-icon="mi mi-24 mi-add"></md-icon>
-			</md-button>
-		</div>
-	</md-card>
+				<md-button flex="initial" type="button" ui-sref="row-edit({ tid: traq._id, rid: 'new' })" class="md-raised md-primary">
+					Add measurement
+				</md-button>
+			</md-content>
+		</md-tab>
+	</md-tabs>
 </md-content>

@@ -1,9 +1,18 @@
+<md-toolbar class="toolbar-gray">
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>Data</h2>
+	</div>
+</md-toolbar>
+
 <table>
 	<thead>
 		<tr>
 			<th class="check"><md-checkbox ng-model="selectAll" aria-label="Select all"></md-checkbox></th>
 			<th>Date/Time</th>
-			<th ng-repeat="column in table.columns" class="numeric">{{ column.name }}</th>
+			<th ng-repeat="column in traq.columns" class="numeric">{{ column.name }}</th>
 			<th class="control"></th>
 		</tr>
 	</thead>
@@ -11,16 +20,16 @@
 		<tr ng-repeat="row in rows | startFrom: start | limitTo: limit" ng-class="{ selected: rowsSelected[row._id] }">
 			<td class="check"><md-checkbox ng-model="rowsSelected[row._id]" aria-label="Select"></md-checkbox></td>
 			<td>{{ row.date | date:dateFormat }}</td>
-			<td ng-repeat="column in table.columns" class="numeric">{{ row[column.id] | number }}</td>
+			<td ng-repeat="column in traq.columns" class="numeric">{{ row[column.id] | number }}</td>
 			<td class="control">
-				<md-button type="button" class="md-icon-button" aria-label="Edit" ui-sref="row-edit({ tid: table._id, rid: row._id })">
+				<md-button type="button" class="md-icon-button" aria-label="Edit" ui-sref="row-edit({ tid: traq._id, rid: row._id })">
 					<md-icon md-font-icon="mi mi-24 mi-edit"></md-icon>
 				</md-button>
 			</td>
 			<!-- note? -->
 		</tr>
 	</tbody>
-</table>
+</traq>
 
 <md-toolbar layout="row" class="toolbar-pages">
 	<div class="md-toolbar-tools">
@@ -34,4 +43,4 @@
 			<md-icon md-font-icon="mi mi-24 mi-chevron-right"></md-icon>
 		</md-button>
 	</div>
-</div>
+</table>

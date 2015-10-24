@@ -12,7 +12,10 @@ var gulp = require('gulp'),
 	resolve = require('resolve'),
 	source = require('vinyl-source-stream'),
 	_ = require('lodash'),
-	deps = _.keys(require('./package.json').dependencies);
+	deps = _.keys(require('./package.json').dependencies),
+	fs = require('fs');
+
+var buildFull = false;
 
 var devMode = true;
 
@@ -74,6 +77,12 @@ gulp.task('templates', ['button-warn'], function () {
 		.pipe(gulp.dest('./dist'));
 });
 
+gulp.task('images', function () {
+	return gulp.src('./src/img/*')
+		.pipe(newer('./dist/img'))
+		.pipe(gulp.dest('./dist/img'));
+});
+
 gulp.task('button-warn', function () {
 	// warn about any md-buttons which do not specify a type (since they are automatically submits)
 	return gulp.src('./src/**/*.html')
@@ -86,11 +95,43 @@ gulp.task('button-warn', function () {
 		}));
 });
 
-gulp.task('default', ['browserify-vendor', 'browserify-app', 'sass', 'index', 'fonts', 'templates']);
+
+
+gulp.task('full-presets', ['browserify-app'], function (done) {
+	try {
+		var fullPresets = require('./full/presets').map(function (preset) {
+			if (buildFull) {
+				return preset;
+			} else {
+				return {
+					id: preset.id,
+					title: preset.title,
+					category: preset.category,
+					icon: preset.icon,
+					locked: true
+				};
+			}
+		});
+		fs.readFile('./dist/index.js', 'utf8', function (err, js) {
+			js = js.replace('// @@FULL_PRESETS', ',' + JSON.stringify(fullPresets).slice(1, -1)); // remove [ and ]
+			fs.writeFile('./dist/index.js', js, done);
+		});
+	} catch (e) {
+		console.log('No files for full version');
+	}
+});
+
+gulp.task('full', ['full-presets']);
+
+gulp.task('obfuscate', ['full'], function () {
+
+});
+
+gulp.task('default', ['browserify-vendor', 'browserify-app', 'sass', 'index', 'fonts', 'templates', 'images', 'full']);
 
 gulp.task('watch', function () {
 	watch('./src/**/*.js', batch(function (events, done) {
-		gulp.start('browserify-app', done);
+		gulp.start(['browserify-app', 'full-presets'], done);
 	}));
 	watch('./package.json', batch(function (events, done) {
 		gulp.start('browserify-vendor', done);
@@ -101,7 +142,13 @@ gulp.task('watch', function () {
 	watch('./src/template/**/*.html', batch(function (events, done) {
 		gulp.start('templates', done);
 	}));
+	watch('./src/img/**/*', batch(function (events, done) {
+		gulp.start('images', done);
+	}));
 	watch('./src/index.html', batch(function (events, done) {
 		gulp.start('index', done);
+	}));
+	watch('./full/presets.js', batch(function (events, done) {
+		gulp.start(['browserify-app', 'full-presets'], done);
 	}));
 });

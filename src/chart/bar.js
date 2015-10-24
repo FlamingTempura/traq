@@ -10,7 +10,7 @@ angular.module('traq')
 			restrict: 'E',
 			replace: true,
 			scope: {
-				table: '=',
+				traq: '=',
 				chart: '=',
 				rows: '='
 			},
@@ -106,10 +106,10 @@ angular.module('traq')
 				};
 
 				var plot = function () {
-					if (!scope.chart || !scope.table || !scope.rows) { return; }
+					if (!scope.chart || !scope.traq || !scope.rows) { return; }
 					rows = _.sortBy(scope.rows, 'date');
 					chart = scope.chart;
-					columns = _.chain(scope.table.columns).map(function (column) {
+					columns = _.chain(scope.traq.columns).map(function (column) {
 						return _.extend({}, column, chart.columns[column.id]);
 					}).where({ show: true }).value();
 
@@ -150,7 +150,7 @@ angular.module('traq')
 				};
 
 				angular.element(window).on('resize', resize);
-				scope.$watch('table + chart + rows', plot);
+				scope.$watch('traq + chart + rows', plot);
 			}
 		};
 	});

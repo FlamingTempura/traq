@@ -102,7 +102,7 @@ angular.module('traq').config(function ($stateProvider) {
 					});
 				}
 				// end fix
-				$scope.table = {
+				$scope.traq = {
 					_id: 'tbl' + uuid.v4(),
 					title: $scope.import.title,
 					columns: _.chain(keys).map(function (key) {
@@ -120,19 +120,19 @@ angular.module('traq').config(function ($stateProvider) {
 
 				$scope.rows = _.map(data, function (_row) {
 					var row = {
-						_id: $scope.table._id + ':row' + uuid.v4(),
+						_id: $scope.traq._id + ':row' + uuid.v4(),
 						date: Date.parse(_row[dateKey])
 					};
-					_.each($scope.table.columns, function (column) {
+					_.each($scope.traq.columns, function (column) {
 						row[column.id] = Number(_row[column.originalKey]);
 					});
 					return row;
 				});
-				console.log($scope.table, $scope.rows);
+				console.log($scope.traq, $scope.rows);
 
 			});
 			$scope.import = function () {
-				$state.go('table-edit', { tid: 'new', table: $scope.table, rows: $scope.rows });
+				$state.go('traq-edit', { tid: 'new', traq: $scope.traq, rows: $scope.rows });
 			};
 		}
 	});

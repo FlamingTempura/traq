@@ -58,7 +58,7 @@ angular.module('traq')
 					.attr('dy', '-.71em')
 					.style('text-anchor', 'end');
 			},
-			update: function (chart, table, rows) {
+			update: function (chart, traq, rows) {
 				var that = this;
 
 				this.chart = chart;
@@ -75,11 +75,9 @@ angular.module('traq')
 
 				this.rows = rows;
 
-				var columns = this.columns = _.chain(table.columns).map(function (column) {
-					return _.extend({}, column, chart.columns[column.id]);
-				}).where({ show: true }).value();
-
-				console.log('oboo', rows);
+				var columns = this.columns = _.map(chart.data, function (d) {
+					return _.extend(d, _.findWhere(traq.columns, { id: d.column }));
+				});
 
 				var leftColumns = _.where(columns, { axis: 'left' }),
 					rightColumns = _.where(columns, { axis: 'right' }),
