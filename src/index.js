@@ -235,6 +235,7 @@ require('./state/settings.js');
 require('./state/traq-new.js');
 require('./state/traq-edit.js');
 require('./state/traq-data.js');
+require('./state/traq-charts.js');
 require('./chart/chart.js');
 require('./chart/line.js');
 //require('./chart/bar.js');

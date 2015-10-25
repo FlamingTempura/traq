@@ -85,7 +85,7 @@
 			<md-list>
 				<md-list-item ng-repeat="chart in charts">
 					<p>{{ chart.type }}</p>
-					<md-button type="button" ng-click="save({ defaultChart: chart._id })" md-aria="Set default">
+					<md-button type="button" ng-click="save({ defaultChart: chart._id })" aria-label="Set default">
 						<md-icon ng-if="traq.defaultChart !== chart._id" md-font-icon="mi mi-24 mi-star-border"></md-icon>
 						<md-icon ng-if="traq.defaultChart === chart._id" md-font-icon="mi mi-24 mi-star"></md-icon>
 					</md-button>

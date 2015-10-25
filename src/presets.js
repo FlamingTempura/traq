@@ -51,7 +51,6 @@ angular.module('traq')
 						{
 							title: 'Change',
 							value: function (traq, rows) {
-								console.log('G', rows);
 								if (!rows) { return; }
 								var weightA = _.first(rows).weight,
 									weightB = _.last(rows).weight,
@@ -62,7 +61,6 @@ angular.module('traq')
 						{
 							title: 'Weight',
 							value: function (traq, rows) {
-								console.log('H', rows);
 								if (!rows) { return; }
 								var weight = _.last(rows).weight,
 									weightUnit = _.findWhere(traq.columns, { id: 'weight' }).unit;

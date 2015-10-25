@@ -151,30 +151,35 @@ md-list {
 	padding: 0;
 }
 
+svg {
+	.gridline {
+		stroke: hsl(0, 0, 32%);
+		shape-rendering: crispEdges;
+	}
 
-.axis path,
-.axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
+	.x.axis path, .x.axis .tick line,
+	.y.axis path, .y.axis .tick line {
+		display: none;
+	}
 
-.x.axis path, .x.axis .tick line,
-.y.axis path, .y.axis .tick line {
-	display: none;
-}
+	.point {
+		fill: #444;
+		stroke-width: 3px;
+	}
 
-.point { stroke: none; }
+	.line {
+		fill: none;
+		stroke-width: 1.5px;
+		stroke-width: 3px;
+	}
 
-.line {
-	fill: none;
-	stroke-width: 1.5px;
-	stroke-width: 3px;
-}
-
-text {
-	fill: hsl(0, 0, 46%);
-	font-size: 12px;
+	text {
+		fill: hsl(0, 0, 66%);
+		font-size: 12px;
+	}
+	.x.axis text {
+		text-transform: uppercase;
+	}
 }
 
 .fixed { position: fixed; }
@@ -184,16 +189,46 @@ text {
 	font-size: 13px;
 }
 
+.dark-bg {
+	background: #333;
+}
 
 .fact {
 	text-align: center;
+	padding: 20px 4px;
+	height: 80px;
 	.title {
-		font-size: 12px;
+		font-size: 11px;
 		text-transform: uppercase;
 		display: block;
 	}
 	.value {
-		font-size: 26px;
+		font-size: 24px;
+		font-weight: 100;
 		display: block;
 	}
+}
+
+.link {
+	color: #aaa;
+	font-size: 14px;
+	text-decoration: none;
+	display: inline-block;
+	position: relative;
+	&::after { // less ugly underline
+		content: '';
+		position: absolute;
+		left: 0;
+		display: inline-block;
+		height: 1em;
+		width: 100%;
+		border-bottom: 1px solid #888;
+		margin-top: 0px;
+	}
+}
+
+.btn-bottom {
+	margin: 0;
+	padding: 10px;
+	border-radius: 0;
 }

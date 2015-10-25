@@ -4,7 +4,7 @@
 	</md-content>
 	<md-tabs md-selected="home.selectedIndex" flex>
 		<md-tab ng-repeat="traq in traqs" label="{{ traq.title }}">
-			<md-content class="md-padding" style="height:100%" layout="column" flex>
+			<md-content style="height:100%" layout="column" flex>
 				<div class="menu-row" layout="row">
 					<div flex></div>
 					<md-menu md-position-mode="target-right target" flex="initial">
@@ -24,18 +24,27 @@
 				</div>
 
 				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traq.title }}</h2>
-				<div flex="auto" ui-sref="chart-view({ tid: chart.traq, cid: chart._id })" layout="row">
-					<chart ng-repeat="chart in charts" ng-if="chart._id === traq.defaultChart" chart="chart" span="week"></chart>
+
+				<div layout="row" style="padding: 0 30px 10px 35px">
+					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'year'">1y</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'month'">1m</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'week'">1w</a>
+					<span flex="auto"></span>
+					<a ng-if="charts.length > 1" class="link" flex="initial" href="" ui-sref="traq-charts({ tid: traq._id })">{{ charts.length - 1 }} other chart{{ charts.length > 2 ? 's' : '' }}</a>
 				</div>
 
-				<div layout="row">
-					<div class="fact" ng-repeat="fact in traqFacts[$index]" style="height: 80px" flex="33">
+				<div flex="auto" ui-sref="chart-view({ tid: chart.traq, cid: chart._id })" layout="row">
+					<chart ng-repeat="chart in charts" ng-if="chart._id === traq.defaultChart" chart="chart" span="home.span[traq._id]"></chart>
+				</div>
+
+				<div layout="row" class="dark-bg">
+					<div class="fact" ng-repeat="fact in traqFacts[$index]" flex="33">
 						<div class="title">{{ fact.title }}</div>
 						<div class="value">{{ fact.value(traq, traqRows[$parent.$index]) }}</div>
 					</div>
 				</div>
 
-				<md-button flex="initial" type="button" ui-sref="row-edit({ tid: traq._id, rid: 'new' })" class="md-raised md-primary">
+				<md-button flex="initial" type="button" ui-sref="row-edit({ tid: traq._id, rid: 'new' })" class="md-raised md-primary btn-bottom">
 					Add measurement
 				</md-button>
 			</md-content>

@@ -44,6 +44,9 @@ angular.module('traq').config(function ($stateProvider) {
 				$mdOpenMenu(ev);
 			};
 
+			$scope.home.span = {};
+			$scope.home.span[traqs[0]._id] = 'week';
+
 			// TODO ensure that defaultChart failsafe to zero in case default chart is deleted
 		}
 	});

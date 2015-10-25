@@ -4,45 +4,52 @@ var angular = require('angular'),
 	d3 = require('d3'),
 	_ = require('lodash');
 
+var spans = {
+	day: { ticks: d3.time.hour, tickFormat: d3.time.format('%H:%M') },
+	week: { ticks: d3.time.day, tickFormat: d3.time.format('%a') },
+	month: { ticks: d3.time.week, tickFormat: d3.time.format('%a') },
+	year: { ticks: d3.time.month, tickFormat: d3.time.format('%b') }
+};
+
+var margin = { top: 10, right: 28, bottom: 30, left: 36 };
+
 angular.module('traq')
 	.config(function (chartTypes) {
-		var margin = { top: 20, right: 50, bottom: 30, left: 50 };
-
 		chartTypes.push({
 			id: 'line',
-			name: 'Line chart',
+			title: 'Line chart',
 			options: {
 				smooth: { label: 'Smooth line', type: Boolean },
 				points: { label: 'Draw points', type: Boolean }
 			},
-			init: function () {
-				this.container = this.element.children()[0];
+			create: function (element) {
+				var plotZeros, columns, rows, span, width, height,
 
-				this.x = d3.time.scale();
-				this.yLeft = d3.scale.linear();
-				this.yRight = d3.scale.linear();
+					x = d3.time.scale(),
+					yLeft = d3.scale.linear(),
+					yRight = d3.scale.linear(),
 
-				this.xAxis = d3.svg.axis()
-					.scale(this.x)
-					.ticks(d3.time.day)
-					.tickFormat(d3.time.format('%a'))
-					.orient('bottom');
+					xAxis = d3.svg.axis()
+						.scale(x)
+						.orient('bottom'),
 
-				this.yAxisLeft = d3.svg.axis()
-					.scale(this.yLeft)
-					.orient('left');
+					yAxisLeft = d3.svg.axis()
+						.scale(yLeft)
+						.orient('left')
+						.ticks(6),
 
-				this.yAxisRight = d3.svg.axis()
-					.scale(this.yRight)
-					.orient('right');
+					yAxisRight = d3.svg.axis()
+						.scale(yRight)
+						.orient('right')
+						.ticks(6),
 
-				this.svg = d3.select(this.container).append('svg');
-				this.cht = this.svg.append('g');
+					svg = d3.select(element).append('svg'),
+					cht = svg.append('g');
 
-				this.cht.append('g')
+				cht.append('g')
 					.attr('class', 'x axis');
 
-				this.cht.append('g')
+				cht.append('g')
 					.attr('class', 'y axis left')
 					.append('text')
 					.attr('transform', 'rotate(-90)')
@@ -50,129 +57,134 @@ angular.module('traq')
 					.attr('dy', '.71em')
 					.style('text-anchor', 'end');
 
-				this.cht.append('g')
+				cht.append('g')
 					.attr('class', 'y axis right')
 					.append('text')
 					.attr('transform', 'rotate(-90)')
 					.attr('y', 6)
 					.attr('dy', '-.71em')
 					.style('text-anchor', 'end');
-			},
-			update: function (chart, traq, rows) {
-				var that = this;
 
-				this.chart = chart;
-				rows = _.sortBy(rows, 'date');
+				var update = function () {
+					if (!rows) { return; }
 
-				var start = this.options.span === 'day' ? Date.now() - 24 * 60 * 60 * 1000 :
-							this.options.span === 'week' ? Date.now() - 7 * 24 * 60 * 60 * 1000 :
-							null;
-				if (start) {
-					rows = _.select(rows, function (row) {
-						return row.date.getTime() > start;
+					var leftColumns = _.where(columns, { axis: 'left' }),
+						rightColumns = _.where(columns, { axis: 'right' }),
+						leftLabel = leftColumns[0] || {},
+						rightLabel = rightColumns[0] || {},
+						allYLeft = _.chain(leftColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).reject(function (val) {
+							return !plotZeros && val === 0;
+						}).flatten().value(),
+						allYRight = _.chain(rightColumns).map(function (column) {
+							return _.pluck(rows, column.id);
+						}).reject(function (val) {
+							return !plotZeros && val === 0;
+						}).flatten().value();
+
+					x.domain(d3.extent(rows, function (d) { return d.date; }));
+					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
+					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
+
+					if (span) {
+						xAxis.ticks(spans[span].ticks)
+							.tickFormat(spans[span].tickFormat);
+					} else {
+						xAxis.ticks(7)
+							.tickFormat(d3.time.format('%a'));
+					}
+
+					cht.selectAll('.x.axis')
+						.call(xAxis);
+
+					cht.selectAll('.y.axis.left')
+						.style('visibility', leftColumns.length > 0)
+						.text(leftLabel.name + ' (' + leftLabel.unit + ')')
+						.call(yAxisLeft);
+
+					cht.selectAll('.y.axis.right')
+						.style('visibility', rightColumns.length > 0)
+						.text(rightLabel.name + ' (' + rightLabel.unit + ')')
+						.call(yAxisRight);
+
+					cht.selectAll('.x.gridline').data(yLeft.ticks(6)).enter()
+						.append('line')
+						.attr('class', 'x gridline')
+						.attr('x1', 0)
+						.attr('x2', width)
+						.attr('y1', function (d) { return yLeft(d); })
+						.attr('y2', function (d) { return yLeft(d); });
+
+					cht.selectAll('.line')
+						.remove();
+
+					_.each(columns, function (column) {
+						var y = column.axis === 'left' ? yLeft : yRight,
+							line = d3.svg.line()
+								.interpolate('monotone')
+								.x(function (d) { return x(d.date); })
+								.y(function (d) { return y(d[column.id]); });
+
+						cht.append('path')
+							.datum(_.reject(rows, function (row) {
+								return isNaN(row[column.id]) || !plotZeros && row[column.id] === 0;
+							}))
+							.attr('class', 'line')
+							.attr('stroke', column.color)
+							.attr('d', line);
+
+						cht.selectAll('.point.p' + column.id)
+							.data(_.reject(rows, function (row) {
+								return isNaN(row[column.id]) || !plotZeros && row[column.id] === 0;
+							}))
+							.enter()
+							.append('svg:circle')
+							.attr('class', 'point p' + column.id)
+							.attr('stroke', column.color)
+							.attr('r', 4)
+							.attr('cx', function (d) { return x(d.date); })
+							.attr('cy', function (d) { return y(d[column.id]); });
 					});
-				}
+				};
 
-				this.rows = rows;
-
-				var columns = this.columns = _.map(chart.data, function (d) {
-					return _.extend(d, _.findWhere(traq.columns, { id: d.column }));
+				this.on('data', function (_columns, _rows, _span) {
+					columns = _columns;
+					rows = _rows;
+					span = _span;
+					update();
 				});
 
-				var leftColumns = _.where(columns, { axis: 'left' }),
-					rightColumns = _.where(columns, { axis: 'right' }),
-					leftLabel = leftColumns[0] || {},
-					rightLabel = rightColumns[0] || {},
-					allYLeft = _.chain(leftColumns).map(function (column) {
-						return _.pluck(rows, column.id);
-					}).reject(function (val) {
-						return !chart.plotZeros && val === 0;
-					}).flatten().value(),
-					allYRight = _.chain(rightColumns).map(function (column) {
-						return _.pluck(rows, column.id);
-					}).reject(function (val) {
-						return !chart.plotZeros && val === 0;
-					}).flatten().value();
-
-				that.x.domain(d3.extent(rows, function (d) { return d.date; }));
-				that.yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
-				that.yRight.domain(d3.extent(allYRight, function (d) { return d; }));
-
-				that.cht.selectAll('.y.axis.left')
-					.style('visibility', leftColumns.length > 0)
-					.text(leftLabel.name + ' (' + leftLabel.unit + ')');
-
-				that.cht.selectAll('.y.axis.right')
-					.style('visibility', rightColumns.length > 0)
-					.text(rightLabel.name + ' (' + rightLabel.unit + ')');
-
-				_.each(columns, function (column) {
-					that.cht.selectAll('.point.p' + column.id)
-						.data(_.reject(rows, function (row) {
-							return isNaN(row[column.id]) || !chart.plotZeros && row[column.id] === 0;
-						}))
-						.enter()
-						.append('svg:circle')
-						.attr('class', 'point p' + column.id)
-						.attr('fill', column.color)
-						.attr('r', 4);
-
-					// TODO label lines
+				this.on('plotZeros', function (_plotZeros) {
+					plotZeros = _plotZeros;
+					update();
 				});
-			},
-			resize: function () {
-				var that = this;
 
-				var width = this.container.offsetWidth - margin.left - margin.right,
-					height = this.container.offsetHeight - margin.top - margin.bottom - 10;
+				this.on('resize', function (_width, _height) {
+					width = _width - margin.left - margin.right;
+					height = _height - margin.top - margin.bottom - 10;
 
-				console.log('w', width, 'h', height);
+					x.range([0, width]);
+					yLeft.range([height, 0]);
+					yRight.range([height, 0]);
 
-				this.x.range([0, width]);
-				this.yLeft.range([height, 0]);
-				this.yRight.range([height, 0]);
+					svg.attr('width', width + margin.left + margin.right)
+						.attr('height', height + margin.top + margin.bottom);
 
-				this.svg.attr('width', width + margin.left + margin.right)
-					.attr('height', height + margin.top + margin.bottom);
+					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-				this.cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+					cht.selectAll('.x.axis')
+						.attr('transform', 'translate(0,' + height + ')');
 
-				this.cht.selectAll('.x.axis')
-					.attr('transform', 'translate(0,' + height + ')')
-					.call(this.xAxis);
+					cht.selectAll('.y.axis.right')
+						.attr('transform', 'translate(' + width + ' ,0)');
 
-				this.cht.selectAll('.y.axis.right')
-					.attr('transform', 'translate(' + width + ' ,0)')
-					.call(this.yAxisRight);
+					cht.selectAll('.y.axis.left');
 
-				this.cht.selectAll('.y.axis.left')
-					.call(this.yAxisLeft);
-
-				this.cht.selectAll('.line')
-					.remove();
-
-				_.each(this.columns, function (column) {
-					var y = column.axis === 'left' ? that.yLeft : that.yRight,
-						x = that.x;
-
-					that.cht.selectAll('.point.p' + column.id)
-						.attr('cx', function (d) { return x(d.date); })
-						.attr('cy', function (d) { return y(d[column.id]); });
-
-					var line = d3.svg.line()
-						.interpolate('monotone')
-						.x(function (d) { return x(d.date); })
-						.y(function (d) { return y(d[column.id]); });
-
-					that.cht.append('path')
-						.datum(_.reject(that.rows, function (row) {
-							return isNaN(row[column.id]) || !that.chart.plotZeros && row[column.id] === 0;
-						}))
-						.attr('class', 'line')
-						.attr('stroke', column.color)
-						.attr('d', line);
+					update();
 				});
+
+				// FIXME: destroy event bindings
 			}
-
 		});
 	});
