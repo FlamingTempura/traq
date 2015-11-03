@@ -23,7 +23,6 @@
     "material-icons": "^0.1.0",
     "moment": "^2.10.6",
     "node-uuid": "^1.4.3",
-    "plottable.js": "git+https://github.com/palantir/plottable.git",
     "pouchdb": "^5.0.0",
     "roboto-fontface": "^0.4.2",
     "transform-pouch": "^1.0.2",

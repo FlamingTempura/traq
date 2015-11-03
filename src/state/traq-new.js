@@ -8,15 +8,12 @@ angular.module('traq').config(function ($stateProvider) {
 		url: '/traq/new',
 		templateUrl: 'traq-new.html',
 		resolve: { onboarded: function (dbConfig) { return dbConfig.exists('onboard'); } },
-		controller: function ($scope, $state, presets, onboarded) {
-			var categories = _.map(presets.categories, function (category) {
+		controller: function ($scope, $state, presetTraqCategories, presetTraqs, onboarded) {
+			var categories = _.map(presetTraqCategories, function (category) {
 				return _.extend({}, category, {
-					presets: _.chain(presets.presets)
-						.filter(function (preset) {
-							return preset.category === category.id;
-						})
-						.sortBy('title')
-						.value()
+					presets: _.chain(presetTraqs).filter(function (preset) {
+						return preset.category === category.id;
+					}).sortBy('title').value()
 				});
 			});
 			$scope.traqNew = {

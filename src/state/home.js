@@ -12,42 +12,47 @@ angular.module('traq').config(function ($stateProvider) {
 		resolve: {
 			onboarded: function (dbConfig) { return dbConfig.exists('onboard'); },
 			traqs: function (dbTraq) { return dbTraq.getAll(); },
-			charts: function (dbChart) { return dbChart.getAll(); },
-			rows: function (dbRow) { return dbRow.getAll(); } // FIXME: this is bad
+			columns: function (dbColumn) { return dbColumn.getAll(); }
 		},
 		onEnter: function ($state, onboarded) {
 			console.log('onboarded?', onboarded);
 			if (!onboarded) { $state.go('welcome'); }
 		},
-		controller: function ($scope, $stateParams, dbTraq, traqs, charts, presets, rows) {
-			$scope.home = { selectedIndex: 0 };
-
+		controller: function ($sce, $q, $scope, $stateParams, dbMeasurement, traqs, columns) {
 			$scope.traqs = traqs;
-			$scope.charts = charts;
-
-			$scope.traqFacts = _.map(traqs, function (traq) {
-				return _.findWhere(presets.presets, { id: traq.preset }).facts;
-			});
-			$scope.traqRows = _.map(traqs, function (traq) {
-				return _.filter(rows, function (row) {
-					return row._id.indexOf(traq._id) === 0;
-				});
-			});
-
-			if ($stateParams.tid) {
-				$scope.home.selectedIndex = _.findIndex(traqs, function (traq) {
+			$scope.home = {
+				selectedIndex: Math.max(0, _.findIndex(traqs, function (traq) {
 					return traq._id === $stateParams.tid;
+				}))
+			};
+			$scope.traqViews = _.map(traqs, function (traq) {
+				var traqView = {
+					traq: traq,
+					span: '1m'
+				};
+				var requireColumns = _.union(_.flattenDeep([
+					_.pluck(traq.charts, 'requireColumns'),
+					_.pluck(traq.insights, 'requireColumns')
+				]));
+				// TODO: only activate this once user is viewing it
+				$q.all(_.map(requireColumns, function (columnName) {
+					return dbMeasurement.getAll({ startWith: columnName }).then(function (measurements) {
+						return _.extend({}, _.findWhere(columns, { _id: columnName }), { measurements: measurements });
+					});
+				})).then(function (data) {
+					traqView.data = data;
+					console.log('DATA', data);
+					traqView.insights = _.map(traq.insights, function (insight) {
+						return _.extend({}, insight, {
+							html: $sce.trustAsHtml(insight.html(traq, data))
+						});
+					});
 				});
-			}
-			
+				return traqView;
+			});
 			$scope.openMenu = function ($mdOpenMenu, ev) {
 				$mdOpenMenu(ev);
 			};
-
-			$scope.home.span = {};
-			$scope.home.span[traqs[0]._id] = 'week';
-
-			// TODO ensure that defaultChart failsafe to zero in case default chart is deleted
 		}
 	});
 }).directive('mdTabContent', function () {

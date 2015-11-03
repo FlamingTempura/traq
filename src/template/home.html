@@ -3,7 +3,8 @@
 		You haven't created any traqs. <a ui-sref="traq-edit({ tid: 'new' })">Create a traq</a>.
 	</md-content>
 	<md-tabs md-selected="home.selectedIndex" flex>
-		<md-tab ng-repeat="traq in traqs" label="{{ traq.title }}">
+		<md-tab ng-repeat="traqView in traqViews" label="{{ traqView.traq.title }}">
+			
 			<md-content style="height:100%" layout="column" flex>
 				<div class="menu-row" layout="row">
 					<div flex></div>
@@ -12,42 +13,43 @@
 							<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 						</md-button>
 						<md-menu-content width="4">
-							<md-menu-item><md-button ui-sref="traq-data({ tid: traq._id })">View data</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="traq-port({ tid: traq._id })">Import/export</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="traq-edit({ tid: traq._id })">Customise</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="traq-edit({ tid: traqView.traq._id })">Customise</md-button></md-menu-item>
 							<md-menu-divider></md-menu-divider>
 							<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="data">View data</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="traq-port">Import/export</md-button></md-menu-item>
 							<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
 							<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
 						</md-menu-content>
 					</md-menu>
 				</div>
 
-				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traq.title }}</h2>
+				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
 
-				<div layout="row" style="padding: 0 30px 10px 35px">
-					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'year'">1y</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'month'">1m</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="home.span[traq._id] = 'week'">1w</a>
-					<span flex="auto"></span>
-					<a ng-if="charts.length > 1" class="link" flex="initial" href="" ui-sref="traq-charts({ tid: traq._id })">{{ charts.length - 1 }} other chart{{ charts.length > 2 ? 's' : '' }}</a>
+				<div class="span-select">
+					<a class="link" flex="initial" href="" ng-click="traqView.span = '1y'" ng-class="{ active: traqView.span == '1y' }">1y</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="traqView.span = '3m'" ng-class="{ active: traqView.span == '3m' }">3m</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="traqView.span = '1m'" ng-class="{ active: traqView.span == '1m' }">1m</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="traqView.span = '1w'" ng-class="{ active: traqView.span == '1w' }">1w</a>&nbsp;&nbsp;
+					<a class="link" flex="initial" href="" ng-click="traqView.span = '1d'" ng-class="{ active: traqView.span == '1d' }">1d</a>
 				</div>
 
-				<div flex="auto" ui-sref="chart-view({ tid: chart.traq, cid: chart._id })" layout="row">
-					<chart ng-repeat="chart in charts" ng-if="chart._id === traq.defaultChart" chart="chart" span="home.span[traq._id]"></chart>
+				<div flex="auto" ui-sref="chart-view({ tid: traqView.traq._id })" layout="row" ng-repeat="chart in traqView.traq.charts">
+					<chart traq="traqView.traq" chart="chart" data="traqView.data" span="traqView.span"></chart>
 				</div>
 
 				<div layout="row" class="dark-bg">
-					<div class="fact" ng-repeat="fact in traqFacts[$index]" flex="33">
-						<div class="title">{{ fact.title }}</div>
-						<div class="value">{{ fact.value(traq, traqRows[$parent.$index]) }}</div>
+					<div class="fact" ng-repeat="insight in traqView.insights" flex="33">
+						<div class="title">{{ insight.title }}</div>
+						<div class="value" ng-bind-html="insight.html"></div>
 					</div>
 				</div>
 
-				<md-button flex="initial" type="button" ui-sref="row-edit({ tid: traq._id, rid: 'new' })" class="md-raised md-primary btn-bottom">
+				<md-button flex="initial" type="button" ui-sref="measurement-edit({ mid: 'new', column: traqView.traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
 					Add measurement
 				</md-button>
 			</md-content>
+
 		</md-tab>
 	</md-tabs>
 </md-content>

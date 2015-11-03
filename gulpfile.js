@@ -43,6 +43,9 @@ gulp.task('browserify-app', function () {
 	});
 
 	return b.bundle()
+		.on('error', function (err) {
+			console.log(err.toString());
+		})
 		.pipe(source('index.js'))
 		.pipe(gulp.dest('./dist'));
 });

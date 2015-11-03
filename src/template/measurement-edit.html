@@ -1,0 +1,54 @@
+<form flex layout="column" ng-submit="save()">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+			</md-button>
+			<h2><span ng-if="isNew">Add measurement</span>
+				<span ng-if="!isNew">Edit measurement</span></h2>
+			<span flex></span>
+			<md-button type="submit">Save</md-button>
+		</div>
+	</md-toolbar>
+
+	<md-content flex layout-padding layout="column">
+		<div flex>
+
+			<md-input-container flex>
+				<md-select ng-model="column" ng-disabled="!isNew" aria-label="Measurement type">
+					<md-optgroup ng-repeat="(category, columns) in groupedColumns" label="{{category}}">
+						<md-option ng-repeat="column in columns" ng-value="column" ng-style="{ color: column.color }">
+							<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }}"></md-icon>{{ column.name }}
+						</md-option>
+					</md-optgroup>
+				</md-select>
+			</md-input-container>
+
+			<div layout="row">
+				<md-input-container flex>
+					<label>Date</label>
+					<input type="date" ng-model="measurement.timestamp" ng-disabled="!isNew" required>
+				</md-input-container>
+
+				<md-input-container flex>
+					<label>Time</label>
+					<input type="time" ng-model="measurement.timestamp" ng-disabled="!isNew" step="1" required>
+				</md-input-container>
+			</div>
+			
+			<md-input-container flex>
+				<label>{{ column.name }} ({{ column.unit }})</label>
+				<input type="number" ng-model="measurement.value" step="any" ng-attr-autofocus="{{ $index === 0 }}">
+			</md-input-container>
+
+			<md-input-container>
+				<label>Note</label>
+				<textarea ng-model="measurement.note"></textarea>
+			</md-input-container>
+
+		</div>
+
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete</md-button>
+
+	</md-content>
+</form>

@@ -15,9 +15,11 @@
 
 <md-content flex layout="column">
 	<form flex layout="column" ng-submit="save()">
-		<md-subheader>Options</md-subheader>
-		<md-content layout-padding layout="column" style="background:#333">
-			<md-input-container>
+		<md-content layout-padding layout="column">
+			
+			<h1 class="md-subhead" ng-if="traq.preset">{{ traq.title }}</h1>
+
+			<md-input-container ng-if="!traq.preset">
 				<label>Title</label>
 				<input type="text" ng-model="traq.title" required>
 			</md-input-container>
@@ -37,7 +39,10 @@
 			<!-- preset (if new) -->
 			<!-- <md-divider></md-divider> -->
 
-			<div ng-repeat="option in preset.options">
+			<!-- TODO unit options -->
+
+			<div ng-repeat="option in presetTraq.options" ng-if="presetTraq">
+
 				<div ng-if="option.type === 'radio'">
 					{{ option.title }} <span ng-if="option.unit">({{ option.unit }})</span>
 					<md-radio-group ng-model="traq[option.id]">
@@ -46,42 +51,40 @@
 						</md-radio-button>
 					</md-radio-group>
 				</div>
+
+				<md-input-container ng-if="option.type === 'select'">
+					<label>{{ option.title }} <span ng-if="option.unit">({{ option.unit }})</span></label>
+					<md-select ng-model="traq[option.id]">
+						<md-option ng-repeat="opt in option.options" value="{{ opt.value }}">
+							{{ opt.title }}
+						</md-option>
+					</md-select>
+				</md-input-container>
+
 				<md-input-container ng-if="option.type === 'number'">
 					<label>{{ option.title }} <span ng-if="option.unit">({{ option.unit }})</span></label>
 					<input type="number" ng-model="traq[option.id]" step="any">
 				</md-input-container>
+
 				<md-input-container ng-if="option.type === 'string'">
 					<label>{{ option.title }} <span ng-if="option.unit">({{ option.unit }})</span></label>
 					<input type="text" ng-model="traq[option.id]" step="any">
 				</md-input-container>
+
+				<div ng-if="option.type === 'text[]'">
+					<div>{{ option.title }} <span ng-if="option.unit">({{ option.unit }})</span></div>
+					<md-input-container ng-repeat="value in traq[option.id]">
+						<input type="text" ng-model="value.value">
+					</md-input-container>
+					<md-button type="button" ng-click="traq[option.id].push({})">Add category</md-button>
+				</div>
+
 			</div>
 		</md-content>
 
-		<md-subheader>Columns</md-subheader>
-		<md-content ng-if="!isNew" layout-padding layout="column" style="background:#333">
-			<div ng-repeat="column in traq.columns" layout="row">
-
-				<md-input-container flex>
-					<label>Name</label>
-					<input type="text" ng-model="column.name" required>
-				</md-input-container>
-
-				<md-input-container style="width: 120px">
-					<label>Unit</label>
-					<input type="text" ng-model="column.unit">
-				</md-input-container>
-				
-				<md-button type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="traq.columns.splice(traq.columns.indexOf(column), 1)">
-					<md-icon md-font-icon="mi mi-24 mi-cancel"></md-icon>
-				</md-button>
-
-			</div>
-			
-			<md-button type="button" class="md-raised md-primary" ng-click="traq.columns.push({})">New column</md-button>
-		</md-content>
-
-		<md-subheader>Charts</md-subheader>
-		<md-content ng-if="!isNew" layout-padding layout="column" style="background:#333">
+		
+		<md-content ng-if="custom" layout-padding layout="column" style="background:#333">
+			<md-subheader>Chart</md-subheader>
 			<md-list>
 				<md-list-item ng-repeat="chart in charts">
 					<p>{{ chart.type }}</p>
@@ -89,9 +92,26 @@
 						<md-icon ng-if="traq.defaultChart !== chart._id" md-font-icon="mi mi-24 mi-star-border"></md-icon>
 						<md-icon ng-if="traq.defaultChart === chart._id" md-font-icon="mi mi-24 mi-star"></md-icon>
 					</md-button>
+					<md-button type="button" ui-sref="chart-edit({ tid: traq._id, cid: chart._id })" aria-label="Edit chart">
+						<md-icon md-font-icon="mi mi-24 mi-edit"></md-icon>
+					</md-button>
 				</md-list-item>
 			</md-list>
 			<md-button type="button" class="md-raised md-primary" ui-sref="chart-edit({ tid: traq._id, cid: 'new' })">New chart</md-button>
+		</md-content>
+
+		
+		<md-content ng-if="!isNew" layout-padding layout="column" style="background:#333">
+			<md-subheader>Series</md-subheader>
+			<div ng-repeat="column in traq.columns" layout="row">
+				{{ column.name }} {{ column.unit }}
+				
+				<md-button ng-if="custom" type="button" class="md-icon-button" aria-label="Delete" style="width: 30px" ng-click="traq.columns.splice(traq.columns.indexOf(column), 1)">
+					<md-icon md-font-icon="mi mi-24 mi-cancel"></md-icon>
+				</md-button>
+			</div>
+			
+			<md-button ng-if="custom" type="button" class="md-raised md-primary" ng-click="traq.columns.push({})">New column</md-button>
 		</md-content>
 	
 	</form>
@@ -99,3 +119,121 @@
 	<md-button type="button" ng-if="!isNew" class="md-raised md-warn" ng-click="remove()">Delete this traq</md-button>
 
 </md-content>
+
+
+<!-- <form flex layout="column" ng-submit="save()">
+	<md-toolbar>
+		<div class="md-toolbar-tools">
+			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+			</md-button>
+			<h2><span ng-if="isNew">New chart</span>
+				<span ng-if="!isNew">Edit {{ chart.title }}</span></h2>
+			<span flex></span>
+			<md-button type="submit">Save</md-button>
+		</div>
+	</md-toolbar>
+
+	<md-content flex layout-padding layout="column">
+		<div flex> -->
+			<!-- <md-input-container>
+				<label>Title</label>
+				<input type="text" ng-model="chart.title" required>
+			</md-input-container>
+
+			<md-input-container>
+				<label>Description</label>
+				<textarea ng-model="chart.description" columns="1"></textarea>
+			</md-input-container> -->
+
+				<!-- preset (if new) -->
+				<!-- <md-divider></md-divider> -->
+
+			<!-- <md-input-container>
+				<label>Type</label>
+				<md-select ng-model="chart.type">
+					<md-option value="line">Line</md-option>
+					<md-option value="bar">Bar</md-option>
+					<md-option value="pie">Pie</md-option>
+				</md-select>
+			</md-input-container> -->
+
+			<!-- chart options -->
+
+			<!-- <md-subheader>Columns</md-subheader>
+
+			<md-list>
+				<md-list-item ng-repeat="column in chart.data"> -->
+					<!-- <md-checkbox aria-label="Show" ng-model="chart.data[column.id].show"></md-checkbox> -->
+					<!-- <p>{{ column.column }}</p>
+
+					<md-menu>
+						<md-button type="button" aria-label="Choose axis" ng-click="$mdOpenMenu($event)" class="md-icon-button">
+							<span ng-if="column.axis === 'left'">Left</span>
+							<span ng-if="column.axis === 'right'">Right</span>
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item value="{{ color.hex }}">
+								<md-button type="button" ng-click="column.axis = 'left'">Left axis</md-button>
+							</md-menu-item>
+							<md-menu-item value="{{ color.hex }}">
+								<md-button type="button" ng-click="column.axis = 'right'">Right axis</md-button>
+							</md-menu-item>
+						</md-menu-content>
+					</md-menu>
+
+					<md-menu>
+						<md-button type="button" aria-label="Choose color" ng-click="$mdOpenMenu($event)" class="md-icon-button">
+							<md-icon md-menu-align-target md-font-icon="mi mi-24 mi-lens" ng-style="{ color: column.color }"></md-icon>
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item ng-repeat="color in colors" value="{{ color.hex }}">
+								<md-button type="button" ng-click="column.color = color.hex">
+									<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{color.hex}}"></md-icon>
+									&nbsp; {{ color.name }}
+								</md-button>
+							</md-menu-item>
+						</md-menu-content>
+					</md-menu>
+				</md-list-item> -->
+				<!-- <md-list-item ng-repeat="column in traq.columns">
+					<md-checkbox aria-label="Show" ng-model="chart.data[column.id].show"></md-checkbox>
+					<p>{{ column.name }}</p>
+
+					<md-menu>
+						<md-button type="button" aria-label="Choose axis" ng-click="$mdOpenMenu($event)" ng-disabled="!chart.data[column.id].show" class="md-icon-button">
+							<span ng-if="chart.data[column.id].axis === 'left'">Left</span>
+							<span ng-if="chart.data[column.id].axis === 'right'">Right</span>
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item value="{{ color.hex }}">
+								<md-button type="button" ng-click="chart.data[column.id].axis = 'left'">Left axis</md-button>
+							</md-menu-item>
+							<md-menu-item value="{{ color.hex }}">
+								<md-button type="button" ng-click="chart.data[column.id].axis = 'right'">Right axis</md-button>
+							</md-menu-item>
+						</md-menu-content>
+					</md-menu>
+
+					<md-menu>
+						<md-button type="button" aria-label="Choose color" ng-click="$mdOpenMenu($event)" ng-disabled="!chart.data[column.id].show" class="md-icon-button">
+							<md-icon md-menu-align-target md-font-icon="mi mi-24 mi-lens" ng-style="{ color: chart.data[column.id].show && chart.data[column.id].color }"></md-icon>
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item ng-repeat="color in colors" value="{{ color.hex }}">
+								<md-button type="button" ng-click="chart.data[column.id].color = color.hex">
+									<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{color.hex}}"></md-icon>
+									&nbsp; {{ color.name }}
+								</md-button>
+							</md-menu-item>
+						</md-menu-content>
+					</md-menu>
+				</md-list-item> -->
+			<!-- </md-list>
+
+		</div>
+		
+		<md-button type="button" ng-if="!isNew" class="md-raised md-warn">Delete</md-button>
+
+	</md-content>
+</form> -->

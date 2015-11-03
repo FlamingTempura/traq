@@ -164,21 +164,20 @@ svg {
 
 	.point {
 		fill: #444;
-		stroke-width: 3px;
+		stroke-width: 2px;
 	}
 
 	.line {
 		fill: none;
-		stroke-width: 1.5px;
-		stroke-width: 3px;
+		stroke-width: 2px;
+		&.forecast {
+			stroke-dasharray: 1, 2;
+		}
 	}
 
 	text {
 		fill: hsl(0, 0, 66%);
-		font-size: 12px;
-	}
-	.x.axis text {
-		text-transform: uppercase;
+		font-size: 11px;
 	}
 }
 
@@ -207,9 +206,13 @@ svg {
 		font-weight: 100;
 		display: block;
 	}
+	.mi {
+	    top: 3px;
+	    color: #aaa;
+	}
 }
 
-.link {
+/* .link {
 	color: #aaa;
 	font-size: 14px;
 	text-decoration: none;
@@ -225,10 +228,33 @@ svg {
 		border-bottom: 1px solid #888;
 		margin-top: 0px;
 	}
-}
+} */
 
 .btn-bottom {
 	margin: 0;
 	padding: 10px;
 	border-radius: 0;
+}
+
+svg {
+	position: absolute;
+}
+
+.span-select {
+	//padding-right: 20px;
+	text-align: center;
+	a {
+		display: inline-block;
+		width: 26px;
+		text-align: center;
+		color: #888;
+		font-size: 14px;
+		text-decoration: none;
+		font-weight: bold;
+		&.active {
+			color: #eee;
+			text-decoration: underline;
+			//&::after { border-bottom: 2px solid #eee; }
+		}
+	}
 }

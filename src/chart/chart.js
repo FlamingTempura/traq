@@ -2,111 +2,75 @@
 
 var angular = require('angular'),
 	_ = require('lodash'),
-	$ = require('jquery');
-
-var spanDurations = {
-	day: 24 * 60 * 60 * 1000,
-	week: 7 * 24 * 60 * 60 * 1000,
-	month: 30 * 24 * 60 * 60 * 1000,
-	year: 365 * 24 * 60 * 60 * 1000
-};
+	d3 = require('d3');
 
 angular.module('traq')
 	.constant('chartTypes', [])
-	.factory('Chart', function (chartTypes) {
-		var Chart = function (element) {
-			this.handlers = [];
-			this.element = element;
-			this.init();
-		};
-		_.extend(Chart.prototype, {
-			init: function () {
-				var that = this;
-				angular.element(window).on('resize', function () {
-					that.trigger('resize', that.element.offsetWidth, that.element.offsetHeight);
-				});
-			},
-			reset: function (chart) {
-				this.destroy();
-				var chartType = _.findWhere(chartTypes, { id: chart.type });
-				chartType.create.call(this, this.element); // bind to this for events
-				this.trigger('resize', this.element.offsetWidth, this.element.offsetHeight);
-			},
-			update: function (traq, chart, rows, span) {
-				if (!traq || !chart || !rows) { return; }
-				if (!this.chart || chart.type !== this.chart.type) {
-					this.reset(chart);
-				}
-
-				this.traq = traq;
-				this.chart = chart;
-				this.rows = rows;
-
-				var dateStart = span ? Date.now() - spanDurations[span] : 0;
-
-				rows = _.chain(rows).select(function (row) {
-					return !dateStart || row.date.getTime() > dateStart;
-				}).sortBy('date').value();
-
-				var columns = _.map(chart.data, function (d) {
-					return _.extend(d, _.findWhere(traq.columns, { id: d.column }));
-				});
-
-				/*_.each(chart.options, function (value, key) {
-					that.option(key, value); // TODO
-				});*/
-
-				this.trigger('data', columns, rows, span);
-			},
-			span: function (span) {
-				this.update(this.traq, this.chart, this.rows, span);
-			},
-			option: function (key, value) {
-				this.trigger(key, value);
-			},
-			destroy: function () {
-				this.trigger('destroy');
-			},
-			on: function (event, fn) {
-				this.handlers.push({ event: event, fn: fn });
-			},
-			trigger: function (event) {
-				var args = Array.prototype.splice.call(arguments, 1);
-				console.log('TRIGGER', event, args);
-				_.chain(this.handlers).where({ event: event }).each(function (handler) {
-					return handler.fn.apply(null, args);
-				}).value();
-			}
-		});
-		return Chart;
+	.constant('spans', {
+		'1d': { duration: 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%H:%M') },
+		'1w': { duration: 7 * 24 * 60 * 60 * 1000, ticks: d3.time.day, tickFormat: d3.time.format('%a') },
+		'1m': { duration: 30 * 24 * 60 * 60 * 1000, ticks: d3.time.monday, tickFormat: d3.time.format('%b %d') },
+		'3m': { duration: 3 * 30 * 24 * 60 * 60 * 1000, ticks: d3.time.monday, tickFormat: d3.time.format('%b %d') },
+		'1y': { duration: 365 * 24 * 60 * 60 * 1000, ticks: d3.time.month, tickFormat: d3.time.format('%b %d') }
 	})
-	.directive('chart', function ($q, $compile, Chart, dbTraq, dbRow) {
+	.directive('chart', function (chartTypes, spans) {
 		return {
 			restrict: 'E',
 			replace: true,
 			scope: {
+				traq: '=',
 				chart: '=',
+				data: '=',
 				span: '='
 			},
 			template: '<div flex layout="row"><div flex></div></div>',
 			link: function (scope, element) {
-				var chartView = new Chart(element.children()[0]);
+				var chart;
+				element = element.children()[0];
 
-				scope.$watch('span', function (span) {
-					console.log('FFFFF')
-					chartView.span(span);
+				scope.$watch('chart', function () {
+					console.log('CHART', scope.chart, element)
+					if (!scope.chart) { return; }
+					var chartType = _.findWhere(chartTypes, { id: scope.chart.type });
+					// TODO: chart.destroy()
+					chart = new chartType.Chart(element);
+					setTimeout(function () {
+						chart.resize(element.offsetWidth, element.offsetHeight);
+					}, 400); // FIXME
 				});
-				scope.$watch('chart', function (chart) {
-					if (!chart) { return; }
-					$q.all({
-						traq: dbTraq.get(scope.chart.traq),
-						rows: dbRow.getAll({ startWith: scope.chart.traq })
-					}).then(function (obj) {
-						chartView.update(obj.traq, scope.chart, obj.rows, scope.span);
-					});
+
+				scope.$watch('data + span', function () {
+					if (!chart || !scope.data) { return; }
+					var columns = _.map(scope.chart.columns, function (column) {
+							return _.extend({}, column, _.findWhere(scope.data, { name: column.name }));
+						}),
+						dateStart = scope.span ? Date.now() - spans[scope.span].duration : 0,
+						rows = _.chain(columns).map(function (column) {
+							var firstI = _.findIndex(column.measurements, function (measurement, i) {
+								return measurement.timestamp.getTime() > dateStart || i === column.measurements.length - 1;
+							});
+							var forecast = {
+								uuid: _.last(column.measurements).columnId + ':forecast',
+								columnId: _.last(column.measurements).columnId,
+								forecast: true,
+								timestamp: new Date(),
+								value: _.last(column.measurements).value
+							};
+							return column.measurements.slice(Math.max(0, firstI - 1), -1)
+								.concat([_.extend({ last: true }, _.last(column.measurements)), forecast]);
+						}).flatten().map(function (measurement) {
+							var obj = _.clone(measurement);
+							obj[measurement.columnId] = measurement.value;
+							return obj;
+						}).value();
+					console.log(chart, columns, rows);
+					chart.data(columns, rows, scope.span);
+				});
+				angular.element(window).on('resize', function () {
+					chart.resize(element.offsetWidth, element.offsetHeight);
 				});
 				scope.$on('$destroy', function () {
-					chartView.destroy();
+					// TODO chart.destroy();
 				});
 			}
 		};
