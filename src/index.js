@@ -196,6 +196,15 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 			});
 		}
 	};
+}).directive('stopPropagation', function () {
+	return {
+		restrict: 'A',
+		link: function (scope, element) {
+			element.on('click', function (e) {
+				e.stopPropagation();
+			});
+		}
+	};
 }).filter('startFrom', function () {
 	return function (input, start) {
 		return input && input.slice(start);

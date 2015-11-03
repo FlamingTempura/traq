@@ -10,8 +10,8 @@ angular.module('traq')
 		'1d': { duration: 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%H:%M') },
 		'1w': { duration: 7 * 24 * 60 * 60 * 1000, ticks: d3.time.day, tickFormat: d3.time.format('%a') },
 		'1m': { duration: 30 * 24 * 60 * 60 * 1000, ticks: d3.time.monday, tickFormat: d3.time.format('%b %d') },
-		'3m': { duration: 3 * 30 * 24 * 60 * 60 * 1000, ticks: d3.time.monday, tickFormat: d3.time.format('%b %d') },
-		'1y': { duration: 365 * 24 * 60 * 60 * 1000, ticks: d3.time.month, tickFormat: d3.time.format('%b %d') }
+		'3m': { duration: 3 * 30 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') },
+		'1y': { duration: 365 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') }
 	})
 	.directive('chart', function (chartTypes, spans) {
 		return {

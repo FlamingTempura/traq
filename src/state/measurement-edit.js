@@ -45,18 +45,6 @@ angular.module('traq').config(function ($stateProvider) {
 					console.error('failed', err); // TODO
 				});
 			};
-
-			$scope.remove = function () {
-				console.log('attempting to remove', measurement);
-				dbMeasurement.remove(measurement).then(function () {
-					history.back();
-					snack('The measurement has been deleted', 'Undo', function () {
-						console.log('reviving', measurement);
-						dbMeasurement.put(_.omit(measurement, '_rev'));
-						$state.go($state.current, {}, { reload: true });
-					});
-				});
-			};
 		}
 	});
 });

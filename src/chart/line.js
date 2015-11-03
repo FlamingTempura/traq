@@ -88,7 +88,7 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 				yRight.domain(d3.extent(allYRight, function (d) { return d; }));
 
 				if (span) {
-					xAxis.ticks(spans[span].ticks)
+					xAxis.ticks(spans[span].ticks || 7)
 						.tickFormat(spans[span].tickFormat);
 				} else {
 					xAxis.ticks(7)
