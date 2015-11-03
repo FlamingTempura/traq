@@ -38,7 +38,7 @@ body {
 	font-weight: 300;
 }
 
-md-content.md-default-theme, md-content { background: #303030; }
+body, md-content.md-default-theme, md-content { background: #303030; }
 
 md-menu-content {
 	background-color: white;
@@ -228,4 +228,49 @@ md-select-menu {
 
 md-input-container .md-input {
 	text-shadow: none;
+}
+
+[ui-view] {
+	
+	
+	.animate-up & {
+		transition: transform .3s ease-out, opacity .3s ease-in-out;
+		&.ng-leave { z-index: 0; }
+		&.ng-enter, &:nth-child(1) { z-index: 1; }
+		&.ng-enter {
+			opacity: 0;
+			transform: translateY(100px);
+		}
+		&.ng-enter-active, &.ng-leave, &.ng-leave-active {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.animate-down & {
+		transition: transform .3s ease-in, opacity .3s ease-in-out;
+		&.ng-leave { z-index: 1; }
+		&.ng-enter { z-index: 0; }
+		&.ng-leave, &.ng-enter, &.ng-leave-enter {
+			opacity: 1;
+			transform: translateY(0);
+		}
+		&.ng-leave-active {
+			opacity: 0;
+			transform: translateY(100px);
+		}
+	}
+	
+}
+
+[ui-view].ng-enter, [ui-view].ng-leave {
+	
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+body {
+	overflow: hidden;
 }

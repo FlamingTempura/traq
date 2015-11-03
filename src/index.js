@@ -15,6 +15,13 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 }).controller('AppCtrl', function ($scope, snack) {
 	$scope.snack = snack;
 }).run(function ($q, $rootScope, snack) {
+	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
+		console.log(to, from)
+		var upAnimation = to.url.split('/') > from.url.split('/');
+		angular.element(document.body)
+			.toggleClass('animate-up', upAnimation)
+			.toggleClass('animate-down', !upAnimation);
+	});
 	$rootScope.$on('$stateChangeError', function (event, to, toParams, from, fromParams, err) {
 		snack('An error occured. Try again.'); // TODO: a more user-friendly message
 		console.error('stateChangeError', err);
