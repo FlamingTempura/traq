@@ -1,11 +1,14 @@
-<!-- <line-chart ng-if="chart.type === 'line'" traq="traq" chart="chart" rows="rows"></line-chart>
-<bar-chart ng-if="chart.type === 'bar'" traq="traq" chart="chart" rows="rows"></bar-chart>
- -->
-<!-- <md-button type="button" class="md-icon-button" aria-label="Edit" ui-sref="chart-edit({ tid: traq._id, cid: chart._id })">
-	<md-icon md-font-icon="mi mi-24 mi-edit"></md-icon>
-</md-button> -->
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>{{ traq.title }}</h2>
+	</div>
+</md-toolbar>
 
+<div class="span-select">
+	<a class="link" flex="initial" href="" ng-repeat="(spanId,s) in spans" ng-click="span = spanId" ng-class="{ active: span == spanId}">{{ spanId }}</a>
+</div>
 
-
-
-<chart chart="chart"></chart>
+<chart traq="traq" chart="chart" data="data" span="span"></chart>

@@ -105,7 +105,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 			return _.extend({
 				preset: !!preset,
 				safeName: doc._id.replace(/[^a-zA-Z0-9-]/g, '-')
-			}, doc, _.pick(preset, 'name', 'color', 'icon'));
+			}, doc, _.pick(preset, 'name', 'color', 'icon', 'units'));
 		}
 	});
 	return db;
@@ -125,6 +125,20 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 		}
 	});
 	return db;
+}).service('getData', function ($q, dbMeasurement, dbColumn) {
+	return function (traq) {
+		var requireColumns = _.union(_.flattenDeep([
+			_.pluck(traq.charts, 'requireColumns'),
+			_.pluck(traq.insights, 'requireColumns')
+		]));
+		return $q.all(_.map(requireColumns, function (columnName) {
+			return dbColumn.get(columnName).then(function (column) {
+				return dbMeasurement.getAll({ startWith: columnName }).then(function (measurements) {
+					return _.extend({}, column, { measurements: measurements });
+				});
+			});
+		}));
+	};
 }).service('download', function () {
 	// http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
 	return function (filename, text) {

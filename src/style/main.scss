@@ -101,7 +101,7 @@ md-list {
 
 svg {
 	.gridline {
-		stroke: hsl(0, 0, 32%);
+		stroke: hsl(0, 0, 24%);
 		shape-rendering: crispEdges;
 	}
 
@@ -121,6 +121,10 @@ svg {
 		&.forecast {
 			stroke-dasharray: 1, 2;
 		}
+	}
+	.area {
+		stroke: none;
+		opacity: 0.15;
 	}
 
 	text {
@@ -157,6 +161,9 @@ svg {
 	.mi {
 	    top: 3px;
 	    color: #aaa;
+	}
+	.unit {
+		font-size: 14px;
 	}
 }
 
@@ -273,4 +280,10 @@ md-input-container .md-input {
 
 body {
 	overflow: hidden;
+}
+
+md-tab-content {
+	&:nth-child(1) { transform: translateX(0%); }
+	&:nth-child(2) { transform: translateX(100%); }
+	&:nth-child(3) { transform: translateX(200%); }
 }

@@ -18,8 +18,9 @@ angular.module('traq').config(function ($stateProvider) {
 			console.log('onboarded?', onboarded);
 			if (!onboarded) { $state.go('welcome'); }
 		},
-		controller: function ($sce, $q, $scope, $stateParams, dbMeasurement, traqs, columns) {
+		controller: function ($sce, $scope, $stateParams, spans, traqs, columns, getData) {
 			$scope.traqs = traqs;
+			$scope.spans = spans;
 			$scope.home = {
 				selectedIndex: Math.max(0, _.findIndex(traqs, function (traq) {
 					return traq._id === $stateParams.tid;
@@ -30,16 +31,8 @@ angular.module('traq').config(function ($stateProvider) {
 					traq: traq,
 					span: '1m'
 				};
-				var requireColumns = _.union(_.flattenDeep([
-					_.pluck(traq.charts, 'requireColumns'),
-					_.pluck(traq.insights, 'requireColumns')
-				]));
 				// TODO: only activate this once user is viewing it
-				$q.all(_.map(requireColumns, function (columnName) {
-					return dbMeasurement.getAll({ startWith: columnName }).then(function (measurements) {
-						return _.extend({}, _.findWhere(columns, { _id: columnName }), { measurements: measurements });
-					});
-				})).then(function (data) {
+				getData(traq).then(function (data) {
 					traqView.data = data;
 					console.log('DATA', data);
 					traqView.insights = _.map(traq.insights, function (insight) {
@@ -74,14 +67,12 @@ angular.module('traq').config(function ($stateProvider) {
 					var $el = $(el).removeClass('snap');
 					return { $el: $el, startTranslate: getTranslateX($el) };
 				});
-			});
-			$element.on('touchmove', function (e) {
+			}).on('touchmove', function (e) {
 				var x = e.originalEvent.changedTouches[0].pageX - startX;
 				_.each(startTranslates, function (o) {
 					setTranslateX(o.$el, o.startTranslate + x);
 				});
-			});
-			$element.on('touchend', function (e) {
+			}).on('touchend', function (e) {
 				var width = $element.width(),
 					threshold = width / 5,
 					x = e.originalEvent.changedTouches[0].pageX - startX;

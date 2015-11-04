@@ -22,5 +22,15 @@
 		</div>
 		<md-switch class="md-secondary" ng-model="settings.enableStats"></md-switch>
 	</md-list-item>
+	
+	<md-subheader>Units</md-subheader>
+	<md-list-item ng-repeat="column in columns">
+		<p>{{ column.name }}</p>
+		<md-select ng-model="column.unit">
+			<md-option ng-repeat="unit in column.units" value="{{ unit.value }}">
+				{{ unit.title }}
+			</md-option>
+		</md-select>
+	</md-list-item>
 </md-list>
 

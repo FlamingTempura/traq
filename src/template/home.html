@@ -27,14 +27,10 @@
 				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
 
 				<div class="span-select">
-					<a class="link" flex="initial" href="" ng-click="traqView.span = '1y'" ng-class="{ active: traqView.span == '1y' }">1y</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="traqView.span = '3m'" ng-class="{ active: traqView.span == '3m' }">3m</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="traqView.span = '1m'" ng-class="{ active: traqView.span == '1m' }">1m</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="traqView.span = '1w'" ng-class="{ active: traqView.span == '1w' }">1w</a>&nbsp;&nbsp;
-					<a class="link" flex="initial" href="" ng-click="traqView.span = '1d'" ng-class="{ active: traqView.span == '1d' }">1d</a>
+					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId}">{{ spanId }}</a>
 				</div>
 
-				<div flex="auto" ui-sref="chart-view({ tid: traqView.traq._id })" layout="row" ng-repeat="chart in traqView.traq.charts">
+				<div flex="auto" ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" layout="row" ng-repeat="chart in traqView.traq.charts">
 					<chart traq="traqView.traq" chart="chart" data="traqView.data" span="traqView.span"></chart>
 				</div>
 

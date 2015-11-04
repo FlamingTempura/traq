@@ -9,7 +9,7 @@ var margin = { top: 6, right: 28, bottom: 30, left: 36 };
 angular.module('traq').config(function (chartTypes, colors, spans) {
 	var nextColor = function (hex) {
 		var i = _.findIndex(colors, { hex: hex });
-		return colors[i === colors.length - 1 ? 0 : i + 1].hex;
+		return colors[i === colors.length - 2 ? 0 : i + 2].hex;
 	};
 	chartTypes.push({
 		id: 'line',
@@ -95,7 +95,7 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 						.tickFormat(d3.time.format('%a'));
 				}
 
-				cht.selectAll('.line').remove();
+				cht.selectAll('.line,.area').remove();
 				defs.selectAll('.grad').remove();
 				cht.selectAll('.point').remove();
 				cht.selectAll('.gridline').remove();
@@ -142,6 +142,10 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 						.attr('stop-opacity', 1);
 
 					var y = column.axis === 'left' ? yLeft : yRight,
+						area = d3.svg.area()
+							.x(function (d) { return x(d.timestamp); })
+							.y0(height)
+							.y1(function (d) { return y(d[column.name]); }),
 						line = d3.svg.line()
 							//.interpolate('monotone')
 							.x(function (d) { return x(d.timestamp); })
@@ -163,6 +167,13 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 						.attr('class', 'line forecast')
 						.attr('stroke', 'url(#grad' + column.safeName + ')')
 						.attr('d', line)
+						.attr('clip-path', 'url(#clip)');
+
+					cht.append('path')
+						.datum(rows)
+						.attr('class', 'area')
+						.attr('fill', 'url(#grad' + column.safeName + ')')
+						.attr('d', area)
 						.attr('clip-path', 'url(#clip)');
 
 					cht.selectAll('.point.p' + column.safeName)
@@ -199,7 +210,7 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 				svg.attr('width', width + margin.left + margin.right)
 					.attr('height', height + margin.top + margin.bottom);
 
-				clip.attr('width', width)
+				clip.attr('width', width + 5) // 5 pixels to show any points on the end
 					.attr('height', height);
 
 				cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');

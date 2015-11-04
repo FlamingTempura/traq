@@ -50,6 +50,52 @@ angular.module('traq')
 			}
 		},
 		{
+			name: 'Heart rate',
+			color: '#F22613',
+			icon: 'favorite',
+			units: [{ title: 'bpm', value: 'bpm', default: true }],
+			fakeData: function () {
+				var bpms = [],
+					lastBpm = 50 + Math.round(Math.random() * 20);
+				_.times(700, function (i) {
+					if (Math.random() > 0.8) { return; }
+					bpms.push({
+						timestamp: moment()
+							.subtract(i, 'days')
+							.hour(Math.round(Math.random() * 24))
+							.minute(Math.round(Math.random() * 60))
+							.second(Math.round(Math.random() * 60))
+							.toDate(),
+						value: lastBpm + Math.round(Math.random() * 300) / 10
+					});
+				});
+				return bpms;
+			}
+		},
+		{
+			name: 'Hours slept',
+			color: '#81CFE0',
+			icon: 'airline-seat-individual-suite',
+			units: [{ title: 'hours', value: 'hours', default: true }],
+			fakeData: function () {
+				var bpms = [],
+					lastBpm = 4 + Math.round(Math.random() * 2);
+				_.times(700, function (i) {
+					if (Math.random() > 0.8) { return; }
+					bpms.push({
+						timestamp: moment()
+							.subtract(i, 'days')
+							.hour(Math.round(Math.random() * 24))
+							.minute(Math.round(Math.random() * 60))
+							.second(Math.round(Math.random() * 60))
+							.toDate(),
+						value: lastBpm + Math.round(Math.random() * 30) / 10
+					});
+				});
+				return bpms;
+			}
+		},
+		{
 			name: 'Height',
 			color: '#F4D03F',
 			icon: 'straighten',
@@ -152,7 +198,7 @@ angular.module('traq')
 								weightB = _.last(weights).value,
 								weightUnit = weight.unit,
 								icon = weightA > weightB ? 'arrow-drop-down' : 'arrow-drop-up';
-							return '<span class="mi mi-24 mi-' + icon + '"></span>' + Math.round((weightB - weightA) * 10) / 10 + ' ' + weightUnit;
+							return '<span class="mi mi-24 mi-' + icon + '"></span>' + Math.round((weightB - weightA) * 10) / 10 + ' <span class="unit">' + weightUnit + '</span>';
 						}
 					},
 					{
@@ -164,7 +210,7 @@ angular.module('traq')
 							if (!weights || !weights.length) { return ''; }
 							var latestWeight = _.last(weights).value,
 								weightUnit = weight.unit;
-							return latestWeight + ' ' + weightUnit;
+							return latestWeight + ' <span class="unit">' + weightUnit + '</span>';
 						}
 					},
 					{
@@ -233,14 +279,88 @@ angular.module('traq')
 				title: 'Heart rate',
 				icon: 'favorite',
 				category: 'health',
-				defaults: {
-					title: 'Heart rate',
-					columns: [{ id: 'heart-rate', name: 'Heart rate', unit: 'bpm' }]
-				}, // TODO - age as an option to auto calculate BPM ranges
 				charts: [
 					{
 						type: 'line',
-						date: [{ column: 'heart-rate', axis: 'left', color: '#663399' }]
+						requireColumns: ['Heart rate'],
+						columns: [{ name: 'Heart rate', axis: 'left' }]
+					}
+				],
+				insights: [
+					{
+						title: 'Lowest',
+						requireColumns: ['Heart rate'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.min(bpms, 'value').value) + ' <span class="unit">bpm</span>';
+						}
+					},
+					{
+						title: 'Average',
+						requireColumns: ['Heart rate', 'Height'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.sum(bpms, 'value') / bpms.length) + ' <span class="unit">bpm</span>';
+						}
+					},
+					{
+						title: 'Highest',
+						requireColumns: ['Heart rate'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.max(bpms, 'value').value) + ' <span class="unit">bpm</span>';
+						}
+					}
+				]
+			},
+			{
+				id: 'sleep',
+				title: 'Sleep',
+				icon: 'airline-seat-individual-suite',
+				category: 'health',
+				charts: [
+					{
+						type: 'line',
+						requireColumns: ['Hours slept'],
+						columns: [{ name: 'Hours slept', axis: 'left' }]
+					}
+				],
+				insights: [
+					{
+						title: 'Least',
+						requireColumns: ['Hours slept'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.min(bpms, 'value').value) + ' <span class="unit">hrs</span>';
+						}
+					},
+					{
+						title: 'Average',
+						requireColumns: ['Hours slept', 'Height'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.sum(bpms, 'value') / bpms.length) + ' <span class="unit">hrs</span>';
+						}
+					},
+					{
+						title: 'Most',
+						requireColumns: ['Hours slept'],
+						html: function (traq, data) {
+							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+								bpms = bpm.measurements;
+							if (!bpms || !bpms.length) { return ''; }
+							return Math.round(_.max(bpms, 'value').value) + ' <span class="unit">hrs</span>';
+						}
 					}
 				]
 			} //,
@@ -248,12 +368,6 @@ angular.module('traq')
 				id: 'temperature',
 				title: 'Temperature',
 				icon: 'wb-sunny',
-				category: 'health'
-			},
-			{
-				id: 'sleep',
-				title: 'Sleep',
-				icon: 'airline-seat-individual-suite',
 				category: 'health'
 			},
 			{

@@ -34,9 +34,12 @@ angular.module('traq')
 					var chartType = _.findWhere(chartTypes, { id: scope.chart.type });
 					// TODO: chart.destroy()
 					chart = new chartType.Chart(element);
-					setTimeout(function () {
+					var fixSize = function () {
 						chart.resize(element.offsetWidth, element.offsetHeight);
-					}, 400); // FIXME
+					};
+					fixSize();
+					setTimeout(fixSize, 400); // FIXME
+					setTimeout(fixSize, 1000); // FIXME
 				});
 
 				scope.$watch('data + span', function () {

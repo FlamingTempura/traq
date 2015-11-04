@@ -3,3 +3,4 @@ dist
 *.sublime-workspace
 npm-debug.log
 full
+todo
