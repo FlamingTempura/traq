@@ -40,6 +40,8 @@ angular.module('traq')
 					fixSize();
 					setTimeout(fixSize, 400); // FIXME
 					setTimeout(fixSize, 1000); // FIXME
+					setTimeout(fixSize, 2000); // FIXME
+					setTimeout(fixSize, 4000); // FIXME
 				});
 
 				scope.$watch('data + span', function () {
