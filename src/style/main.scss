@@ -286,4 +286,30 @@ md-tab-content {
 	&:nth-child(1) { transform: translateX(0%); }
 	&:nth-child(2) { transform: translateX(100%); }
 	&:nth-child(3) { transform: translateX(200%); }
+	// TODO: more of these
+}
+
+
+.data-view {
+	position: relative;
+	.data-container {
+		@extend md-list;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		.measurement {
+			//@extend md-list-item;
+			@extend md-list-item.md-2-line;
+			height: 72px;
+			overflow: hidden;
+			//md-icon, .measurement-text {
+				//display: inline-block;
+			//}
+			//.md-list-item-text {
+				//@extend md-list md-list-item.md-2-line .md-list-item-text;
+			//}
+		}
+	}
 }
