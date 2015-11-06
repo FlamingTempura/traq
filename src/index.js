@@ -26,6 +26,8 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 		snack('An error occured. Try again.'); // TODO: a more user-friendly message
 		console.error('stateChangeError', err);
 	});
+	$rootScope.windowHeight = window.innerHeight;
+	// TODO on resize, change windowHeight
 	PouchDB.plugin(require('transform-pouch'));
 	PouchDB.plugin({
 		getAll: function (options) {

@@ -10,19 +10,48 @@ angular.module('traq').config(function ($stateProvider) {
 		templateUrl: 'data.html',
 		resolve: {
 			columns: function (dbColumn) { return dbColumn.getAll(); },
-			measurements: function (dbMeasurement) {
-				return dbMeasurement.getAll().then(function (measurements) {
-					return _.sortBy(measurements, 'timestamp').reverse();
+			measurementIds: function (dbMeasurement) {
+				return dbMeasurement.allDocs().then(function (response) {
+					return _.chain(response.rows).pluck('id').sortBy(function (id) {
+						return id.split(':')[1];
+					}).value().reverse();
 				});
 			}
 		},
-		controller: function ($q, $scope, $state, snack, dbMeasurement, columns, measurements) {
-			$scope.measurements = _.map(measurements, function (measurement) {
-				return _.extend({}, measurement, {
-					date: moment(measurement.timestamp).calendar(null, { sameElse: 'ddd D MMM YYYY [at] H:mm A' }),
-					column: _.findWhere(columns, { _id: measurement._id.split(':')[0] })
-				});
-			});
+		controller: function ($q, $scope, $state, snack, dbMeasurement, columns, measurementIds) {
+			var measurementsCount = measurementIds.length,
+				chunkSize = 20,
+				chunks = {},
+				fetchChunk = function (chunkNumber) {
+					if (chunks[chunkNumber] === null) { return; }
+					chunks[chunkNumber] = null;
+
+					$q.all(_.map(measurementIds.slice(chunkNumber * chunkSize, (chunkNumber + 1) * chunkSize), function (id) {
+						return dbMeasurement.get(id).then(function (measurement) {
+							return _.extend({}, measurement, {
+								date: moment(measurement.timestamp).calendar(null, { sameElse: 'ddd D MMM YYYY [at] H:mm A' }),
+								column: _.findWhere(columns, { _id: measurement._id.split(':')[0] })
+							});
+						});
+					})).then(function (measurements) {
+						chunks[chunkNumber] = measurements;
+					});
+				};
+
+			$scope.measurements = {
+				getLength: function () { return measurementsCount; },
+				getItemAtIndex: function (index) {
+					var chunkNumber = Math.floor(index / chunkSize),
+						chunk = chunks[chunkNumber];
+					if (chunk) {
+						console.log('getting', chunk, index % chunkSize, chunk[index % chunkSize])
+						return chunk[index % chunkSize];
+					} else {
+						fetchChunk(chunkNumber);
+					}
+				}
+			};
+
 			$scope.data = {
 				selectMode: false,
 				selected: {}

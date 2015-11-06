@@ -7,10 +7,7 @@ var angular = require('angular'),
 var margin = { top: 6, right: 28, bottom: 30, left: 36 };
 
 angular.module('traq').config(function (chartTypes, colors, spans) {
-	var nextColor = function (hex) {
-		var i = _.findIndex(colors, { hex: hex });
-		return colors[i === colors.length - 2 ? 0 : i + 2].hex;
-	};
+	
 	chartTypes.push({
 		id: 'line',
 		title: 'Line chart',
@@ -138,7 +135,7 @@ angular.module('traq').config(function (chartTypes, colors, spans) {
 						.attr('stop-opacity', 1);
 					gradient.append('svg:stop')
 						.attr('offset', '100%')
-						.attr('stop-color', nextColor(column.color))
+						.attr('stop-color', colors.next(column.color, 2))
 						.attr('stop-opacity', 1);
 
 					var y = column.axis === 'left' ? yLeft : yRight,

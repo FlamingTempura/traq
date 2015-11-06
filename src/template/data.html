@@ -12,15 +12,15 @@
 </md-toolbar>
 
 <md-content class="data-view" flex layout="column">
-	<md-virtual-repeat-container class="data-container">
+	<md-virtual-repeat-container class="data-container" ng-style="{ height: windowHeight - 56 + 'px' }">
 		<md-list>
-			<md-list-item class="measurement md-2-line" md-virtual-repeat="measurement in measurements" ui-sref="measurement-edit({ mid: measurement._id })" flex>
+			<md-list-item class="measurement md-2-line" md-virtual-repeat="measurement in measurements" md-on-demand ui-sref="measurement-edit({ mid: measurement._id })" flex>
 				<md-icon md-font-icon="mi mi-24 mi-{{ measurement.column.icon }} circle-icon" ng-style="{ color: measurement.column.color }" ng-if="!data.selectMode" ng-click="data.selected[measurement._id] = true" stop-propagation></md-icon>
 				<md-checkbox ng-if="data.selectMode" ng-model="data.selected[measurement._id]" aria-label="Select" stop-propagation></md-checkbox>
 				<div class="md-list-item-text">
 					<h3>{{ measurement.column.name }}: {{ measurement.value }} {{ measurement.column.unit }}</h3>
 					<p>{{ measurement.date }}</p>
-					<p ng-if="measurement.note">{{ measurement.note }}</p>
+					<!-- <p ng-if="measurement.note">{{ measurement.note }}</p> -->
 				</div>
 			</md-list-item>
 		</md-list>

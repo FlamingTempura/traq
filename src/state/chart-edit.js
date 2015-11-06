@@ -4,20 +4,27 @@ var angular = require('angular'),
 	_ = require('lodash'),
 	uuid = require('node-uuid');
 
+var colors = [
+	{ hex: '#BB0AFA', name: 'Neon purple' },
+	{ hex: '#ED009A', name: 'Brilliant Pink' },
+	{ hex: '#F22613', name: 'Pomegranate' },
+	{ hex: '#F9690E', name: 'Ecstasy' },
+	{ hex: '#F89406', name: 'California' },
+	{ hex: '#F4D03F', name: 'Safron' },
+	{ hex: '#87D37C', name: 'Gossip' },
+	{ hex: '#03C9A9', name: 'Caribbean Green' },
+	{ hex: '#19B5FE', name: 'Dodger Blue' },
+	{ hex: '#81CFE0', name: 'Spray' },
+	{ hex: '#ECF0F1', name: 'Porcelain' }
+];
+
+colors.next = function (hex, n) {
+	var i = _.findIndex(colors, { hex: hex });
+	return colors[i === colors.length - n ? 0 : i + n].hex;
+};
+
 angular.module('traq')
-	.constant('colors', [
-		{ hex: '#BB0AFA', name: 'Neon purple' },
-		{ hex: '#ED009A', name: 'Brilliant Pink' },
-		{ hex: '#F22613', name: 'Pomegranate' },
-		{ hex: '#F9690E', name: 'Ecstasy' },
-		{ hex: '#F89406', name: 'California' },
-		{ hex: '#F4D03F', name: 'Safron' },
-		{ hex: '#87D37C', name: 'Gossip' },
-		{ hex: '#03C9A9', name: 'Caribbean Green' },
-		{ hex: '#19B5FE', name: 'Dodger Blue' },
-		{ hex: '#81CFE0', name: 'Spray' },
-		{ hex: '#ECF0F1', name: 'Porcelain' }
-	])
+	.constant('colors', colors)
 	.config(function ($stateProvider, colors) {
 		var colorDefault = [3, 1, 8, 9, 6, 5, 4, 2, 0, 7, 10],
 			chartDefaults = function (traq, chart) {
