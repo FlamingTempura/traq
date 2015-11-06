@@ -4,3 +4,5 @@ dist
 npm-debug.log
 full
 todo
+cordova/platforms/
+cordova/plugins/
