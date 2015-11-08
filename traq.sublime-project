@@ -3,7 +3,7 @@
 	[
 		{
 			"path": ".",
-			"folder_exclude_patterns": ["node_modules", "dist", "cordova"]
+			"folder_exclude_patterns": ["node_modules", "dist", "cordova/www", "cordova/platforms", "cordova/plugins"]
 		}
 	]
 }

@@ -21,6 +21,16 @@ var fastclick = function () {
 	};
 };
 
+var progressSplashI = 0,
+	progressSplash = function () {
+		progressSplashI++;
+		if (navigator.splashscreen && progressSplashI >= 2) {
+			navigator.splashscreen.hide();
+		}
+	};
+
+document.addEventListener('deviceready', progressSplash, false);
+
 angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
 	$mdThemingProvider.theme('default')
 		.dark()
@@ -29,6 +39,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 }).controller('AppCtrl', function ($scope, snack) {
 	$scope.snack = snack;
 }).run(function ($q, $rootScope, snack) {
+	progressSplash();
 	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
 		var upAnimation = _.compact(to.url.split('/')).length > _.compact(from.url.split('/')).length;
 		angular.element(document.body)
