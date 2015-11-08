@@ -9,7 +9,12 @@ $material-design-icons-font-path: 'fonts/';
 
 md-toolbar:not(.md-menu-toolbar) {
 	color: hsl(0, 0, 23%);
+	min-height: 56px !important;
 	md-icon { color: hsl(0, 0, 23%); }
+	.md-toolbar-tools {
+		height: 56px !important;
+		max-height: 56px !important;
+	}
 }
 
 md-tab-item { color: inherit !important; }
@@ -240,7 +245,7 @@ md-input-container .md-input {
 
 [ui-view] {
 	
-	.ng-enter, .ng-leave {	
+	&.ng-enter, &.ng-leave {	
 		position: absolute;
 		left: 0;
 		right: 0;

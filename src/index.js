@@ -3,11 +3,12 @@
 var _ = require('lodash'),
 	angular = require('angular'),
 	ngMaterial = require('angular-material'),
+	ngTouch = require('angular-touch'),
 	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
 	moment = require('moment');
 
-angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
+angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
 	$mdThemingProvider.theme('default')
 		.dark()
 		.primaryPalette('yellow');
@@ -16,8 +17,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	$scope.snack = snack;
 }).run(function ($q, $rootScope, snack) {
 	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
-		console.log(to, from)
-		var upAnimation = to.url.split('/') > from.url.split('/');
+		var upAnimation = to.url.split('/').length > from.url.split('/').length;
 		angular.element(document.body)
 			.toggleClass('animate-up', upAnimation)
 			.toggleClass('animate-down', !upAnimation);
