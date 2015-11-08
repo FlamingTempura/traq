@@ -108,74 +108,13 @@ angular.module('traq')
 					value: 1 + Math.round(Math.random() * 100) / 100
 				}];
 			}
-		},
-		{
-			name: 'Food (Expense)',
-			color: '#F4D03F',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
-		},
-		{
-			name: 'Rent (Expense)',
-			color: '#81CFE0',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
-		},
-		{
-			name: 'Utilities (Expense)',
-			color: '#19B5FE',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
-		},
-		{
-			name: 'Transport (Expense)',
-			color: '#F9690E',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
-		},
-		{
-			name: 'Shopping (Expense)',
-			color: '#ED009A',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
-		},
-		{
-			name: 'Other (Expense)',
-			color: '#ECF0F1',
-			icon: 'shopping-basket',
-			units: [
-				{ title: 'GBP', value: 'GBP', default: true },
-				{ title: 'USD', value: 'USD' }],
-			fakeData: expensesData
 		}
-	])
-	.constant('presetTraqCategories', [
-		{ id: 'health', title: 'Health', color: '#F62459' },
-		{ id: 'sport', title: 'Sport', color: '#F9BF3B' },
-		{ id: 'finance', title: 'Finance', color: '#26A65B' },
-		{ id: 'other', title: 'Other', color: '#BDC3C7' }
 	])
 	.service('presetTraqs', function () {
 		return [
 			{
 				id: 'weight',
 				title: 'Weight',
-				category: 'health',
 				icon: 'filter-frames',
 
 				charts: [
@@ -230,55 +169,19 @@ angular.module('traq')
 				]
 			},
 			{
-				id: 'spending',
-				title: 'Spending',
-				category: 'finance',
-				icon: 'shopping-basket',
-
-				charts: [
-					{
-						type: 'line',
-						requireColumns: ['Food (Expense)', 'Rent (Expense)', 'Utilities (Expense)', 'Transport (Expense)', 'Shopping (Expense)', 'Other (Expense)'],
-						columns: [
-							{ name: 'Food (Expense)', axis: 'left' },
-							{ name: 'Rent (Expense)', axis: 'left' },
-							{ name: 'Utilities (Expense)', axis: 'left' },
-							{ name: 'Transport (Expense)', axis: 'left' },
-							{ name: 'Shopping (Expense)', axis: 'left' },
-							{ name: 'Other (Expense)', axis: 'left' }
-						]
-					}
-				]
-			},
-			{
 				id: 'steps',
 				title: 'Steps',
-				icon: 'directions-walk',
-				category: 'health'
-			},
-			{
-				id: 'milage',
-				title: 'Milage',
-				icon: 'filter-hdr',
-				category: 'health'
-			},
-			{
-				id: 'income',
-				title: 'Income',
-				icon: 'attach-money',
-				category: 'finance'
+				icon: 'directions-walk'
 			},
 			{
 				id: 'miles-ran',
 				title: 'Miles ran',
-				icon: 'directions-run',
-				category: 'sport'
+				icon: 'directions-run'
 			},
 			{
 				id: 'heart-rate',
 				title: 'Heart rate',
 				icon: 'favorite',
-				category: 'health',
 				charts: [
 					{
 						type: 'line',
@@ -323,7 +226,6 @@ angular.module('traq')
 				id: 'sleep',
 				title: 'Sleep',
 				icon: 'airline-seat-individual-suite',
-				category: 'health',
 				charts: [
 					{
 						type: 'line',
@@ -364,22 +266,11 @@ angular.module('traq')
 					}
 				]
 			} //,
-			/*{
-				id: 'temperature',
-				title: 'Temperature',
-				icon: 'wb-sunny',
-				category: 'health'
-			},
+			/*
 			{
 				id: 'walking-distance',
 				title: 'Walking distance',
 				icon: 'directions-walk',
-				category: 'health'
-			},
-			{
-				id: 'height',
-				title: 'Height',
-				icon: 'straighten',
 				category: 'health'
 			},
 			{

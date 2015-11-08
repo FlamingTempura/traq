@@ -1,52 +1,38 @@
 <md-toolbar>
 	<div class="md-toolbar-tools">
-		<md-button ng-if="traqNew.onboarded" type="button" class="md-icon-button" aria-label="Close" ui-back>
+		<md-button ng-if="onboarded" type="button" class="md-icon-button" aria-label="Close" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 		</md-button>
-		<md-button ng-if="!traqNew.onboarded" type="button" class="md-icon-button" aria-label="Back" ui-back>
+		<md-button ng-if="!onboarded" type="button" class="md-icon-button" aria-label="Back" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-arrow-back"></md-icon>
 		</md-button>
-		<h2><span ng-if="traqNew.onboarded">Create a traq</span>
-			<span ng-if="!traqNew.onboarded">Create your first traq</span>
+		<h2><span ng-if="onboarded">Create a traq</span>
+			<span ng-if="!onboarded">Create your first traq</span>
 	</div>
 </md-toolbar>
 <md-content flex layout="column">
 	<md-subheader>What do you want to track?</md-subheader>
-	<div layout="row" flex="auto">
-		<md-content style="width: 100px;" layout="column">
-			<md-list flex="grow">
-				<md-list-item 
-						ng-repeat="category in traqNew.categories" 
-						ng-click="traqNew.selectedCategory = category" 
-						ng-class="{ active: category === traqNew.selectedCategory }"
-						ng-style="{ color: category.color, 'border-color': category.color }">
-					<p>{{ category.title }}</p>
-				</md-list-item>
-			</md-list>
-		</md-content>
-		<md-content flex layout="column">
-			<md-list flex="grow" ng-style="{ color: traqNew.selectedCategory.color }">
-				<div ui-sref="traq-edit({ id: 'new' })"><!-- HACK until this fix deployed https://github.com/angular/material/issues/2131 -->
-					<md-list-item ng-show="traqNew.selectedCategory.id === 'other'">
-						<md-icon md-font-icon="mi mi-24 mi-create"></md-icon>
-						<p>Create your own traq</p>
-					</md-list-item>
-				</div>
-				<div ng-repeat="preset in traqNew.selectedCategory.presets">
-					
-					<md-list-item ng-click="traqNew.go('traq-edit', { tid: 'new', preset: preset.id })" ng-if="!preset.locked">
-						<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
-						<p>{{ preset.title }}</p>
-					</md-list-item>
+	<md-list flex="grow">
+		
+		<div ng-repeat="preset in presets">
+			
+			<md-list-item ng-click="go('traq-edit', { tid: 'new', preset: preset.id })" ng-if="!preset.locked">
+				<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
+				<p>{{ preset.title }}</p>
+			</md-list-item>
 
-					<md-list-item ng-click="traqNew.go('traq-full')" ng-if="preset.locked">
-						<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
-						<p>{{ preset.title }}</p>
-						<md-icon md-font-icon="mi mi-24 mi-lock upgrade-icon"></md-icon>
-					</md-list-item>
+			<md-list-item ng-click="go('traq-full')" ng-if="preset.locked">
+				<md-icon md-font-icon="mi mi-24 mi-{{ preset.icon }}"></md-icon>
+				<p>{{ preset.title }}</p>
+				<md-icon md-font-icon="mi mi-24 mi-lock upgrade-icon"></md-icon>
+			</md-list-item>
 
-				</div>
-			</md-list>
-		</md-content>
-	</div>
+		</div>
+		<div ui-sref="traq-edit({ id: 'new' })"><!-- HACK until this fix deployed https://github.com/angular/material/issues/2131 -->
+			<md-list-item>
+				<md-icon md-font-icon="mi mi-24 mi-create"></md-icon>
+				<p>Create your own traq</p>
+			</md-list-item>
+		</div>
+	</md-list>
 </md-content>
