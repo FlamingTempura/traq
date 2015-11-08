@@ -18,14 +18,14 @@
 	<md-list-item class="md-2-line">
 		<div class="md-list-item-text">
 			<h3>Send statistics</h3>
-			<p>Enable this to send anonymous data about how you use the app. This helps us improve the Traq.</p>
+			<p>Enable this to send anonymous data about how you use the app to help improve Traq.</p>
 		</div>
 		<md-switch class="md-secondary" ng-model="settings.enableStats"></md-switch>
 	</md-list-item>
 	
 	<md-subheader>Units</md-subheader>
 	<md-list-item ng-repeat="column in columns">
-		<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{ column.color }}"></md-icon>
+		<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }} circle-icon" ng-style="{ color: column.color }"></md-icon>
 		<p>{{ column.name }}</p>
 		<md-select ng-model="column.unit" ng-disabled="column.units.length < 2" aria-label="Unit">
 			<md-option ng-repeat="unit in column.units" value="{{ unit.value }}">

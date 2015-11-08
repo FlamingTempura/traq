@@ -1,5 +1,5 @@
 <md-content flex class="home" layout="column">
-	<md-content layout-padding ng-if="traqs.length === 0">
+	<md-content layout-padding ng-if="traqViews.length === 0">
 		You haven't created any traqs. <a ui-sref="traq-edit({ tid: 'new' })">Create a traq</a>.
 	</md-content>
 	<md-tabs md-selected="home.selectedIndex" flex>
@@ -9,7 +9,7 @@
 				<div class="menu-row" layout="row">
 					<div flex></div>
 					<md-menu md-position-mode="target-right target" flex="initial">
-						<md-button md-menu-origin type="button" ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
+						<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
 							<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 						</md-button>
 						<md-menu-content width="4">
@@ -27,12 +27,10 @@
 				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
 
 				<div class="span-select">
-					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId }">{{ spanId }}</a>
+					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" fastclick ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId }">{{ spanId }}</a>
 				</div>
 
-				<div flex="auto" ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" layout="row" ng-repeat="chart in traqView.traq.charts">
-					<chart traq="traqView.traq" chart="chart" data="traqView.data" span="traqView.span"></chart>
-				</div>
+				<chart traq="traqView.traq" chart="traqView.traq.charts[0]" data="traqView.data" span="traqView.span" ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" flex="auto"></chart>
 
 				<div layout="row" class="dark-bg">
 					<div class="fact" ng-repeat="insight in traqView.insights" flex="33">
@@ -41,7 +39,7 @@
 					</div>
 				</div>
 
-				<md-button flex="initial" type="button" ui-sref="measurement-edit({ mid: 'new', column: traqView.traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
+				<md-button flex="initial" type="button" fastclick ui-sref="measurement-edit({ mid: 'new', column: traqView.traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
 					Add measurement
 				</md-button>
 			</md-content>

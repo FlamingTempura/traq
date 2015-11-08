@@ -19,7 +19,6 @@ angular.module('traq').config(function ($stateProvider) {
 			if (!onboarded) { $state.go('welcome'); }
 		},
 		controller: function ($sce, $scope, $stateParams, spans, traqs, columns, getData) {
-			$scope.traqs = traqs;
 			$scope.spans = spans;
 			$scope.home = {
 				selectedIndex: Math.max(0, _.findIndex(traqs, function (traq) {
@@ -29,12 +28,10 @@ angular.module('traq').config(function ($stateProvider) {
 			$scope.traqViews = _.map(traqs, function (traq, i) {
 				var traqView = { traq: traq, span: '1m' };
 				$scope.$watch('traqViews[' + i + '].span', function (span) {
-					console.log('SPAN', span);
 					if (!span) { return; }
 					// TODO: only activate this once user is viewing it
 					getData(traq, new Date(Date.now() - spans[span].duration)).then(function (data) {
 						traqView.data = data;
-						console.log('DATA', data);
 						traqView.insights = _.map(traq.insights, function (insight) {
 							return _.extend({}, insight, {
 								html: $sce.trustAsHtml(insight.html(traq, data))

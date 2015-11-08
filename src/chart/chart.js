@@ -5,7 +5,7 @@ var angular = require('angular'),
 	d3 = require('d3');
 
 angular.module('traq')
-	.constant('chartTypes', [])
+	.constant('charts', [])
 	.constant('spans', {
 		'1d': { duration: 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%H:%M') },
 		'1w': { duration: 7 * 24 * 60 * 60 * 1000, ticks: d3.time.day, tickFormat: d3.time.format('%a') },
@@ -13,7 +13,7 @@ angular.module('traq')
 		'3m': { duration: 3 * 30 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') },
 		'1y': { duration: 365 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') }
 	})
-	.directive('chart', function (chartTypes, spans) {
+	.directive('chart', function (charts) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -23,28 +23,26 @@ angular.module('traq')
 				data: '=',
 				span: '='
 			},
-			template: '<div flex layout="row"><div flex></div></div>',
+			template: '<div flex></div>',
 			link: function (scope, element) {
 				var chart;
-				element = element.children()[0];
+				element = element[0];
 
 				scope.$watch('chart', function () {
-					console.log('CHART', scope.chart, element)
+					console.log('$watch chart', scope.chart)
 					if (!scope.chart) { return; }
-					var chartType = _.findWhere(chartTypes, { id: scope.chart.type });
+					var chartType = _.findWhere(charts, { id: scope.chart.type });
 					// TODO: chart.destroy()
 					chart = new chartType.Chart(element);
 					var fixSize = function () {
-						chart.resize(element.offsetWidth, element.offsetHeight);
+						chart.resize(window.innerWidth, window.innerHeight - 260);
+						//chart.resize(element.offsetWidth, element.offsetHeight); // needs a delay with flexbox
 					};
 					fixSize();
-					setTimeout(fixSize, 400); // FIXME
-					setTimeout(fixSize, 1000); // FIXME
-					setTimeout(fixSize, 2000); // FIXME
-					setTimeout(fixSize, 4000); // FIXME
 				});
 
 				scope.$watch('data + span', function () {
+					console.log('$watch data + span', scope.data, scope.span)
 					if (!chart || !scope.data) { return; }
 					var columns = _.map(scope.chart.columns, function (column) {
 							return _.extend({}, column, _.findWhere(scope.data, { name: column.name }));

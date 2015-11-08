@@ -6,9 +6,9 @@ var angular = require('angular'),
 
 var margin = { top: 6, right: 28, bottom: 30, left: 36 };
 
-angular.module('traq').config(function (chartTypes, colors, spans) {
+angular.module('traq').config(function (charts, colors, spans) {
 	
-	chartTypes.push({
+	charts.push({
 		id: 'line',
 		title: 'Line chart',
 		options: {

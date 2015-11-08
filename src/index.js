@@ -3,12 +3,25 @@
 var _ = require('lodash'),
 	angular = require('angular'),
 	ngMaterial = require('angular-material'),
-	ngTouch = require('angular-touch'),
 	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
 	moment = require('moment');
 
-angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
+var fastclick = function () {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			if (attrs.hasOwnProperty('noFastclick')) { return; }
+			element.bind('touchstart', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+				element[0].click();
+			});
+		}
+	};
+};
+
+angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
 	$mdThemingProvider.theme('default')
 		.dark()
 		.primaryPalette('yellow');
@@ -17,7 +30,7 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 	$scope.snack = snack;
 }).run(function ($q, $rootScope, snack) {
 	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
-		var upAnimation = to.url.split('/').length > from.url.split('/').length;
+		var upAnimation = _.compact(to.url.split('/')).length > _.compact(from.url.split('/')).length;
 		angular.element(document.body)
 			.toggleClass('animate-up', upAnimation)
 			.toggleClass('animate-down', !upAnimation);
@@ -41,16 +54,6 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 			}
 			return this.allDocs(options).then(function (result) {
 				return _.pluck(result.rows, 'doc');
-			}).then(function (docs) {
-				if (that.filterFn) {
-					return $q.all(_.map(docs, that.filterFn)).then(function (results) {
-						return _.select(docs, function (doc, i) {
-							return results[i];
-						});
-					});
-				} else {
-					return docs;
-				}
 			});
 		},
 		exists: function (id) {
@@ -72,9 +75,6 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 					return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
 				};
 			});
-		},
-		filter: function (fn) {
-			this.filterFn = fn;
 		}
 	});
 }).service('dbConfig', function ($q) {
@@ -116,7 +116,8 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 	db.observe($q);
 	db.transform({
 		incoming: function (doc) {
-			return _.pick(doc, '_id', '_rev', 'value', 'note');
+			// TODO: check that timestamp === _id.split(':')[1]
+			return _.chain(doc).pick('_id', '_rev', 'value', 'note').value();
 		},
 		outgoing: function (doc) {
 			var idParts = doc._id.split(':');
@@ -145,8 +146,6 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 						startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : ''),
 						limit: 1
 					}).then(function (preMeasurements) {
-						console.log(preMeasurements);
-						console.log('result count', measurements.length, preMeasurements.length);
 						return _.extend({}, column, { measurements: preMeasurements.concat(measurements) });
 					});
 				});
@@ -244,9 +243,22 @@ angular.module('traq', [ngMaterial, ngTouch, uiRouter]).config(function ($mdThem
 	return function (input, start) {
 		return input && input.slice(start);
 	};
+}).directive('fastclick', fastclick)
+.directive('ngClick', fastclick)
+.directive('uiSref', fastclick)
+.directive('autofocusDelay', function ($timeout) {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			$timeout(function () { element.focus(); }, attrs.autofocusDelay);
+		}
+	};
 });
 
+
+
 require('./presets.js');
+
 require('./state/welcome.js');
 require('./state/chart-edit.js');
 require('./state/chart-view.js');
@@ -260,6 +272,11 @@ require('./state/settings.js');
 require('./state/traq-new.js');
 require('./state/traq-edit.js');
 require('./state/measurements.js');
+
 require('./chart/chart.js');
 require('./chart/line.js');
 //require('./chart/bar.js');
+
+require('./transport/transport.js');
+require('./transport/fake.js');
+require('./transport/sv.js');

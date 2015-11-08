@@ -298,10 +298,17 @@ md-tab-content {
 		.measurement {
 			height: 72px;
 			overflow: hidden;
+			transition: opacity 0.3s ease-out;
+			opacity: 1;
+			&.hided { opacity: 0; }
 		}
 	}
 }
 
 .md-subheader {
 	margin-right: 0;
+}
+
+.md-open-menu-container.md-active { // angular material default animation is slow and ugly
+	transition: opacity 0.15s ease-in-out;
 }

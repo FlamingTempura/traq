@@ -202,7 +202,7 @@ angular.module('traq')
 					},
 					{
 						title: 'Average',
-						requireColumns: ['Heart rate', 'Height'],
+						requireColumns: ['Heart rate'],
 						html: function (traq, data) {
 							var bpm = _.findWhere(data, { name: 'Heart rate' }),
 								bpms = bpm.measurements;
@@ -246,7 +246,7 @@ angular.module('traq')
 					},
 					{
 						title: 'Average',
-						requireColumns: ['Hours slept', 'Height'],
+						requireColumns: ['Hours slept'],
 						html: function (traq, data) {
 							var bpm = _.findWhere(data, { name: 'Hours slept' }),
 								bpms = bpm.measurements;

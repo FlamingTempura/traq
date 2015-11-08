@@ -2,7 +2,8 @@
 
 var angular = require('angular'),
 	_ = require('lodash'),
-	moment = require('moment');
+	moment = require('moment')/*,
+	emit = require('pouchdb').emit*/;
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('measurements', {
@@ -10,25 +11,48 @@ angular.module('traq').config(function ($stateProvider) {
 		templateUrl: 'measurements.html',
 		resolve: {
 			columns: function (dbColumn) { return dbColumn.getAll(); },
-			measurementIds: function (dbMeasurement) {
-				return dbMeasurement.allDocs().then(function (response) {
+			/*measurementIds: function (dbMeasurement) {
+				return dbMeasurement.allDocs({ limit: 10 }).then(function (response) {
 					return _.chain(response.rows).pluck('id').sortBy(function (id) {
 						return id.split(':')[1];
 					}).reverse().value();
 				});
+			},*/
+			measurementCount: function (dbMeasurement) {
+				return dbMeasurement.allDocs({ keys: [] }).then(function (result) {
+					return result.total_rows; // FIXME: omit design docs
+				});
 			}
 		},
-		controller: function ($q, $scope, $state, snack, dbMeasurement, columns, measurementIds) {
-			var measurementsCount = measurementIds.length,
-				chunkSize = 20,
+		controller: function ($q, $scope, $state, snack, dbMeasurement, columns, measurementCount) {
+			console.log('COUNT', measurementCount);
+			var oldestTimestamp,
+				chunkSize = 100,
 				chunks = {},
 				fetchChunk = function (chunkNumber) {
-					if (chunks[chunkNumber] === null) { return; }
 					chunks[chunkNumber] = null;
 
-					var ids = measurementIds.slice(chunkNumber * chunkSize, (chunkNumber + 1) * chunkSize);
-
-					dbMeasurement.getAll({ keys: ids }).then(function (measurements) {
+					// get 20 rows for each column (bit silly, but avoid need for confusing pouchdb view)
+					$q.all(_.map(columns, function (column) {
+						return dbMeasurement.allDocs({
+							startkey: column._id + ':' + (oldestTimestamp || '\uffff'), // FIXME: this doesn't work if user scroll straight down!
+							endkey: column._id + ':',
+							limit: chunkSize,
+							descending: true
+						});
+					})).then(function (columnResults) {
+						console.log('RS', columnResults)
+						var ids = _.chain(columnResults).pluck('rows').flatten().map(function (measurement) {
+							return {
+								id: measurement.id,
+								timestamp: measurement.id.split(':')[1]
+							};
+						}).sortByOrder('timestamp', 'desc').slice(0, chunkSize).pluck('id').value();
+						console.log('gotIds');
+						return dbMeasurement.getAll({ keys: ids });
+					}).then(function (measurements) {
+						console.log('MEAS', measurements);
+						oldestTimestamp = _.last(measurements)._id.split(':')[1];
 						return _.map(measurements, function (measurement) {
 							return _.extend({}, measurement, {
 								date: moment(measurement.timestamp).calendar(null, { sameElse: 'ddd D MMM YYYY [at] H:mm A' }),
@@ -38,17 +62,19 @@ angular.module('traq').config(function ($stateProvider) {
 					}).then(function (measurements) {
 						console.log('fetched chunk', chunkNumber);
 						chunks[chunkNumber] = measurements;
+					}).catch(function (err) {
+						console.error(err);
 					});
 				};
 
 			$scope.measurements = {
-				getLength: function () { return measurementsCount; },
+				getLength: function () { return measurementCount; },
 				getItemAtIndex: function (index) {
 					var chunkNumber = Math.floor(index / chunkSize),
 						chunk = chunks[chunkNumber];
 					if (chunk) {
 						return chunk[index % chunkSize];
-					} else {
+					} else if (chunk !== null) {
 						fetchChunk(chunkNumber);
 					}
 				}
