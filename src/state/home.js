@@ -46,7 +46,7 @@ angular.module('traq').config(function ($stateProvider) {
 			};
 		}
 	});
-}).directive('mdTabContent', function () {
+}).directive('traq', function () {
 	return {
 		link: function ($scope, element) {
 			var $element = $(element),
@@ -66,6 +66,7 @@ angular.module('traq').config(function ($stateProvider) {
 					return { $el: $el, startTranslate: getTranslateX($el) };
 				});
 			}).on('touchmove', function (e) {
+				e.preventDefault();
 				var x = e.originalEvent.changedTouches[0].pageX - startX;
 				_.each(startTranslates, function (o) {
 					setTranslateX(o.$el, o.startTranslate + x);

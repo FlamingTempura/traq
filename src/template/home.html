@@ -1,49 +1,43 @@
-<md-content flex class="home" layout="column">
+<md-content class="home" layout="column">
 	<md-content layout-padding ng-if="traqViews.length === 0">
 		You haven't created any traqs. <a ui-sref="traq-edit({ tid: 'new' })">Create a traq</a>.
 	</md-content>
-	<md-tabs md-selected="home.selectedIndex" flex>
-		<md-tab ng-repeat="traqView in traqViews" label="{{ traqView.traq.title }}">
-			
-			<md-content style="height:100%" layout="column" flex>
-				<div class="menu-row" layout="row">
-					<div flex></div>
-					<md-menu md-position-mode="target-right target" flex="initial">
-						<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
-							<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
-						</md-button>
-						<md-menu-content width="4">
-							<md-menu-item><md-button ui-sref="traq-edit({ tid: traqView.traq._id })">Customise {{ traqView.traq.title }}</md-button></md-menu-item>
-							<md-menu-divider></md-menu-divider>
-							<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="measurements">View measurements</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="traq-port">Import/export</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
-							<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
-						</md-menu-content>
-					</md-menu>
-				</div>
-
-				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
-
-				<div class="span-select">
-					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" fastclick ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId }">{{ spanId }}</a>
-				</div>
-
-				<chart traq="traqView.traq" chart="traqView.traq.charts[0]" data="traqView.data" span="traqView.span" ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" flex="auto"></chart>
-
-				<div layout="row" class="dark-bg">
-					<div class="fact" ng-repeat="insight in traqView.insights" flex="33">
-						<div class="title">{{ insight.title }}</div>
-						<div class="value" ng-bind-html="insight.html"></div>
-					</div>
-				</div>
-
-				<md-button flex="initial" type="button" fastclick ui-sref="measurement-edit({ mid: 'new', column: traqView.traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
-					Add measurement
+	<traq ng-repeat="traqView in traqViews" layout="column">
+		<div class="menu-row" layout="row">
+			<div flex></div>
+			<md-menu md-position-mode="target-right target" flex="initial">
+				<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
+					<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 				</md-button>
-			</md-content>
+				<md-menu-content width="4">
+					<md-menu-item><md-button ui-sref="traq-edit({ tid: traqView.traq._id })">Customise {{ traqView.traq.title }}</md-button></md-menu-item>
+					<md-menu-divider></md-menu-divider>
+					<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="measurements">View measurements</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="traq-port">Import/export</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
+				</md-menu-content>
+			</md-menu>
+		</div>
 
-		</md-tab>
-	</md-tabs>
+		<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
+
+		<div class="span-select">
+			<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" fastclick ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId }">{{ spanId }}</a>
+		</div>
+
+		<chart traq="traqView.traq" chart="traqView.traq.charts[0]" data="traqView.data" span="traqView.span" no-fastclick ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" flex="auto"></chart>
+
+		<div layout="row" class="dark-bg">
+			<div class="fact" ng-repeat="insight in traqView.insights" flex="33">
+				<div class="title">{{ insight.title }}</div>
+				<div class="value" ng-bind-html="insight.html"></div>
+			</div>
+		</div>
+
+		<md-button flex="initial" type="button" fastclick ui-sref="measurement-edit({ mid: 'new', column: traqView.traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
+			Add measurement
+		</md-button>
+	</traq>
 </md-content>
