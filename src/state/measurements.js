@@ -5,16 +5,16 @@ var angular = require('angular'),
 	moment = require('moment');
 
 angular.module('traq').config(function ($stateProvider) {
-	$stateProvider.state('data', {
-		url: '/data',
-		templateUrl: 'data.html',
+	$stateProvider.state('measurements', {
+		url: '/measurements',
+		templateUrl: 'measurements.html',
 		resolve: {
 			columns: function (dbColumn) { return dbColumn.getAll(); },
 			measurementIds: function (dbMeasurement) {
 				return dbMeasurement.allDocs().then(function (response) {
 					return _.chain(response.rows).pluck('id').sortBy(function (id) {
 						return id.split(':')[1];
-					}).value().reverse();
+					}).reverse().value();
 				});
 			}
 		},

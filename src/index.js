@@ -247,7 +247,7 @@ require('./state/settings-dropbox.js');
 require('./state/settings.js');
 require('./state/traq-new.js');
 require('./state/traq-edit.js');
-require('./state/data.js');
+require('./state/measurements.js');
 require('./chart/chart.js');
 require('./chart/line.js');
 //require('./chart/bar.js');

@@ -25,8 +25,9 @@
 	
 	<md-subheader>Units</md-subheader>
 	<md-list-item ng-repeat="column in columns">
+		<md-icon md-font-icon="mi mi-24 mi-lens" style="color: {{ column.color }}"></md-icon>
 		<p>{{ column.name }}</p>
-		<md-select ng-model="column.unit">
+		<md-select ng-model="column.unit" ng-disabled="column.units.length < 2" aria-label="Unit">
 			<md-option ng-repeat="unit in column.units" value="{{ unit.value }}">
 				{{ unit.title }}
 			</md-option>
