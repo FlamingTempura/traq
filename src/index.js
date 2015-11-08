@@ -128,15 +128,27 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	});
 	return db;
 }).service('getData', function ($q, dbMeasurement, dbColumn) {
-	return function (traq) {
+	return function (traq, startDate, endDate) {
 		var requireColumns = _.union(_.flattenDeep([
 			_.pluck(traq.charts, 'requireColumns'),
 			_.pluck(traq.insights, 'requireColumns')
 		]));
 		return $q.all(_.map(requireColumns, function (columnName) {
 			return dbColumn.get(columnName).then(function (column) {
-				return dbMeasurement.getAll({ startWith: columnName }).then(function (measurements) {
-					return _.extend({}, column, { measurements: measurements });
+				return dbMeasurement.getAll({
+					startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : ''),
+					endkey: columnName + ':' + (endDate ? moment(endDate).format('YYYYMMDD[-]HHmmss') : '\uffff')
+				}).then(function (measurements) {
+					// get the preceding measurement so that the plot will not start part way through the time span
+					return dbMeasurement.getAll({
+						descending: true,
+						startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : ''),
+						limit: 1
+					}).then(function (preMeasurements) {
+						console.log(preMeasurements);
+						console.log('result count', measurements.length, preMeasurements.length);
+						return _.extend({}, column, { measurements: preMeasurements.concat(measurements) });
+					});
 				});
 			});
 		}));

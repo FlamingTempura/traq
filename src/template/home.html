@@ -13,7 +13,7 @@
 							<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 						</md-button>
 						<md-menu-content width="4">
-							<md-menu-item><md-button ui-sref="traq-edit({ tid: traqView.traq._id })">Customise</md-button></md-menu-item>
+							<md-menu-item><md-button ui-sref="traq-edit({ tid: traqView.traq._id })">Customise {{ traqView.traq.title }}</md-button></md-menu-item>
 							<md-menu-divider></md-menu-divider>
 							<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
 							<md-menu-item><md-button ui-sref="measurements">View measurements</md-button></md-menu-item>
@@ -27,7 +27,7 @@
 				<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traqView.traq.title }}</h2>
 
 				<div class="span-select">
-					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId}">{{ spanId }}</a>
+					<a class="link" flex="initial" href="" ng-repeat="(spanId,span) in spans" ng-click="traqView.span = spanId" ng-class="{ active: traqView.span == spanId }">{{ spanId }}</a>
 				</div>
 
 				<div flex="auto" ui-sref="chart-view({ tid: traqView.traq._id, chart: $index })" layout="row" ng-repeat="chart in traqView.traq.charts">

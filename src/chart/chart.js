@@ -49,26 +49,23 @@ angular.module('traq')
 					var columns = _.map(scope.chart.columns, function (column) {
 							return _.extend({}, column, _.findWhere(scope.data, { name: column.name }));
 						}),
-						dateStart = scope.span ? Date.now() - spans[scope.span].duration : 0,
 						rows = _.chain(columns).map(function (column) {
-							var firstI = _.findIndex(column.measurements, function (measurement, i) {
-								return measurement.timestamp.getTime() > dateStart || i === column.measurements.length - 1;
-							});
-							var forecast = {
-								uuid: _.last(column.measurements).columnId + ':forecast',
-								columnId: _.last(column.measurements).columnId,
-								forecast: true,
-								timestamp: new Date(),
-								value: _.last(column.measurements).value
-							};
-							return column.measurements.slice(Math.max(0, firstI - 1), -1)
-								.concat([_.extend({ last: true }, _.last(column.measurements)), forecast]);
+							return column.measurements.concat([
+								_.extend({ last: true }, _.last(column.measurements)),
+								{
+									uuid: _.last(column.measurements).columnId + ':forecast',
+									columnId: _.last(column.measurements).columnId,
+									forecast: true,
+									timestamp: new Date(),
+									value: _.last(column.measurements).value
+								}
+							]);
 						}).flatten().map(function (measurement) {
 							var obj = _.clone(measurement);
 							obj[measurement.columnId] = measurement.value;
 							return obj;
 						}).value();
-					console.log(chart, columns, rows);
+					//console.log(chart, columns, rows);
 					chart.data(columns, rows, scope.span);
 				});
 				angular.element(window).on('resize', function () {

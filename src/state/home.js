@@ -26,18 +26,19 @@ angular.module('traq').config(function ($stateProvider) {
 					return traq._id === $stateParams.tid;
 				}))
 			};
-			$scope.traqViews = _.map(traqs, function (traq) {
-				var traqView = {
-					traq: traq,
-					span: '1m'
-				};
-				// TODO: only activate this once user is viewing it
-				getData(traq).then(function (data) {
-					traqView.data = data;
-					console.log('DATA', data);
-					traqView.insights = _.map(traq.insights, function (insight) {
-						return _.extend({}, insight, {
-							html: $sce.trustAsHtml(insight.html(traq, data))
+			$scope.traqViews = _.map(traqs, function (traq, i) {
+				var traqView = { traq: traq, span: '1m' };
+				$scope.$watch('traqViews[' + i + '].span', function (span) {
+					console.log('SPAN', span);
+					if (!span) { return; }
+					// TODO: only activate this once user is viewing it
+					getData(traq, new Date(Date.now() - spans[span].duration)).then(function (data) {
+						traqView.data = data;
+						console.log('DATA', data);
+						traqView.insights = _.map(traq.insights, function (insight) {
+							return _.extend({}, insight, {
+								html: $sce.trustAsHtml(insight.html(traq, data))
+							});
 						});
 					});
 				});
