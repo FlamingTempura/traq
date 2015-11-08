@@ -2,7 +2,7 @@
 	<md-content layout-padding ng-if="traqViews.length === 0">
 		You haven't created any traqs. <a ui-sref="traq-edit({ tid: 'new' })">Create a traq</a>.
 	</md-content>
-	<traq ng-repeat="traqView in traqViews" layout="column" ng-style="{ transform: 'translateX(' + $index + '00%)' }">
+	<traq ng-repeat="traqView in traqViews" layout="column" ng-style="{ transform: 'translateX(' + ($index - selectedIndex) + '00%)' }" tid="{{ traqView.traq._id }}">
 		<div class="menu-row" layout="row">
 			<div flex></div>
 			<md-menu md-position-mode="target-right target" flex="initial">

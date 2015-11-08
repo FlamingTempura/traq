@@ -186,14 +186,18 @@ svg {
 
 .span-select {
 	text-align: center;
+	margin-top: -16px;
+	margin-bottom: 14px;
 	a {
 		display: inline-block;
-		width: 26px;
+		width: 36px;
+		height: 26px;
+		line-height: 26px;
 		text-align: center;
 		color: #888;
 		font-size: 14px;
 		text-decoration: none;
-		font-weight: bold;
+		font-weight: normal;
 		&.active {
 			color: #eee;
 			text-decoration: underline;
@@ -299,6 +303,8 @@ md-input-container .md-input {
 	margin-right: 0;
 }
 
-.md-open-menu-container.md-active { // angular material default animation is slow and ugly
-	transition: opacity 0.15s ease-in-out;
+.md-open-menu-container.md-active, // angular material default animation is slow and ugly
+.md-select-menu-container.md-active md-select-menu,
+.md-select-menu-container.md-active md-select-menu > * {
+	transition: opacity 0.15s ease-in-out;//, transform 0.15s ease-in-out;
 }

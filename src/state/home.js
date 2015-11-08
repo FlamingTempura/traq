@@ -6,7 +6,7 @@ var angular = require('angular'),
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('home', {
-		url: '/',
+		url: '/?tid',
 		templateUrl: 'home.html',
 		params: { tid: null },
 		resolve: {
@@ -19,12 +19,11 @@ angular.module('traq').config(function ($stateProvider) {
 			if (!onboarded) { $state.go('welcome'); }
 		},
 		controller: function ($sce, $scope, $stateParams, spans, traqs, columns, getData) {
+			console.log('controller')
 			$scope.spans = spans;
-			$scope.home = {
-				selectedIndex: Math.max(0, _.findIndex(traqs, function (traq) {
-					return traq._id === $stateParams.tid;
-				}))
-			};
+			$scope.selectedIndex = Math.max(0, _.findIndex(traqs, function (traq) {
+				return traq._id === $stateParams.tid;
+			}));
 			$scope.traqViews = _.map(traqs, function (traq, i) {
 				var traqView = { traq: traq, span: '1m' };
 				$scope.$watch('traqViews[' + i + '].span', function (span) {
@@ -46,7 +45,7 @@ angular.module('traq').config(function ($stateProvider) {
 			};
 		}
 	});
-}).directive('traq', function () {
+}).directive('traq', function ($state) {
 	return {
 		link: function ($scope, element) {
 			var $element = $(element),
@@ -80,6 +79,9 @@ angular.module('traq').config(function ($stateProvider) {
 					x > threshold && !$element.is(':first-child') ? width : 0;
 
 				_.each(startTranslates, function (o) {
+					if (o.startTranslate + x === 0) {
+						$state.transitionTo('home', { tid: o.$el.attr('tid') }, { notify: false });
+					}
 					setTranslateX(o.$el.addClass('snap'), o.startTranslate + x);
 				});
 			});

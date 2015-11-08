@@ -27,4 +27,6 @@
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="SplashScreenDelay" value="10000" />
     <preference name="BackgroundColor" value="0x303030ff"/>
+
+    <preference name="StatusBarBackgroundColor" value="#222222" />
 </widget>
