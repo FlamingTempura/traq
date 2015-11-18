@@ -1,25 +1,30 @@
-<form ng-submit="import()">
-	<md-toolbar>
-		<div class="md-toolbar-tools">
-			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
-				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
-			</md-button>
-			<h2>Import</h2>
-			<span flex></span>
-			<md-button type="submit" class="md-icon-button" aria-label="Export">
-				<md-icon md-font-icon="mi mi-24 mi-file-upload"></md-icon>
-			</md-button>
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>Import</h2>
+	</div>
+</md-toolbar>
+
+<md-content>
+	<md-list>
+		<div ng-repeat="import in imports" ui-sref="{{ import.name }}">
+			<md-list-item>
+				<md-icon md-svg-src="{{ import.icon }}" aria-label="{{ import.title }}"></md-icon>
+				<p>{{ import.title }}</p>
+			</md-list-item>
 		</div>
-	</md-toolbar>
+	</md-list>
+</md-content>
 
-	<md-content layout-padding>
-		<file-reader name="import.title" format="import.format" contents="import.contents"></file-reader>
+<!-- <md-content layout-padding>
+	<file-reader name="import.title" format="import.format" contents="import.contents"></file-reader>
 
-		<div ng-if="traq">
-			{{traq.title}}
-			{{traq.columns}}
-			{{rows.length}}
-		</div>
-	</md-content>
-
-</form>
+	<div ng-if="traq">
+		{{traq.title}}
+		{{traq.columns}}
+		{{rows.length}}
+	</div>
+</md-content>
+ -->

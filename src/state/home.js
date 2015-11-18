@@ -11,42 +11,26 @@ angular.module('traq').config(function ($stateProvider) {
 		params: { tid: null },
 		resolve: {
 			onboarded: function (dbConfig) { return dbConfig.exists('onboard'); },
-			traqs: function (dbTraq) { return dbTraq.getAll(); },
-			columns: function (dbColumn) { return dbColumn.getAll(); }
+			traqs: function (dbTraq) { return dbTraq.getAll(); }
 		},
-		onEnter: function ($state, onboarded) {
-			console.log('onboarded?', onboarded);
+		onEnter: function ($state, $log, onboarded) {
+			$log = $log.instance('home', 'blue');
+			$log.log('onboarded?', onboarded);
 			if (!onboarded) { $state.go('welcome'); }
 		},
-		controller: function ($sce, $scope, $stateParams, spans, traqs, columns, getData) {
-			console.log('controller')
-			$scope.spans = spans;
+		controller: function ($scope, $stateParams, traqs) {
+			$scope.traqs = traqs;
 			$scope.selectedIndex = Math.max(0, _.findIndex(traqs, function (traq) {
 				return traq._id === $stateParams.tid;
 			}));
-			$scope.traqViews = _.map(traqs, function (traq, i) {
-				var traqView = { traq: traq, span: '1m' };
-				$scope.$watch('traqViews[' + i + '].span', function (span) {
-					if (!span) { return; }
-					// TODO: only activate this once user is viewing it
-					getData(traq, new Date(Date.now() - spans[span].duration)).then(function (data) {
-						traqView.data = data;
-						traqView.insights = _.map(traq.insights, function (insight) {
-							return _.extend({}, insight, {
-								html: $sce.trustAsHtml(insight.html(traq, data))
-							});
-						});
-					});
-				});
-				return traqView;
-			});
 			$scope.openMenu = function ($mdOpenMenu, ev) {
 				$mdOpenMenu(ev);
 			};
 		}
 	});
-}).directive('traq', function ($state) {
+}).directive('traqSlide', function ($state) {
 	return {
+		restrict: 'E',
 		link: function ($scope, element) {
 			var $element = $(element),
 				startX, startTranslates,
@@ -83,6 +67,42 @@ angular.module('traq').config(function ($stateProvider) {
 						$state.transitionTo('home', { tid: o.$el.attr('tid') }, { notify: false });
 					}
 					setTranslateX(o.$el.addClass('snap'), o.startTranslate + x);
+				});
+			});
+		}
+	};
+}).directive('traq', function ($sce, getData, spans) {
+	return {
+		restrict: 'E',
+		templateUrl: 'traq.html',
+		replace: true,
+		scope: {
+			traq: '=',
+			fullscreen: '@',
+			span: '='
+		},
+		controller: function ($scope) {
+			var traq = $scope.traq;
+			$scope.spans = spans;
+			$scope.o = { span: $scope.span || '1m' };
+			$scope.$watch('span', function (span) {
+				if (!span) { return; }
+				$scope.o.span = span;
+			});
+			$scope.$watch('o.span', function (span) {
+				if (!span) { return; }
+				$scope.span = span;
+				// TODO: only activate this once user is viewing it
+				getData(traq, new Date(Date.now() - spans[span].duration)).then(function (data) {
+					$scope.measurementCount = _.reduce(data, function (memo, o) {
+						return memo + o.measurements.length;
+					}, 0);
+					$scope.data = data;
+					$scope.insights = _.map(traq.insights, function (insight) {
+						return _.extend({}, insight, {
+							html: $sce.trustAsHtml(insight.html(traq, data))
+						});
+					});
 				});
 			});
 		}

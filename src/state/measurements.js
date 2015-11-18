@@ -11,18 +11,7 @@ angular.module('traq').config(function ($stateProvider) {
 		templateUrl: 'measurements.html',
 		resolve: {
 			columns: function (dbColumn) { return dbColumn.getAll(); },
-			/*measurementIds: function (dbMeasurement) {
-				return dbMeasurement.allDocs({ limit: 10 }).then(function (response) {
-					return _.chain(response.rows).pluck('id').sortBy(function (id) {
-						return id.split(':')[1];
-					}).reverse().value();
-				});
-			},*/
-			measurementCount: function (dbMeasurement) {
-				return dbMeasurement.allDocs({ keys: [] }).then(function (result) {
-					return result.total_rows; // FIXME: omit design docs
-				});
-			}
+			measurementCount: function (dbMeasurement) { return dbMeasurement.count(); }
 		},
 		controller: function ($q, $scope, $state, snack, dbMeasurement, columns, measurementCount) {
 			console.log('COUNT', measurementCount);

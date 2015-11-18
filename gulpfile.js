@@ -81,7 +81,7 @@ gulp.task('templates', ['button-warn'], function () {
 });
 
 gulp.task('images', function () {
-	return gulp.src('./src/img/*')
+	return gulp.src('./src/img/**/*')
 		.pipe(newer('./dist/img'))
 		.pipe(gulp.dest('./dist/img'));
 });

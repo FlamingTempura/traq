@@ -4,17 +4,15 @@ var angular = require('angular');
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('chart-view', {
-		url: '/traq/:tid/chart/:chart',
+		url: '/traq/:tid',
 		templateUrl: 'chart-view.html',
 		resolve: {
-			traq: function ($stateParams, dbTraq) { return dbTraq.get($stateParams.tid); },
-			data: function (traq, getData) { return getData(traq); }
+			traq: function ($stateParams, dbTraq) { return dbTraq.get($stateParams.tid); }
 		},
-		controller: function ($scope, $stateParams, traq, data) {
+		controller: function ($scope, $stateParams, spans, traq) {
 			$scope.traq = traq;
-			$scope.data = data;
-			$scope.span = '1m';
-			$scope.chart = traq.charts[$stateParams.chart];
+			$scope.spans = spans;
+			$scope.o = { span: '1m' };
 		}
 	});
 });

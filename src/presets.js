@@ -31,69 +31,19 @@ angular.module('traq')
 				{ title: 'kg', value: 'kg', default: true },
 				{ title: 'lbs', value: 'lbs' },
 				{ title: 'st', value: 'st' }],
-			fakeData: function () {
-				var weights = [],
-					lastWeight = 50 + Math.round(Math.random() * 20);
-				_.times(700, function (i) {
-					if (Math.random() > 0.3) { return; }
-					weights.push({
-						timestamp: moment()
-							.subtract(i, 'days')
-							.hour(Math.round(Math.random() * 24))
-							.minute(Math.round(Math.random() * 60))
-							.second(Math.round(Math.random() * 60))
-							.toDate(),
-						value: lastWeight + Math.round(Math.random() * 1 * 10) / 10
-					});
-				});
-				return weights;
-			}
+			forecast: { before: true, after: true }
 		},
 		{
 			name: 'Heart rate',
 			color: '#F22613',
 			icon: 'favorite',
-			units: [{ title: 'bpm', value: 'bpm', default: true }],
-			fakeData: function () {
-				var bpms = [],
-					lastBpm = 50 + Math.round(Math.random() * 20);
-				_.times(700, function (i) {
-					if (Math.random() > 0.8) { return; }
-					bpms.push({
-						timestamp: moment()
-							.subtract(i, 'days')
-							.hour(Math.round(Math.random() * 24))
-							.minute(Math.round(Math.random() * 60))
-							.second(Math.round(Math.random() * 60))
-							.toDate(),
-						value: lastBpm + Math.round(Math.random() * 300) / 10
-					});
-				});
-				return bpms;
-			}
+			units: [{ title: 'bpm', value: 'bpm', default: true }]
 		},
 		{
 			name: 'Hours slept',
 			color: '#81CFE0',
 			icon: 'airline-seat-individual-suite',
-			units: [{ title: 'hours', value: 'hours', default: true }],
-			fakeData: function () {
-				var bpms = [],
-					lastBpm = 4 + Math.round(Math.random() * 2);
-				_.times(700, function (i) {
-					if (Math.random() > 0.8) { return; }
-					bpms.push({
-						timestamp: moment()
-							.subtract(i, 'days')
-							.hour(Math.round(Math.random() * 24))
-							.minute(Math.round(Math.random() * 60))
-							.second(Math.round(Math.random() * 60))
-							.toDate(),
-						value: lastBpm + Math.round(Math.random() * 30) / 10
-					});
-				});
-				return bpms;
-			}
+			units: [{ title: 'hours', value: 'hours', default: true }]
 		},
 		{
 			name: 'Height',
@@ -102,12 +52,73 @@ angular.module('traq')
 			units: [
 				{ title: 'm', value: 'm', default: true },
 				{ title: 'ft', value: 'ft' }],
-			fakeData: function () {
-				return [{
-					timestamp: new Date(),
-					value: 1 + Math.round(Math.random() * 100) / 100
-				}];
-			}
+			forecast: { before: true, after: true }
+		},
+		{
+			name: 'Walking (steps)',
+			color: '#03C9A9',
+			icon: 'directions-walk',
+			units: [{ title: 'steps', value: 'steps', default: true }]
+		},
+		{
+			name: 'Walking (distance)',
+			color: '#F22613',
+			icon: 'directions-walk',
+			units: [{ title: 'km', value: 'km', default: true }]
+		},
+		{
+			name: 'Walking (calories)',
+			color: '#F89406',
+			icon: 'directions-walk',
+			units: [{ title: 'kcal', value: 'kcal', default: true }]
+		},
+		{
+			name: 'Walking (duration)',
+			color: '#87D37C',
+			icon: 'directions-walk',
+			units: [{ title: 'minutes', value: 'mins', default: true }]
+		},
+		{
+			name: 'Running (distance)',
+			color: '#ED009A',
+			icon: 'directions-run',
+			units: [{ title: 'km', value: 'km', default: true }]
+		},
+		{
+			name: 'Running (calories)',
+			color: '#F9690E',
+			icon: 'directions-run',
+			units: [{ title: 'kcal', value: 'kcal', default: true }]
+		},
+		{
+			name: 'Running (steps)',
+			color: '#F4D03F',
+			icon: 'directions-run',
+			units: [{ title: 'steps', value: 'steps', default: true }]
+		},
+		{
+			name: 'Running (duration)',
+			color: '#03C9A9',
+			icon: 'directions-run',
+			units: [{ title: 'minutes', value: 'mins', default: true }]
+		},
+		{
+			name: 'Cycling (distance)',
+			color: '#19B5FE',
+			icon: 'directions-bike',
+			units: [{ title: 'km', value: 'km', default: true }]
+		},
+		{
+			name: 'Cycling (calories)',
+			color: '#81CFE0',
+			icon: 'directions-bike',
+			units: [{ title: 'kcal', value: 'kcal', default: true }]
+		},
+		{
+			name: 'Cycling (duration)',
+			color: '#ECF0F1',
+			icon: 'directions-bike',
+			units: [{ title: 'minutes', value: 'mins', default: true }]
 		}
 	])
 	.service('presetTraqs', function () {
@@ -167,16 +178,6 @@ angular.module('traq')
 						}
 					}
 				]
-			},
-			{
-				id: 'steps',
-				title: 'Steps',
-				icon: 'directions-walk'
-			},
-			{
-				id: 'miles-ran',
-				title: 'Miles ran',
-				icon: 'directions-run'
 			},
 			{
 				id: 'heart-rate',
@@ -263,6 +264,69 @@ angular.module('traq')
 							if (!bpms || !bpms.length) { return ''; }
 							return Math.round(_.max(bpms, 'value').value) + ' <span class="unit">hrs</span>';
 						}
+					}
+				]
+			},
+			{
+				id: 'steps',
+				title: 'Steps',
+				icon: 'directions-walk',
+				charts: [
+					{
+						type: 'line',
+						requireColumns: ['Running (steps)', 'Walking (steps)'],
+						columns: [
+							{ name: 'Running (steps)', axis: 'left' },
+							{ name: 'Walking (steps)', axis: 'left' }
+						]
+					}
+				]
+			},
+			{
+				id: 'calories-burnt',
+				title: 'Calories burnt',
+				icon: 'directions-walk',
+				charts: [
+					{
+						type: 'line',
+						requireColumns: ['Running (calories)', 'Walking (calories)', 'Cycling (calories)'],
+						columns: [
+							{ name: 'Running (calories)', axis: 'left' },
+							{ name: 'Walking (calories)', axis: 'left' },
+							{ name: 'Cycling (calories)', axis: 'left' }
+						]
+					}
+				]
+			},
+			{
+				id: 'distance-travelled',
+				title: 'Distance travelled',
+				icon: 'directions-walk',
+				charts: [
+					{
+						type: 'line',
+						requireColumns: ['Running (distance)', 'Walking (distance)', 'Cycling (distance)'],
+						columns: [
+							{ name: 'Running (distance)', axis: 'left' },
+							{ name: 'Walking (distance)', axis: 'left' },
+							{ name: 'Cycling (distance)', axis: 'left' }
+						]
+					}
+				]
+			},
+			{
+				id: 'physical-activity-duration',
+				title: 'Physical activity duration',
+				icon: 'directions-walk',
+				charts: [
+					{
+						type: 'line',
+						requireColumns: ['Running (duration)', 'Walking (duration)', 'Cycling (duration)'],
+						columns: [
+							{ name: 'Running (duration)', axis: 'left' },
+							{ name: 'Walking (duration)', axis: 'left' },
+							{ name: 'Cycling (duration)', axis: 'left' }
+						]
 					}
 				]
 			} //,

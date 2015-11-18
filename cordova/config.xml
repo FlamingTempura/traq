@@ -16,6 +16,9 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+
+    <allow-intent href="*" /><!-- FIXME: not recommended -->
+    <allow-navigation href="*" /> <!-- FIXME: not recommended -->
     <platform name="android">
         <allow-intent href="market:*" />
     </platform>
@@ -29,4 +32,8 @@
     <preference name="BackgroundColor" value="0x303030ff"/>
 
     <preference name="StatusBarBackgroundColor" value="#222222" />
+
+
+    <preference name="AndroidLaunchMode" value="singleTask" />
+    
 </widget>

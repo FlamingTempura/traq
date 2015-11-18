@@ -1,0 +1,17 @@
+<div class="traq" flex layout="column">
+	<div class="span-select" ng-if="!fullscreen">
+		<a class="link" flex="initial" href="" ng-repeat="(spanId,_span) in spans" fastclick ng-click="o.span = spanId" ng-class="{ active: o.span === spanId }">{{ spanId }}</a>
+	</div>
+
+	<a ng-if="!fullscreen" class="fullscreen" ui-sref="chart-view({ tid: traq._id })"><md-icon md-font-icon="mi mi-24 mi-fullscreen"></md-icon></a>
+
+	<div ng-if="measurementCount === 0" class="no-chart" flex="auto">No measurements</div>
+	<chart ng-if="measurementCount > 0" traq="traq" chart="traq.charts[0]" data="data" span="o.span" no-fastclick flex="auto"></chart>
+
+	<div ng-if="!fullscreen && measurementCount > 0" layout="row" class="dark-bg">
+		<div class="fact" ng-repeat="insight in insights" flex="33">
+			<div class="title">{{ insight.title }}</div>
+			<div class="value" ng-bind-html="insight.html"></div>
+		</div>
+	</div>
+</div>

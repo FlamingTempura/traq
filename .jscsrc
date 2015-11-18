@@ -24,7 +24,6 @@
 	"maximumNumberOfLines": 500,
 	"requireAnonymousFunctions": true,
 	"requireBlocksOnNewline": 1,
-	"requireCamelCaseOrUpperCaseIdentifiers": true,
 	"requireCapitalizedConstructors": true,
 	"requireCommaBeforeLineBreak": true,
 	"requireCurlyBraces": true,

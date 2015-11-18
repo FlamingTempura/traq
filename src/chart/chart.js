@@ -13,7 +13,8 @@ angular.module('traq')
 		'3m': { duration: 3 * 30 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') },
 		'1y': { duration: 365 * 24 * 60 * 60 * 1000, ticks: undefined, tickFormat: d3.time.format('%b %d') }
 	})
-	.directive('chart', function (charts) {
+	.directive('chart', function ($log, charts) {
+		$log = $log.instance('chart', 'orange');
 		return {
 			restrict: 'E',
 			replace: true,
@@ -29,41 +30,57 @@ angular.module('traq')
 				element = element[0];
 
 				scope.$watch('chart', function () {
-					console.log('$watch chart', scope.chart)
+					$log.log('$watch chart', scope.chart);
 					if (!scope.chart) { return; }
 					var chartType = _.findWhere(charts, { id: scope.chart.type });
 					// TODO: chart.destroy()
 					chart = new chartType.Chart(element);
 					var fixSize = function () {
-						chart.resize(window.innerWidth, window.innerHeight - 260);
-						//chart.resize(element.offsetWidth, element.offsetHeight); // needs a delay with flexbox
+						requestAnimationFrame(function () {
+							if (element.offsetWidth === 0) { return; }
+							chart.resize(element.offsetWidth, element.offsetHeight);
+						});
 					};
 					fixSize();
 				});
 
-				scope.$watch('data + span', function () {
-					console.log('$watch data + span', scope.data, scope.span)
+				scope.$watch('data', function () {
+					$log.log('$watch data', scope.data)
 					if (!chart || !scope.data) { return; }
 					var columns = _.map(scope.chart.columns, function (column) {
 							return _.extend({}, column, _.findWhere(scope.data, { name: column.name }));
 						}),
 						rows = _.chain(columns).map(function (column) {
-							return column.measurements.concat([
-								_.extend({ last: true }, _.last(column.measurements)),
-								{
-									uuid: _.last(column.measurements).columnId + ':forecast',
-									columnId: _.last(column.measurements).columnId,
-									forecast: true,
+							if (column.measurements.length === 0) { return; }
+							var measurements = _.clone(column.measurements);
+							measurements.unshift(_.extend({ first: true }, measurements.shift()));
+							measurements.push(_.extend({ last: true }, measurements.pop()));
+							
+							if (column.forecast && column.forecast.before) {
+								measurements.unshift({
+									uuid: column.name + ':before',
+									columnId: column.name,
+									forecast: 'before',
+									timestamp: new Date(0),
+									value: _.first(measurements).value
+								});
+							}
+							if (column.forecast && column.forecast.after) {
+								measurements.push({
+									uuid: column.name + ':after',
+									columnId: column.name,
+									forecast: 'after',
 									timestamp: new Date(),
-									value: _.last(column.measurements).value
-								}
-							]);
+									value: _.last(measurements).value
+								});
+							}
+							return measurements;
 						}).flatten().map(function (measurement) {
 							var obj = _.clone(measurement);
 							obj[measurement.columnId] = measurement.value;
 							return obj;
 						}).value();
-					//console.log(chart, columns, rows);
+					$log.log(chart, columns, rows);
 					chart.data(columns, rows, scope.span);
 				});
 				angular.element(window).on('resize', function () {

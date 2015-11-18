@@ -1,0 +1,53 @@
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>Import Moves</h2>
+	</div>
+</md-toolbar>
+
+<md-content>
+	<md-content class="vspace">
+		<md-list><md-list-item class="md-2-line">
+			<md-icon md-svg-src="img/icons/moves.svg" aria-label="Moves" class="big-svg-icon"></md-icon>
+			<div class="md-list-item-text" layout="column">
+				<h3>Moves</h3>
+				<p>Moves provides data on walking, running and cycling. <a ext-href="http://moves-app.com">http://moves-app.com</a>.</p>
+			</div>
+		</md-list-item></md-list>
+	</md-content>
+
+	<md-content layout-padding>
+		<md-content ng-if="!movesTransport.moves.accessToken">
+			<p class="md-body-1" >Connecting Moves will import data to the following traqs, which will be created if they don't exist:</p>
+			<ul class="md-body-1">
+				<li>Steps (walking and running)</li>
+				<li>Calories burnt (walking, running and cycling)</li>
+				<li>Distance travelled (walking, running and cycling)</li>
+				<li>Physical activity duraction (walking, running and cycling)</li>
+			</ul>
+		</md-content>
+
+		<md-content layout="row">
+			<md-button ng-if="!movesTransport.moves.accessToken" ng-click="movesTransport.getToken()" class="md-raised" flex>Connect</md-button>
+			<md-button ng-if="movesTransport.moves.accessToken" ng-click="movesTransport.deleteToken()" class="md-raised" flex>Disconnect</md-button>
+			<md-button ng-disabled="!movesTransport.moves.accessToken" ng-click="movesTransport.sync()" class="md-raised" flex>Sync</md-button>
+		</md-content>
+
+		<p class="md-body-1" ng-if="lastSynced" style="text-align: center">Last synced: {{ lastSynced }}</p>
+	</md-content>
+
+	<!-- <md-subheader>Import columns</md-subheader>
+	<md-list>
+		<md-list-item ng-repeat="importColumn in importColumns">
+			<p>{{ importColumn.title }} ({{moves.columnMapping[importColumn.id]}})</p>
+			<md-select ng-model="moves.columnMapping[importColumn.id]" ng-disabled="!moves.accessToken" aria-label="Column">
+				<md-option ng-value="undefined">None</md-option>
+				<md-option ng-repeat="column in columns" ng-value="column._id" ng-style="{ color: column.color }">
+					<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }}"></md-icon> {{ column.name }}
+				</md-option>
+			</md-select>
+		</md-list-item>
+	</md-list> -->
+</md-content>

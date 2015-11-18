@@ -1,0 +1,37 @@
+<md-toolbar>
+	<div class="md-toolbar-tools">
+		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
+		</md-button>
+		<h2>Import fake data</h2>
+	</div>
+</md-toolbar>
+
+<md-content>
+	<md-content class="vspace">
+		<md-list><md-list-item class="md-2-line">
+			<md-icon md-svg-src="img/icons/moves.svg" aria-label="Moves" class="big-svg-icon"></md-icon>
+			<div class="md-list-item-text" layout="column">
+				<h3>Fake data</h3>
+				<p>Generate fake data.</p>
+			</div>
+		</md-list-item></md-list>
+	</md-content>
+
+	<md-content layout-padding>
+
+		<md-content layout="row">
+			<md-button ng-click="import()" class="md-raised" flex>Generate data</md-button>
+		</md-content>
+
+		<p class="md-body-1" ng-if="lastSynced" style="text-align: center">Last synced: {{ lastSynced }}</p>
+	</md-content>
+
+	<md-subheader>Generate data for the following columns</md-subheader>
+	<md-list>
+		<md-list-item ng-repeat="importColumn in importColumns">
+			<md-checkbox ng-model="importColumn.selected">{{ importColumn.key }}</md-checkbox>
+			{{ importColumn.key }}
+		</md-list-item>
+	</md-list>
+</md-content>

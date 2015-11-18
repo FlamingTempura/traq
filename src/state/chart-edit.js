@@ -20,7 +20,7 @@ var colors = [
 
 colors.next = function (hex, n) {
 	var i = _.findIndex(colors, { hex: hex });
-	return colors[i === colors.length - n ? 0 : i + n].hex;
+	return colors[i >= colors.length - n ? 0 : i + n].hex;
 };
 
 angular.module('traq')

@@ -2,8 +2,7 @@
 
 var angular = require('angular'),
 	uuid = require('node-uuid'),
-	_ = require('lodash'),
-	moment = require('moment');
+	_ = require('lodash');
 
 angular.module('traq').config(function ($stateProvider) {
 	$stateProvider.state('traq-edit', {
@@ -23,38 +22,14 @@ angular.module('traq').config(function ($stateProvider) {
 				}
 			}
 		},
-		controller: function ($q, $scope, $state, dbTraq, dbColumn, dbConfig, dbMeasurement, presetColumns, snack, onboarded, traq) {
+		controller: function ($q, $scope, $state, dbTraq, dbColumn, dbConfig, dbMeasurement, presetColumns, createPreset, snack, onboarded, traq) {
 			$scope.isNew = $state.params.tid === 'new';
 			$scope.onboarded = onboarded;
 			$scope.traq = traq;
 
 			$scope.save = function (attrs) {
 				if (traq.preset) {
-					var requireColumns = _.union(_.flattenDeep([
-						_.pluck(traq.charts, 'requireColumns'),
-						_.pluck(traq.insights, 'requireColumns')
-					]));
-					$q.all(_.map(requireColumns, function (columnName) {
-						var presetColumn = _.findWhere(presetColumns, { name: columnName });
-						return dbColumn.exists(presetColumn.name).then(function (exists) {
-							if (exists) { return; }
-							return dbColumn.put({
-								_id: presetColumn.name,
-								unit: _.findWhere(presetColumn.units, { default: true }).value // TODO: incorporate unit options
-							}).then(function () {
-								// TODO: only import fake data when debug mode is on
-								if (presetColumn.fakeData) {
-									return dbMeasurement.bulkDocs(_.map(presetColumn.fakeData(), function (measurement) {
-										return _.extend({
-											_id: columnName + ':' + moment(measurement.timestamp).format('YYYYMMDD[-]HHmmss') + ':' + uuid.v4().slice(0, 4)
-										}, measurement);
-									}));
-								}
-							});
-						});
-					})).then(function () {
-						return dbTraq.put(traq);
-					}).then(function () {
+					createPreset(traq._id).then(function () {
 						console.log('saved...', attrs, traq);
 						if (!onboarded) { return dbConfig.put({ _id: 'onboard' }); }
 					}).then(function () {

@@ -29,19 +29,46 @@ var progressSplashI = 0,
 		}
 	};
 
-document.addEventListener('deviceready', progressSplash, false);
+document.addEventListener('deviceready', function () {
+	progressSplash();
+}, false);
 
-angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider) {
+
+angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider, $provide) {
 	$mdThemingProvider.theme('default')
 		.dark()
 		.primaryPalette('yellow');
 	$urlRouterProvider.otherwise('/');
+
+	$provide.decorator('$log', function ($delegate) {
+		$delegate.instance = function (name, color) {
+			var $log = {},
+				disable;
+			['log', 'info', 'warn', 'error', 'debug'].forEach(function (method) {
+				$log[method] = function () {
+					if (disable) { return; }
+					var args = Array.prototype.slice.call(arguments);
+					args.unshift('%c' + name, 'margin-left: -7px;border-left:2px solid ' + color + '; color:' + color + ';padding-left:5px;text-transform:uppercase;');
+					$delegate[method].apply(null, args);
+				};
+			});
+			$log.disable = function () {
+				disable = true;
+				return $log;
+			};
+			return $log;
+		};
+		return $delegate;
+	});
 }).controller('AppCtrl', function ($scope, snack) {
 	$scope.snack = snack;
 }).run(function ($q, $rootScope, snack) {
 	progressSplash();
+	var urlDepth = function (url) {
+		return _.compact(url.split('?')[0].split('/')).length;
+	};
 	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
-		var upAnimation = _.compact(to.url.split('/')).length > _.compact(from.url.split('/')).length;
+		var upAnimation = urlDepth(to.url) > urlDepth(from.url);
 		angular.element(document.body)
 			.toggleClass('animate-up', upAnimation)
 			.toggleClass('animate-down', !upAnimation);
@@ -55,7 +82,6 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	PouchDB.plugin(require('transform-pouch'));
 	PouchDB.plugin({
 		getAll: function (options) {
-			var that = this;
 			options = _.extend({ include_docs: true }, options);
 			if (options.startWith) {
 				_.extend(options, {
@@ -67,12 +93,33 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 				return _.pluck(result.rows, 'doc');
 			});
 		},
+		getOrCreate: function (id) {
+			var that = this;
+			return that.get(id).catch(function () {
+				return that.put({ _id: id }).then(function () {
+					return that.get(id);
+				});
+			});
+		},
 		exists: function (id) {
 			return this.allDocs({
 				startkey: id,
 				endkey: id
 			}).then(function (result) {
 				return result.rows.length > 0;
+			});
+		},
+		count: function () {
+			return this.allDocs({ keys: [] }).then(function (res) {
+				return res.total_rows;
+			});
+		},
+		erase: function () {
+			var that = this;
+			return that.allDocs({}).then(function (res) {
+				return $q.all(_.map(res.rows, function (row) {
+					return that.remove(row.id, row.value.rev);
+				}));
 			});
 		},
 		// use angular promises ($q) to avoid need for $scope.$apply
@@ -118,7 +165,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 			return _.extend({
 				preset: !!preset,
 				safeName: doc._id.replace(/[^a-zA-Z0-9-]/g, '-')
-			}, doc, _.pick(preset, 'name', 'color', 'icon', 'units'));
+			}, doc, _.pick(preset, 'name', 'color', 'icon', 'units', 'forecast'));
 		}
 	});
 	return db;
@@ -128,7 +175,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	db.transform({
 		incoming: function (doc) {
 			// TODO: check that timestamp === _id.split(':')[1]
-			return _.chain(doc).pick('_id', '_rev', 'value', 'note').value();
+			return _.chain(doc).pick('_id', '_rev', 'value', 'from', 'note').value();
 		},
 		outgoing: function (doc) {
 			var idParts = doc._id.split(':');
@@ -163,6 +210,29 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 			});
 		}));
 	};
+}).service('createPreset', function ($q, dbTraq, dbColumn, presetTraqs, presetColumns) {
+	return function (id) {
+		return dbTraq.exists(id).then(function (exists) {
+			if (exists) { return; }
+			var traq = _.extend({ _id: id }, _.findWhere(presetTraqs, { id: id })),
+				requireColumns = _.union(_.flattenDeep([
+					_.pluck(traq.charts, 'requireColumns'),
+					_.pluck(traq.insights, 'requireColumns')
+				]));
+			return $q.all(_.map(requireColumns, function (columnName) {
+				var presetColumn = _.findWhere(presetColumns, { name: columnName });
+				return dbColumn.exists(presetColumn.name).then(function (exists) {
+					if (exists) { return; }
+					return dbColumn.put({
+						_id: presetColumn.name,
+						unit: _.findWhere(presetColumn.units, { default: true }).value
+					});
+				});
+			})).then(function () {
+				return dbTraq.put(traq);
+			});
+		});
+	};
 }).service('download', function () {
 	// http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
 	return function (filename, text) {
@@ -190,6 +260,45 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 		}, 5000);
 	};
 	return snack;
+}).service('appUrl', function () { // handle traq:// urls
+	var fns = [],
+		on = function (event, fn, limit) {
+			fns.push({ event: event, fn: fn, limit: limit });
+		},
+		off = function (event, fn) {
+			fns = _.reject(fns, function (o) {
+				return (!event || o.event === event) && (!fn || o.fn === fn);
+			});
+		},
+		once = function (event, fn) {
+			return on(event, fn, 1);
+		};
+
+	window.handleOpenURL = function (url) {
+		console.log('Got traq:// url', url);
+		var pathStart = url.indexOf('//') + 2,
+			queryStart = url.indexOf('?'),
+			path = url.slice(pathStart, queryStart),
+			query = url.slice(queryStart + 1).split('&'),
+			params = {};
+		_.each(query, function (arg) {
+			var parts = arg.split('=');
+			params[parts[0]] = parts[1];
+		});
+		_.each(fns, function (o) {
+			if (o.event === path) {
+				o.fn(path, params);
+				o.limit--;
+				if (o.limit === 0) { off(o.event, o.fn); }
+			}
+		});
+	};
+
+	return {
+		on: on,
+		off: off,
+		once: once
+	};
 }).directive('fileReader', function () {
 	return {
 		restrict: 'E',
@@ -264,9 +373,16 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 			$timeout(function () { element.focus(); }, attrs.autofocusDelay);
 		}
 	};
+}).directive('extHref', function () {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			element.on('click', function () { window.open(attrs.extHref, '_system'); });
+		}
+	};
 });
 
-
+require('./config.js');
 
 require('./presets.js');
 
@@ -291,3 +407,4 @@ require('./chart/line.js');
 require('./transport/transport.js');
 require('./transport/fake.js');
 require('./transport/sv.js');
+require('./transport/moves.js');
