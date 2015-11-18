@@ -6,4 +6,5 @@ full
 todo
 cordova/platforms/
 cordova/plugins/
+cordova/www
 config.js
