@@ -68,10 +68,9 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 		return _.compact(url.split('?')[0].split('/')).length;
 	};
 	$rootScope.$on('$stateChangeStart', function (event, to, toParams, from) {
-		var upAnimation = urlDepth(to.url) > urlDepth(from.url);
 		angular.element(document.body)
-			.toggleClass('animate-up', upAnimation)
-			.toggleClass('animate-down', !upAnimation);
+			.toggleClass('animate-up', urlDepth(to.url) > urlDepth(from.url))
+			.toggleClass('animate-down', urlDepth(to.url) < urlDepth(from.url));
 	});
 	$rootScope.$on('$stateChangeError', function (event, to, toParams, from, fromParams, err) {
 		snack('An error occured. Try again.'); // TODO: a more user-friendly message

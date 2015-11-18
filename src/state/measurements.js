@@ -77,22 +77,18 @@ angular.module('traq').config(function ($stateProvider) {
 				$scope.data.selectMode = !!_.find(selected, function (selected) { return selected; });
 			}, true);
 			$scope.delete = function () {
-				var selected = _.chain($scope.data.selected).map(function (selected, measurementId) {
-					return { measurementId: measurementId, selected: selected };
+				$q.all(_.chain($scope.data.selected).map(function (selected, key) {
+					var parts = key.split(':::');
+					return { id: parts[0], rev: parts[1], selected: selected };
 				}).select(function (o) {
-					console.log('o', o)
 					return o.selected;
-				}).pluck('measurementId').map(function (id) {
-					return _.findWhere(measurements, { _id: id });
-				}).value();
-				console.log('attempting to remove', selected);
-				$q.all(_.map(selected, function (measurement) {
-					return dbMeasurement.remove(measurement);
-				})).then(function () {
-					history.back();
+				}).map(function (o) {
+					return dbMeasurement.remove(o.id, o.rev);
+				}).value()).then(function () {
+					$state.go($state.current, {}, { reload: true });
 					snack('The measurement has been deleted', 'Undo', function () {
 						console.log('reviving', selected);
-						dbMeasurement.bulkDocs(_.map(selected, function (measurement) {
+						dbMeasurement.bulkDocs(_.map(selected, function (measurement) { // FIXME
 							return _.omit(measurement, '_rev');
 						}));
 						$state.go($state.current, {}, { reload: true });

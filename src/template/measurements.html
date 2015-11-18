@@ -15,8 +15,8 @@
 	<md-virtual-repeat-container class="data-container" ng-style="{ height: windowHeight - 56 + 'px' }">
 		<md-list>
 			<md-list-item class="measurement md-2-line" md-virtual-repeat="measurement in measurements" md-on-demand flex ng-class="{ hided: !measurement }">
-				<md-icon md-font-icon="" ng-style="{ color: measurement.column.color }" ng-if="!data.selectMode" ng-click="data.selected[measurement._id] = true" stop-propagation class="mi mi-24 mi-{{ measurement.column.icon }} circle-icon"></md-icon> <!-- md-icon is broken (icons weren't aligning with scope) - use class instead of md-font-icon -->
-				<md-checkbox ng-if="data.selectMode" ng-model="data.selected[measurement._id]" aria-label="Select" stop-propagation></md-checkbox>
+				<md-icon md-font-icon="" ng-style="{ color: measurement.column.color }" ng-if="!data.selectMode" ng-click="data.selected[measurement._id + ':::' + measurement._rev] = true" stop-propagation class="mi mi-24 mi-{{ measurement.column.icon }} circle-icon"></md-icon> <!-- md-icon is broken (icons weren't aligning with scope) - use class instead of md-font-icon -->
+				<md-checkbox ng-if="data.selectMode" ng-model="data.selected[measurement._id + ':::' + measurement._rev]" aria-label="Select" stop-propagation></md-checkbox>
 				<div class="md-list-item-text" no-fastclick ui-sref="measurement-edit({ mid: measurement._id })">
 					<h3>{{ measurement.column.name }}: {{ measurement.value }} {{ measurement.column.unit }}</h3>
 					<p>{{ measurement.date }}</p>
