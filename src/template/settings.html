@@ -26,18 +26,21 @@
 		<md-list-item>
 			<md-icon md-font-icon="mi mi-24 mi-language"></md-icon>
 			<p>{{ 'LANGUAGE' | translate }}</p>
-			<md-select ng-model="settings.language" aria-label="{{ 'LANGUAGE' | translate }}">
-				<md-option value="en">{{ 'ENGLISH' | translate }}</md-option>
-				<md-option value="es">{{ 'SPANISH' | translate }}</md-option>
+			<md-select fastclick ng-model="settings.language" aria-label="{{ 'LANGUAGE' | translate }}">
+				<md-option value="en">{{ 'LANGUAGE_ENGLISH' | translate }}</md-option>
+				<md-option value="es">{{ 'LANGUAGE_SPANISH' | translate }}</md-option>
+				<md-option value="de">{{ 'LANGUAGE_GERMAN' | translate }}</md-option>
+				<md-option value="pt">{{ 'LANGUAGE_PORTUGUESE' | translate }}</md-option>
+				<md-option value="ja">{{ 'LANGUAGE_JAPANESE' | translate }}</md-option>
 			</md-select>
 		</md-list-item>
 		
 		<md-subheader>{{ 'SETTING_UNITS' | translate }}</md-subheader>
 		<md-list-item ng-repeat="column in columns">
 			<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }} circle-icon" ng-style="{ color: column.color }"></md-icon>
-			<p>{{ column.name }}</p>
+			<p>{{ column.name | translate }}</p>
 			<md-select ng-model="column.unit" ng-disabled="column.units.length < 2" aria-label="Unit">
-				<md-option ng-repeat="unit in column.units" value="{{ unit.value }}">{{ unit.title }}</md-option>
+				<md-option ng-repeat="unit in column.units" value="{{ unit.value }}">{{ unit.title | translate }}</md-option>
 			</md-select>
 		</md-list-item>
 

@@ -71,7 +71,7 @@ angular.module('traq').config(function ($stateProvider) {
 			});
 		}
 	};
-}).directive('traq', function ($sce, getData, spans) {
+}).directive('traq', function (getData, spans) {
 	return {
 		restrict: 'E',
 		templateUrl: 'traq.html',
@@ -98,13 +98,24 @@ angular.module('traq').config(function ($stateProvider) {
 						return memo + o.measurements.length;
 					}, 0);
 					$scope.data = data;
-					$scope.insights = _.map(traq.insights, function (insight) {
-						return _.extend({}, insight, {
-							html: $sce.trustAsHtml(insight.html(traq, data))
-						});
-					});
+					$scope.insights = traq.insights;
 				});
 			});
+		}
+	};
+}).directive('insight', function ($compile) {
+	return {
+		scope: {
+			traq: '=',
+			data: '=',
+			insight: '='
+		},
+		template: '<div class="title">{{ insight.title | translate }}</div><div class="value"></div>',
+		restrict: 'E',
+		link: function ($scope, element) {
+			var html = '<span>' + $scope.insight.html($scope.traq, $scope.data) + '</span>', // wrap in span to prevent jqlite from dying
+				value = $compile(html)($scope);
+			element.children().eq(1).html('').append(value);
 		}
 	};
 });

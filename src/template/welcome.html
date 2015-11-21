@@ -3,11 +3,11 @@
 	<img src="img/logo.svg" width="60%">
 	
 	<div flex="auto">
-		<h2 class="md-subhead">Use traq to record measurements and explore your health and fitness.</h2>
-		<p>Keeping track of your physical activity, diet or health can be difficult - traq helps you record that data and visualise it instantly.</p>
+		<h2 class="md-subhead">{{ 'WELCOME_SLOGAN' | translate }}</h2>
+		<p>{{ 'WELCOME_DESCRIPTION' | translate }}</p>
 	</div>
 	
-	<md-button type="button" class="md-raised md-primary" ui-sref="traq-new">Get started</md-button>
+	<md-button type="button" class="md-raised md-primary" ui-sref="traq-new">{{ 'WELCOME_GET_STARTED' | translate }}</md-button>
 	
-	<md-button type="button" ng-click="skip()">Skip</md-button>
+	<md-button type="button" ng-click="skip()">{{ 'SKIP' | translate }}</md-button>
 </md-content>

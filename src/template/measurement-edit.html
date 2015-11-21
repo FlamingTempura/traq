@@ -1,13 +1,13 @@
 <form flex layout="column" ng-submit="save()">
 	<md-toolbar>
 		<div class="md-toolbar-tools">
-			<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+			<md-button type="button" class="md-icon-button" aria-label="{{ 'CLOSE' | translate }}" ui-back>
 				<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 			</md-button>
-			<h2><span ng-if="isNew">Add measurement</span>
-				<span ng-if="!isNew">Edit measurement</span></h2>
+			<h2><span ng-if="isNew">{{ 'MEASUREMENT_ADD' | translate }}</span>
+				<span ng-if="!isNew">{{ 'MEASUREMENT_EDIT' | translate }}</span></h2>
 			<span flex></span>
-			<md-button type="submit">Save</md-button>
+			<md-button type="submit">{{ 'SAVE' | translate }}</md-button>
 		</div>
 	</md-toolbar>
 
@@ -15,10 +15,10 @@
 		<div flex>
 
 			<md-input-container flex>
-				<md-select ng-model="column" ng-disabled="!isNew" aria-label="Measurement type">
+				<md-select ng-model="column" ng-disabled="!isNew" aria-label="{{ 'MEASUREMENT_TYPE' | translate }}">
 					<md-optgroup ng-repeat="(category, columns) in groupedColumns" label="{{category}}">
 						<md-option ng-repeat="column in columns" ng-value="column" ng-style="{ color: column.color }">
-							<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }}"></md-icon>{{ column.name }}
+							<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }}"></md-icon>{{ column.name | translate }}
 						</md-option>
 					</md-optgroup>
 				</md-select>
@@ -26,23 +26,23 @@
 
 			<div layout="row">
 				<md-input-container flex>
-					<label>Date</label>
+					<label>{{ 'DATE' | translate }}</label>
 					<input type="date" ng-model="measurement.timestamp" ng-disabled="!isNew" required>
 				</md-input-container>
 
 				<md-input-container flex>
-					<label>Time</label>
+					<label>{{ 'TIME' | translate }}</label>
 					<input type="time" ng-model="measurement.timestamp" ng-disabled="!isNew" step="1" required>
 				</md-input-container>
 			</div>
 			
 			<md-input-container flex>
-				<label>{{ column.name }} ({{ column.unit }})</label>
+				<label>{{ column.name | translate }} ({{ column.unit | translate }})</label>
 				<input required type="number" ng-model="measurement.value" step="any" autofocus-delay="350">
 			</md-input-container>
 
 			<md-input-container>
-				<label>Note</label>
+				<label>{{ 'NOTE' | translate }}</label>
 				<textarea ng-model="measurement.note"></textarea>
 			</md-input-container>
 

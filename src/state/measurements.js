@@ -34,7 +34,7 @@ angular.module('traq').config(function ($stateProvider) {
 						var ids = _.chain(columnResults).pluck('rows').flatten().map(function (measurement) {
 							return {
 								id: measurement.id,
-								timestamp: measurement.id.split(':')[1]
+								timestamp: Number(measurement.id.split(':')[1])
 							};
 						}).sortByOrder('timestamp', 'desc').slice(0, chunkSize).pluck('id').value();
 						console.log('gotIds');
@@ -44,7 +44,6 @@ angular.module('traq').config(function ($stateProvider) {
 						oldestTimestamp = _.last(measurements)._id.split(':')[1];
 						return _.map(measurements, function (measurement) {
 							return _.extend({}, measurement, {
-								date: moment(measurement.timestamp).calendar(null, { sameElse: 'ddd D MMM YYYY [at] H:mm A' }),
 								column: _.findWhere(columns, { _id: measurement._id.split(':')[0] })
 							});
 						});

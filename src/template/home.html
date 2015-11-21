@@ -3,48 +3,49 @@
 		<div class="menu-row" layout="row">
 			<div flex></div>
 			<md-menu md-position-mode="target-right target" flex="initial">
-				<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
+				<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="{{ 'MENU' | translate }}">
 					<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 				</md-button>
 				<md-menu-content width="4">
-					<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="measurements">View measurements</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="import">Import/export</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="traq-new">{{ 'TRAQ_CREATE_ANOTHER' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="measurements">{{ 'MEASUREMENTS_VIEW' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="import">{{ 'IMPORT' | translate }}/{{ 'EXPORT' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="settings">{{ 'SETTINGS' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="feedback">{{ 'FEEDBACK_SEND' | translate }}</md-button></md-menu-item>
 				</md-menu-content>
 			</md-menu>
 		</div>
 		<md-content flex layout="column" layout-align="center center">
-			<p class="md-body-1 vspace" style="text-align: center">You haven't created any traqs.</p>
-			<md-button class="md-raised" ui-sref="traq-new">Create a traq</md-button>
+			<p class="md-body-1 vspace" style="text-align: center">{{ 'TRAQS_NONE' | translate }}</p>
+			<md-button class="md-raised" ui-sref="traq-new">{{ 'TRAQ_CREATE' | translate }}</md-button>
 		</md-content>
 	</md-content>
 	<traq-slide ng-repeat="traq in traqs" layout="column" ng-style="{ transform: 'translateX(' + ($index - selectedIndex) + '00%)' }" tid="{{ traq._id }}">
 		<div class="menu-row" layout="row">
 			<div flex></div>
 			<md-menu md-position-mode="target-right target" flex="initial">
-				<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="Menu">
+				<md-button md-menu-origin type="button" fastclick ng-click="openMenu($mdOpenMenu, $event)" hide-gt-sm class="md-icon-button" aria-label="{{ 'MENU' | translate }}">
 					<md-icon md-font-icon="mi mi-24 mi-more-horiz"></md-icon>
 				</md-button>
 				<md-menu-content width="4">
-					<md-menu-item><md-button ui-sref="traq-edit({ tid: traq._id })">Customise {{ traq.title }}</md-button></md-menu-item>
-					<md-menu-divider></md-menu-divider>
-					<md-menu-item><md-button ui-sref="traq-new">Create another traq</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="measurements">View measurements</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="import">Import/export</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="settings">Settings</md-button></md-menu-item>
-					<md-menu-item><md-button ui-sref="feedback">Send feedback</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="traq-edit({ tid: traq._id })">
+						<span translate="CUSTOMIZE" translate-values="{  title: '{{ traq.title | translate }}' }"></span>
+					</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="traq-new">{{ 'TRAQ_CREATE_ANOTHER' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="measurements">{{ 'MEASUREMENTS_VIEW' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="import">{{ 'IMPORT' | translate }}/{{ 'EXPORT' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="settings">{{ 'SETTINGS' | translate }}</md-button></md-menu-item>
+					<md-menu-item><md-button ui-sref="feedback">{{ 'FEEDBACK_SEND' | translate }}</md-button></md-menu-item>
 				</md-menu-content>
 			</md-menu>
 		</div>
 
-		<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traq.title }}</h2>
+		<h2 flex="initial" class="md-display-1" style="text-align: center;">{{ traq.title | translate }}</h2>
 
 		<traq traq="traq"></traq>
 
 		<md-button flex="initial" type="button" fastclick ui-sref="measurement-edit({ mid: 'new', column: traq.charts[0].requireColumns[0] })" class="md-raised md-primary btn-bottom">
-			Add measurement
+			{{ 'MEASUREMENT_ADD' | translate }}
 		</md-button>
 	</traq-slide>
 </md-content>

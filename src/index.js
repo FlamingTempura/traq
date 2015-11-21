@@ -6,7 +6,7 @@ var _ = require('lodash'),
 	ngTranslate = require('angular-translate'),
 	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
-	moment = require('moment');
+	moment = require('moment/min/moment-with-locales.js');
 
 PouchDB.plugin(require('transform-pouch'));
 PouchDB.plugin(require('pouchdb-undo'));
@@ -25,18 +25,19 @@ PouchDB.plugin({
 	},
 	getOrCreate: function (id) {
 		var that = this;
-		return that.get(id).catch(function () {
+		return that.get(id).catch(function (err) {
+			if (err.status !== 404) { throw err; }
 			return that.put({ _id: id }).then(function () {
 				return that.get(id);
 			});
 		});
 	},
 	exists: function (id) {
-		return this.allDocs({
-			startkey: id,
-			endkey: id
-		}).then(function (result) {
-			return result.rows.length > 0;
+		return this.get(id).then(function () {
+			return true;
+		}).catch(function (err) {
+			if (err.status !== 404) { throw err; }
+			return false;
 		});
 	},
 	count: function () {
@@ -46,9 +47,10 @@ PouchDB.plugin({
 	},
 	erase: function () {
 		var that = this;
-		return that.allDocs({ include_docs: true }).then(function (res) {
+		return that.allDocs({ }).then(function (res) {
+			console.log('all', res.rows[0])
 			return that.bulkDocs(_.map(res.rows, function (row) {
-				return _.extend(row.doc, { _deleted: true });
+				return { _id: row.id, _rev: row.value.rev, _deleted: true };
 			}));
 		});
 	},
@@ -98,7 +100,11 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 		.dark()
 		.primaryPalette('yellow');
 	$urlRouterProvider.otherwise('/');
-	$translateProvider.preferredLanguage('en');
+	$translateProvider.preferredLanguage('en')
+		//.determinePreferredLanguage();
+		.fallbackLanguage('en')
+		.useSanitizeValueStrategy('escape')
+		.statefulFilter(false);
 	$provide.decorator('$log', function ($delegate) {
 		$delegate.instance = function (name, color) {
 			var $log = {},
@@ -119,9 +125,11 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 		};
 		return $delegate;
 	});
+}).value('locale', {
+	code: 'en'
 }).controller('AppCtrl', function ($scope, snack) {
 	$scope.snack = snack;
-}).run(function ($q, $rootScope, $translate, snack, dbConfig) {
+}).run(function ($q, $rootScope, $locale, $translate, snack, dbConfig, locale) {
 	progressSplash();
 	var urlDepth = function (url) {
 		return _.compact(url.split('?')[0].split('/')).length;
@@ -133,13 +141,15 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 	});
 	$rootScope.$on('$stateChangeError', function (event, to, toParams, from, fromParams, err) {
 		snack('An error occured. Try again.'); // TODO: a more user-friendly message
-		console.error('stateChangeError', err);
+		console.error('stateChangeError', err, to);
 	});
 	$rootScope.windowHeight = window.innerHeight;
 	// TODO on resize, change windowHeight
-	
-	dbConfig.getOrCreate('language').then(function (doc) {
-		if (doc.key) { $translate.use(doc.key); }
+	dbConfig.getOrCreate('language').then(function (doc) { // FIXME: will this happen before render?
+		if (!doc.code) { return; }
+		$translate.use(doc.code);
+		moment.locale(doc.code);
+		locale.code = doc.code;
 	});
 }).service('dbConfig', function ($q) {
 	var db = new PouchDB('traq-config');
@@ -386,6 +396,18 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 		link: function (scope, element, attrs) {
 			element.on('click', function () { window.open(attrs.extHref, '_system'); });
 		}
+	};
+}).filter('localeDate', function () {
+	return function (date, format) {
+		var m = moment(date);
+		if (format === 'calendar') {
+			return m.calendar(null, { sameElse: 'ddd D MMM YYYY [at] H:mm A' });
+		}
+	};
+}).filter('localeNumber', function (locale) {
+	return function (number) {
+		if (!locale.code || typeof number !== 'number') { return number; }
+		return number.toLocaleString(locale.code);
 	};
 });
 

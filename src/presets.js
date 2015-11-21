@@ -24,242 +24,245 @@ var expensesData = function () {
 angular.module('traq')
 	.constant('presetColumns', [
 		{
-			name: 'Weight',
+			name: 'COLUMN_WEIGHT',
 			color: '#87D37C',
 			icon: 'filter-frames',
 			units: [
-				{ title: 'kg', value: 'kg', default: true },
-				{ title: 'lbs', value: 'lbs' },
-				{ title: 'st', value: 'st' }],
+				{ title: 'UNIT_KILOGRAM', value: 'UNIT_KILOGRAM_ABBRV', default: true },
+				{ title: 'UNIT_POUND', value: 'UNIT_POUND_ABBRV' },
+				{ title: 'UNIT_STONE', value: 'UNIT_STONE_ABBRV' }],
 			forecast: { before: true, after: true }
 		},
 		{
-			name: 'Heart rate',
+			name: 'COLUMN_HEART_RATE',
 			color: '#F22613',
 			icon: 'favorite',
-			units: [{ title: 'bpm', value: 'bpm', default: true }]
+			units: [{ title: 'UNIT_BPM', value: 'UNIT_BPM', default: true }]
 		},
 		{
-			name: 'Hours slept',
+			name: 'COLUMN_HOURS_SLEPT',
 			color: '#81CFE0',
 			icon: 'airline-seat-individual-suite',
-			units: [{ title: 'hours', value: 'hours', default: true }]
+			units: [{ title: 'UNIT_HOUR', value: 'UNIT_HOUR', default: true }]
 		},
 		{
-			name: 'Height',
+			name: 'COLUMN_HEIGHT',
 			color: '#F4D03F',
 			icon: 'straighten',
 			units: [
-				{ title: 'm', value: 'm', default: true },
-				{ title: 'ft', value: 'ft' }],
+				{ title: 'UNIT_METER', value: 'UNIT_METER_ABBRV', default: true },
+				{ title: 'UNIT_FOOT', value: 'UNIT_FOOT_ABBRV' }],
 			forecast: { before: true, after: true }
 		},
 		{
-			name: 'Walking (steps)',
+			name: 'COLUMN_WALKING_STEPS',
 			color: '#03C9A9',
 			icon: 'directions-walk',
-			units: [{ title: 'steps', value: 'steps', default: true }]
+			units: [{ title: 'UNIT_STEPS', value: 'UNIT_STEPS_ABBRV', default: true }]
 		},
 		{
-			name: 'Walking (distance)',
+			name: 'COLUMN_WALKING_DISTANCE',
 			color: '#F22613',
 			icon: 'directions-walk',
-			units: [{ title: 'km', value: 'km', default: true }]
+			units: [{ title: 'UNIT_KILOMETER', value: 'UNIT_KILOMETER_ABBRV', default: true }]
 		},
 		{
-			name: 'Walking (calories)',
+			name: 'COLUMN_WALKING_CALORIES',
 			color: '#F89406',
 			icon: 'directions-walk',
-			units: [{ title: 'kcal', value: 'kcal', default: true }]
+			units: [{ title: 'UNIT_KILOCALORIES', value: 'UNIT_KILOCALORIES_ABBRV', default: true }]
 		},
 		{
-			name: 'Walking (duration)',
+			name: 'COLUMN_WALKING_DURATION',
 			color: '#87D37C',
 			icon: 'directions-walk',
-			units: [{ title: 'minutes', value: 'mins', default: true }]
+			units: [{ title: 'UNIT_MINUTES', value: 'UNIT_MINUTES_ABBRV', default: true }]
 		},
 		{
-			name: 'Running (distance)',
+			name: 'COLUMN_RUNNING_DISTANCE',
 			color: '#ED009A',
 			icon: 'directions-run',
-			units: [{ title: 'km', value: 'km', default: true }]
+			units: [{ title: 'UNIT_KILOMETER', value: 'UNIT_KILOMETER_ABBRV', default: true }]
 		},
 		{
-			name: 'Running (calories)',
+			name: 'COLUMN_RUNNING_CALORIES',
 			color: '#F9690E',
 			icon: 'directions-run',
-			units: [{ title: 'kcal', value: 'kcal', default: true }]
+			units: [{ title: 'UNIT_KILOCALORIES', value: 'UNIT_KILOCALORIES_ABBRV', default: true }]
 		},
 		{
-			name: 'Running (steps)',
+			name: 'COLUMN_RUNNING_STEPS',
 			color: '#F4D03F',
 			icon: 'directions-run',
-			units: [{ title: 'steps', value: 'steps', default: true }]
+			units: [{ title: 'UNIT_STEPS', value: 'UNIT_STEPS_ABBRV', default: true }]
 		},
 		{
-			name: 'Running (duration)',
+			name: 'COLUMN_RUNNING_DURATION',
 			color: '#03C9A9',
 			icon: 'directions-run',
-			units: [{ title: 'minutes', value: 'mins', default: true }]
+			units: [{ title: 'UNIT_MINUTES', value: 'UNIT_MINUTES_ABBRV', default: true }]
 		},
 		{
-			name: 'Cycling (distance)',
+			name: 'COLUMN_CYCLING_DISTANCE',
 			color: '#19B5FE',
 			icon: 'directions-bike',
-			units: [{ title: 'km', value: 'km', default: true }]
+			units: [{ title: 'UNIT_KILOMETER', value: 'UNIT_KILOMETER_ABBRV', default: true }]
 		},
 		{
-			name: 'Cycling (calories)',
+			name: 'COLUMN_CYCLING_CALORIES',
 			color: '#81CFE0',
 			icon: 'directions-bike',
-			units: [{ title: 'kcal', value: 'kcal', default: true }]
+			units: [{ title: 'UNIT_KILOCALORIES', value: 'UNIT_KILOCALORIES_ABBRV', default: true }]
 		},
 		{
-			name: 'Cycling (duration)',
+			name: 'COLUMN_CYCLING_DURATION',
 			color: '#ECF0F1',
 			icon: 'directions-bike',
-			units: [{ title: 'minutes', value: 'mins', default: true }]
+			units: [{ title: 'UNIT_MINUTES', value: 'UNIT_MINUTES_ABBRV', default: true }]
 		}
 	])
-	.service('presetTraqs', function () {
+	.service('presetTraqs', function ($translate) {
 		return [
 			{
 				id: 'weight',
-				title: 'Weight',
+				title: 'TRAQ_WEIGHT',
 				icon: 'filter-frames',
 
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Weight'],
-						columns: [{ name: 'Weight', axis: 'left' }]
+						requireColumns: ['COLUMN_WEIGHT'],
+						columns: [{ name: 'COLUMN_WEIGHT', axis: 'left' }]
 					}
 				],
 
 				insights: [
 					{
-						title: 'Change',
-						requireColumns: ['Weight'],
+						title: 'CHANGE',
+						requireColumns: ['COLUMN_WEIGHT'],
 						html: function (traq, data) {
-							var weight = _.findWhere(data, { name: 'Weight' }),
+							var weight = _.findWhere(data, { name: 'COLUMN_WEIGHT' }),
 								weights = weight.measurements;
 							if (!weights || !weights.length) { return ''; }
 							var weightA = _.first(weights).value,
 								weightB = _.last(weights).value,
 								weightUnit = weight.unit,
 								icon = weightA > weightB ? 'arrow-drop-down' : 'arrow-drop-up';
-							return '<span class="mi mi-24 mi-' + icon + '"></span>' + Math.round((weightB - weightA) * 10) / 10 + ' <span class="unit">' + weightUnit + '</span>';
+							return '<span class="mi mi-24 mi-' + icon + '"></span>' +
+								'{{ ' + Math.round((weightB - weightA) * 10) / 10 + ' | localeNumber }} ' +
+								'<span class="unit">{{ "' + weightUnit + '" | translate }}</span>';
 						}
 					},
 					{
-						title: 'Weight',
-						requireColumns: ['Weight'],
+						title: 'TRAQ_WEIGHT',
+						requireColumns: ['COLUMN_WEIGHT'],
 						html: function (traq, data) {
-							var weight = _.findWhere(data, { name: 'Weight' }),
+							var weight = _.findWhere(data, { name: 'COLUMN_WEIGHT' }),
 								weights = weight.measurements;
 							if (!weights || !weights.length) { return ''; }
 							var latestWeight = _.last(weights).value,
 								weightUnit = weight.unit;
-							return latestWeight + ' <span class="unit">' + weightUnit + '</span>';
+							return '{{ ' + latestWeight + ' | localeNumber }} ' +
+								'<span class="unit">{{ "' + weightUnit + '" | translate }}</span>';
 						}
 					},
 					{
-						title: 'BMI',
-						requireColumns: ['Weight', 'Height'],
+						title: 'TRAQ_WEIGHT_BMI',
+						requireColumns: ['COLUMN_WEIGHT', 'COLUMN_HEIGHT'],
 						html: function (traq, data) {
-							var weight = _.findWhere(data, { name: 'Weight' }),
+							var weight = _.findWhere(data, { name: 'COLUMN_WEIGHT' }),
 								weights = weight.measurements,
-								height = _.findWhere(data, { name: 'Height' }),
+								height = _.findWhere(data, { name: 'COLUMN_HEIGHT' }),
 								heights = height.measurements;
 							if (!heights || !weights || !heights.length || !weights.length) { return ''; }
 							var latestHeight = _.last(heights).value, // TODO: unit conversion to m
 								latestWeight = _.last(weights).value; // TODO: unit conversion to kg
-							return String(Math.round(latestWeight / (latestHeight * latestHeight) * 10) / 10);
+							return '{{ ' + Math.round(latestWeight / (latestHeight * latestHeight) * 10) / 10 + ' | localeNumber }}';
 						}
 					}
 				]
 			},
 			{
 				id: 'heart-rate',
-				title: 'Heart rate',
+				title: 'TRAQ_HEART_RATE',
 				icon: 'favorite',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Heart rate'],
-						columns: [{ name: 'Heart rate', axis: 'left' }]
+						requireColumns: ['COLUMN_HEART_RATE'],
+						columns: [{ name: 'COLUMN_HEART_RATE', axis: 'left' }]
 					}
 				],
 				insights: [
 					{
-						title: 'Lowest',
-						requireColumns: ['Heart rate'],
+						title: 'LOWEST',
+						requireColumns: ['COLUMN_HEART_RATE'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HEART_RATE' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
-							return Math.round(_.min(bpms, 'value').value) + ' <span class="unit">bpm</span>';
+							return '{{ ' + Math.round(_.min(bpms, 'value').value) + ' | localeNumber }} <span class="unit">bpm</span>';
 						}
 					},
 					{
-						title: 'Average',
-						requireColumns: ['Heart rate'],
+						title: 'AVERAGE',
+						requireColumns: ['COLUMN_HEART_RATE'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HEART_RATE' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
-							return Math.round(_.sum(bpms, 'value') / bpms.length) + ' <span class="unit">bpm</span>';
+							return '{{ ' + Math.round(_.sum(bpms, 'value') / bpms.length) + ' | localeNumber }} <span class="unit">bpm</span>';
 						}
 					},
 					{
-						title: 'Highest',
-						requireColumns: ['Heart rate'],
+						title: 'HIGHEST',
+						requireColumns: ['COLUMN_HEART_RATE'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Heart rate' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HEART_RATE' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
-							return Math.round(_.max(bpms, 'value').value) + ' <span class="unit">bpm</span>';
+							return '{{ ' + Math.round(_.max(bpms, 'value').value) + ' | localeNumber }} <span class="unit">bpm</span>';
 						}
 					}
 				]
 			},
 			{
 				id: 'sleep',
-				title: 'Sleep',
+				title: 'TRAQ_SLEEP',
 				icon: 'airline-seat-individual-suite',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Hours slept'],
-						columns: [{ name: 'Hours slept', axis: 'left' }]
+						requireColumns: ['COLUMN_HOURS_SLEPT'],
+						columns: [{ name: 'COLUMN_HOURS_SLEPT', axis: 'left' }]
 					}
 				],
 				insights: [
 					{
-						title: 'Least',
-						requireColumns: ['Hours slept'],
+						title: 'LEAST',
+						requireColumns: ['COLUMN_HOURS_SLEPT'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HOURS_SLEPT' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
 							return Math.round(_.min(bpms, 'value').value) + ' <span class="unit">hrs</span>';
 						}
 					},
 					{
-						title: 'Average',
-						requireColumns: ['Hours slept'],
+						title: 'AVERAGE',
+						requireColumns: ['COLUMN_HOURS_SLEPT'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HOURS_SLEPT' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
 							return Math.round(_.sum(bpms, 'value') / bpms.length) + ' <span class="unit">hrs</span>';
 						}
 					},
 					{
-						title: 'Most',
-						requireColumns: ['Hours slept'],
+						title: 'MOST',
+						requireColumns: ['COLUMN_HOURS_SLEPT'],
 						html: function (traq, data) {
-							var bpm = _.findWhere(data, { name: 'Hours slept' }),
+							var bpm = _.findWhere(data, { name: 'COLUMN_HOURS_SLEPT' }),
 								bpms = bpm.measurements;
 							if (!bpms || !bpms.length) { return ''; }
 							return Math.round(_.max(bpms, 'value').value) + ' <span class="unit">hrs</span>';
@@ -269,74 +272,68 @@ angular.module('traq')
 			},
 			{
 				id: 'steps',
-				title: 'Steps',
+				title: 'TRAQ_STEPS',
 				icon: 'directions-walk',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Running (steps)', 'Walking (steps)'],
+						requireColumns: ['COLUMN_RUNNING_STEPS', 'COLUMN_WALKING_STEPS'],
 						columns: [
-							{ name: 'Running (steps)', axis: 'left' },
-							{ name: 'Walking (steps)', axis: 'left' }
+							{ name: 'COLUMN_RUNNING_STEPS', axis: 'left' },
+							{ name: 'COLUMN_WALKING_STEPS', axis: 'left' }
 						]
 					}
 				]
 			},
 			{
 				id: 'calories-burnt',
-				title: 'Calories burnt',
+				title: 'TRAQ_CALORIES_BURNT',
 				icon: 'directions-walk',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Running (calories)', 'Walking (calories)', 'Cycling (calories)'],
+						requireColumns: ['COLUMN_RUNNING_CALORIES', 'COLUMN_WALKING_CALORIES', 'COLUMN_CYCLING_CALORIES'],
 						columns: [
-							{ name: 'Running (calories)', axis: 'left' },
-							{ name: 'Walking (calories)', axis: 'left' },
-							{ name: 'Cycling (calories)', axis: 'left' }
+							{ name: 'COLUMN_RUNNING_CALORIES', axis: 'left' },
+							{ name: 'COLUMN_WALKING_CALORIES', axis: 'left' },
+							{ name: 'COLUMN_CYCLING_CALORIES', axis: 'left' }
 						]
 					}
 				]
 			},
 			{
 				id: 'distance-travelled',
-				title: 'Distance travelled',
+				title: 'TRAQ_DISTANCE_TRAVELLED',
 				icon: 'directions-walk',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Running (distance)', 'Walking (distance)', 'Cycling (distance)'],
+						requireColumns: ['COLUMN_RUNNING_DISTANCE', 'COLUMN_WALKING_DISTANCE', 'COLUMN_CYCLING_DISTANCE'],
 						columns: [
-							{ name: 'Running (distance)', axis: 'left' },
-							{ name: 'Walking (distance)', axis: 'left' },
-							{ name: 'Cycling (distance)', axis: 'left' }
+							{ name: 'COLUMN_RUNNING_DISTANCE', axis: 'left' },
+							{ name: 'COLUMN_WALKING_DISTANCE', axis: 'left' },
+							{ name: 'COLUMN_CYCLING_DISTANCE', axis: 'left' }
 						]
 					}
 				]
 			},
 			{
 				id: 'physical-activity-duration',
-				title: 'Physical activity duration',
+				title: 'TRAQ_PHYSICAL_ACTIVITY_DURATION',
 				icon: 'directions-walk',
 				charts: [
 					{
 						type: 'line',
-						requireColumns: ['Running (duration)', 'Walking (duration)', 'Cycling (duration)'],
+						requireColumns: ['COLUMN_RUNNING_DURATION', 'COLUMN_WALKING_DURATION', 'COLUMN_CYCLING_DURATION'],
 						columns: [
-							{ name: 'Running (duration)', axis: 'left' },
-							{ name: 'Walking (duration)', axis: 'left' },
-							{ name: 'Cycling (duration)', axis: 'left' }
+							{ name: 'COLUMN_RUNNING_DURATION', axis: 'left' },
+							{ name: 'COLUMN_WALKING_DURATION', axis: 'left' },
+							{ name: 'COLUMN_CYCLING_DURATION', axis: 'left' }
 						]
 					}
 				]
 			} //,
 			/*
-			{
-				id: 'walking-distance',
-				title: 'Walking distance',
-				icon: 'directions-walk',
-				category: 'health'
-			},
 			{
 				id: 'calories',
 				title: 'Calories',

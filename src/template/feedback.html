@@ -1,11 +1,11 @@
 <md-toolbar>
 	<div class="md-toolbar-tools">
-		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+		<md-button type="button" class="md-icon-button" aria-label="{{ 'CLOSE' | translate }}" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 		</md-button>
-		<h2>Send Feedback</h2>
+		<h2>{{ 'FEEDBACK_SEND' | translate }}</h2>
 		<span flex></span>
-		<md-button type="button" class="md-icon-button" aria-label="Send">
+		<md-button type="button" class="md-icon-button" aria-label="{{ 'SEND' | translate }}">
 			<md-icon md-font-icon="mi mi-24 mi-send"></md-icon>
 		</md-button>
 	</div>
@@ -14,14 +14,14 @@
 <md-content layout-padding layout="row" layout-sm="column">
 	<form>
 		<md-input-container>
-			<label>Your feedback, suggestions or comments</label>
+			<label>{{ 'FEEDBACK_INPUT' | translate }}</label>
 			<textarea ng-model="feedback.message" required columns="1" md-maxlength="500"></textarea>
 		</md-input-container>
 		
-		<md-checkbox ng-model="feedback.sendEmail" class="md-align-top-left">Include your email address so Traq can respond to you</md-checkbox>
+		<md-checkbox ng-model="feedback.sendEmail" class="md-align-top-left">{{ 'FEEDBACK_EMAIL' | translate }}</md-checkbox>
 		
 		<md-input-container ng-if="feedback.sendEmail">
-			<label>Your email address</label>
+			<label>{{ 'YOUR_EMAIL' | translate }}</label>
 			<input type="email" ng-model="feedback.email">
 		</md-input-container>
 	</form>

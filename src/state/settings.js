@@ -8,9 +8,10 @@ angular.module('traq').config(function ($stateProvider) {
 		url: '/settings',
 		templateUrl: 'settings.html',
 		resolve: {
-			columns: function (dbColumn) { return dbColumn.getAll(); }
+			columns: function (dbColumn) { return dbColumn.getAll(); },
+			language: function (dbConfig) { return dbConfig.getOrCreate('language'); }
 		},
-		controller: function ($scope, $translate, dbConfig, dbTraq, dbColumn, dbMeasurement, columns) {
+		controller: function ($scope, $translate, dbConfig, dbTraq, dbColumn, dbMeasurement, columns, language) {
 			$scope.settings = {};
 			$scope.columns = columns;
 			_.each(columns, function (column, i) {
@@ -41,16 +42,15 @@ angular.module('traq').config(function ($stateProvider) {
 			updateColumnCount();
 			updateMeasurementCount();
 
-			dbConfig.getOrCreate('language').then(function (doc) {
-				$scope.settings.language = doc.key;
-			});
+			$scope.settings.language = language.code;
 
-			$scope.$watch('settings.language', function (language) {
-				if (!language) { return; }
+			$scope.$watch('settings.language', function (code) {
+				if (!code || code === language.code) { return; }
 				dbConfig.getOrCreate('language').then(function (doc) {
-					dbConfig.put(_.extend(doc, { key: language }));
+					return dbConfig.put(_.extend(doc, { code: code }));
+				}).then(function () {
+					window.location.reload();
 				});
-				$translate.use(language);
 			});
 		}
 	});

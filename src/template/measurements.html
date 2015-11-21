@@ -1,11 +1,11 @@
 <md-toolbar>
 	<div class="md-toolbar-tools">
-		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+		<md-button type="button" class="md-icon-button" aria-label="{{ 'CLOSE' | translate }}" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 		</md-button>
-		<h2>Data</h2>
+		<h2>{{ 'MEASUREMENTS' | translate }}</h2>
 		<span flex></span>
-		<md-button type="button" class="md-icon-button" aria-label="Date" ng-if="data.selectMode" ng-click="delete()">
+		<md-button type="button" class="md-icon-button" aria-label="{{ 'DATE' | translate }}" ng-if="data.selectMode" ng-click="delete()">
 			<md-icon md-font-icon="mi mi-24 mi-delete"></md-icon>
 		</md-button>
 	</div>
@@ -18,8 +18,8 @@
 				<md-icon md-font-icon="" ng-style="{ color: measurement.column.color }" ng-if="!data.selectMode" ng-click="data.selected[measurement._id + ':::' + measurement._rev] = true" stop-propagation class="mi mi-24 mi-{{ measurement.column.icon }} circle-icon"></md-icon> <!-- md-icon is broken (icons weren't aligning with scope) - use class instead of md-font-icon -->
 				<md-checkbox ng-if="data.selectMode" ng-model="data.selected[measurement._id + ':::' + measurement._rev]" aria-label="Select" stop-propagation></md-checkbox>
 				<div class="md-list-item-text" no-fastclick ui-sref="measurement-edit({ mid: measurement._id })">
-					<h3>{{ measurement.column.name }}: {{ measurement.value }} {{ measurement.column.unit }}</h3>
-					<p>{{ measurement.date }}</p>
+					<h3>{{ measurement.column.name | translate }}: {{ measurement.value | localeNumber }} {{ measurement.column.unit | translate }}</h3>
+					<p>{{ measurement.timestamp | localeDate:'calendar' }}</p>
 					<!-- <p ng-if="measurement.note">{{ measurement.note }}</p> -->
 				</div>
 			</md-list-item>

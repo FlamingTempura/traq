@@ -29,7 +29,7 @@ angular.module('traq').service('fakeTransport', function (dbMeasurement) {
 	};
 
 	var generators = {
-		'Weight': rand1(28, 365, 70, 30, 10, 1),
+		'COLUMN_WEIGHT': rand1(28, 365, 70, 30, 10, 1),
 		'Heart rate': rand1(250, 365, 60, 20, 30, 0),
 		'Hours slept': rand1(280, 365, 6.5, 2, 3, 1),
 		'Height': function () {

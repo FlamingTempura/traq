@@ -144,6 +144,7 @@ gulp.task('languages', function (done) {
 			_.map(languageCodes, function (code) {
 				var language = {};
 				_.each(translations, function (translation) {
+					if (!translation[code]) { return; }
 					language[translation.id] = translation[code];
 				});
 				return '$translateProvider.translations(\'' + code + '\', ' + JSON.stringify(language) + ');';
