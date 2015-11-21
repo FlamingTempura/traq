@@ -3,9 +3,68 @@
 var _ = require('lodash'),
 	angular = require('angular'),
 	ngMaterial = require('angular-material'),
+	ngTranslate = require('angular-translate'),
 	uiRouter = require('angular-ui-router'),
 	PouchDB = require('pouchdb'),
 	moment = require('moment');
+
+PouchDB.plugin(require('transform-pouch'));
+PouchDB.plugin(require('pouchdb-undo'));
+PouchDB.plugin({
+	getAll: function (options) {
+		options = _.extend({ include_docs: true }, options);
+		if (options.startWith) {
+			_.extend(options, {
+				startkey: options.startWith + ':',
+				endkey: options.startWith + ':\uffff'
+			});
+		}
+		return this.allDocs(options).then(function (result) {
+			return _.pluck(result.rows, 'doc');
+		});
+	},
+	getOrCreate: function (id) {
+		var that = this;
+		return that.get(id).catch(function () {
+			return that.put({ _id: id }).then(function () {
+				return that.get(id);
+			});
+		});
+	},
+	exists: function (id) {
+		return this.allDocs({
+			startkey: id,
+			endkey: id
+		}).then(function (result) {
+			return result.rows.length > 0;
+		});
+	},
+	count: function () {
+		return this.allDocs({ keys: [] }).then(function (res) {
+			return res.total_rows;
+		});
+	},
+	erase: function () {
+		var that = this;
+		return that.allDocs({ include_docs: true }).then(function (res) {
+			return that.bulkDocs(_.map(res.rows, function (row) {
+				return _.extend(row.doc, { _deleted: true });
+			}));
+		});
+	},
+	// use angular promises ($q) to avoid need for $scope.$apply
+	observe: function ($q) {
+		var that = this,
+			methods = ['destroy', 'put', 'post', 'get', 'remove', 'bulkDocs', 'allDocs',
+				'changes', 'putAttachment', 'getAttachment', 'removeAttachment',
+				'query', 'viewCleanup', 'info', 'compact', 'revsDiff'];
+		methods.forEach(function (method) {
+			that[method] = function () {
+				return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
+			};
+		});
+	}
+});
 
 var fastclick = function () {
 	return {
@@ -34,12 +93,12 @@ document.addEventListener('deviceready', function () {
 }, false);
 
 
-angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider, $provide) {
+angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($mdThemingProvider, $urlRouterProvider, $translateProvider, $provide) {
 	$mdThemingProvider.theme('default')
 		.dark()
 		.primaryPalette('yellow');
 	$urlRouterProvider.otherwise('/');
-
+	$translateProvider.preferredLanguage('en');
 	$provide.decorator('$log', function ($delegate) {
 		$delegate.instance = function (name, color) {
 			var $log = {},
@@ -62,7 +121,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	});
 }).controller('AppCtrl', function ($scope, snack) {
 	$scope.snack = snack;
-}).run(function ($q, $rootScope, snack) {
+}).run(function ($q, $rootScope, $translate, snack, dbConfig) {
 	progressSplash();
 	var urlDepth = function (url) {
 		return _.compact(url.split('?')[0].split('/')).length;
@@ -78,64 +137,12 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 	});
 	$rootScope.windowHeight = window.innerHeight;
 	// TODO on resize, change windowHeight
-	PouchDB.plugin(require('transform-pouch'));
-	PouchDB.plugin({
-		getAll: function (options) {
-			options = _.extend({ include_docs: true }, options);
-			if (options.startWith) {
-				_.extend(options, {
-					startkey: options.startWith + ':',
-					endkey: options.startWith + ':\uffff'
-				});
-			}
-			return this.allDocs(options).then(function (result) {
-				return _.pluck(result.rows, 'doc');
-			});
-		},
-		getOrCreate: function (id) {
-			var that = this;
-			return that.get(id).catch(function () {
-				return that.put({ _id: id }).then(function () {
-					return that.get(id);
-				});
-			});
-		},
-		exists: function (id) {
-			return this.allDocs({
-				startkey: id,
-				endkey: id
-			}).then(function (result) {
-				return result.rows.length > 0;
-			});
-		},
-		count: function () {
-			return this.allDocs({ keys: [] }).then(function (res) {
-				return res.total_rows;
-			});
-		},
-		erase: function () {
-			var that = this;
-			return that.allDocs({}).then(function (res) {
-				return $q.all(_.map(res.rows, function (row) {
-					return that.remove(row.id, row.value.rev);
-				}));
-			});
-		},
-		// use angular promises ($q) to avoid need for $scope.$apply
-		observe: function ($q) {
-			var that = this,
-				methods = ['destroy', 'put', 'post', 'get', 'remove', 'bulkDocs', 'allDocs',
-					'changes', 'putAttachment', 'getAttachment', 'removeAttachment',
-					'query', 'viewCleanup', 'info', 'compact', 'revsDiff'];
-			methods.forEach(function (method) {
-				that[method] = function () {
-					return $q.resolve(PouchDB.prototype[method].apply(that, arguments));
-				};
-			});
-		}
+	
+	dbConfig.getOrCreate('language').then(function (doc) {
+		if (doc.key) { $translate.use(doc.key); }
 	});
 }).service('dbConfig', function ($q) {
-	var db = new PouchDB('track-config');
+	var db = new PouchDB('traq-config');
 	db.observe($q);
 	return db;
 }).service('dbTraq', function ($q, presetTraqs) {
@@ -171,6 +178,7 @@ angular.module('traq', [ngMaterial, uiRouter]).config(function ($mdThemingProvid
 }).service('dbMeasurement', function ($q) {
 	var db = new PouchDB('traq-measurement');
 	db.observe($q);
+	db.enableUndo();
 	db.transform({
 		incoming: function (doc) {
 			// TODO: check that timestamp === _id.split(':')[1]

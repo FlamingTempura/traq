@@ -13,11 +13,15 @@ var gulp = require('gulp'),
 	source = require('vinyl-source-stream'),
 	_ = require('lodash'),
 	deps = _.keys(require('./package.json').dependencies),
-	fs = require('fs');
+	fs = require('fs'),
+	request = require('request-promise'),
+	d3 = require('d3');
 
 var buildFull = false;
 
 var devMode = true;
+
+var languageUrl = 'https://docs.google.com/spreadsheets/d/1emrP3rP-p8sujNziSjfCWaTCZGu6E32VxuYbhcplILc/pub?output=csv';
 
 gulp.task('browserify-vendor', function () {
 	var b = browserify({ debug: false });
@@ -128,6 +132,24 @@ gulp.task('full', ['full-presets']);
 
 gulp.task('obfuscate', ['full'], function () {
 
+});
+
+gulp.task('languages', function (done) {
+	request(languageUrl).then(function (csv) {
+		var translations = d3.csv.parse(csv),
+			languageCodes = _.chain(translations[0]).keys().filter(function (key) {
+				return key.length === 2 && key !== 'id';
+			}).value();
+		var c = 'angular.module(\'traq\').config(function ($translateProvider) {' +
+			_.map(languageCodes, function (code) {
+				var language = {};
+				_.each(translations, function (translation) {
+					language[translation.id] = translation[code];
+				});
+				return '$translateProvider.translations(\'' + code + '\', ' + JSON.stringify(language) + ');';
+			}).join('\n') + '});';
+		fs.writeFile('./dist/languages.js', c, done);
+	});
 });
 
 gulp.task('default', ['browserify-vendor', 'browserify-app', 'sass', 'index', 'fonts', 'templates', 'images', 'full']);

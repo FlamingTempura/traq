@@ -19,7 +19,7 @@ angular.module('traq').config(function ($stateProvider) {
 				}
 			}
 		},
-		controller: function ($scope, $state, dbMeasurement, snack, columns, measurement) {
+		controller: function ($scope, $state, dbMeasurement, columns, measurement) {
 			$scope.isNew = $state.params.mid === 'new';
 			$scope.groupedColumns = _.groupBy(columns, function (column) {
 				return column.name.replace(/^[^(]+(?:\(([^)]+)\))?$/, '$1') || 'Other'; // extract category from brackets e.g. Food (Expense)

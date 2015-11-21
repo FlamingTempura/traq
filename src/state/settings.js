@@ -10,7 +10,8 @@ angular.module('traq').config(function ($stateProvider) {
 		resolve: {
 			columns: function (dbColumn) { return dbColumn.getAll(); }
 		},
-		controller: function ($scope, dbConfig, dbTraq, dbColumn, dbMeasurement, columns) {
+		controller: function ($scope, $translate, dbConfig, dbTraq, dbColumn, dbMeasurement, columns) {
+			$scope.settings = {};
 			$scope.columns = columns;
 			_.each(columns, function (column, i) {
 				var oldUnit = column.oldUnit;
@@ -39,6 +40,18 @@ angular.module('traq').config(function ($stateProvider) {
 			updateTraqCount();
 			updateColumnCount();
 			updateMeasurementCount();
+
+			dbConfig.getOrCreate('language').then(function (doc) {
+				$scope.settings.language = doc.key;
+			});
+
+			$scope.$watch('settings.language', function (language) {
+				if (!language) { return; }
+				dbConfig.getOrCreate('language').then(function (doc) {
+					dbConfig.put(_.extend(doc, { key: language }));
+				});
+				$translate.use(language);
+			});
 		}
 	});
 });

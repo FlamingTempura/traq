@@ -62,14 +62,20 @@ angular.module('traq').service('fakeTransport', function (dbMeasurement) {
 			title: 'Fake data',
 			icon: 'img/icons/moves.svg'
 		},
-		controller: function ($scope, fakeTransport) {
+		controller: function ($scope, $state, fakeTransport, snack, dbMeasurement) {
 			$scope.importColumns = _.map(fakeTransport.generators, function (generator, key) {
 				return { key: key, selected: false };
 			});
 			$scope.import = function () {
 				_.each($scope.importColumns, function (importColumn) {
 					if (importColumn.selected) {
-						fakeTransport.generate(importColumn.key);
+						fakeTransport.generate(importColumn.key).then(function (result) {
+							var undoId = result[0].undoId;
+							snack('Fake data has been imported', 'Undo', function () {
+								dbMeasurement.undo(undoId);
+								$state.go($state.current, {}, { reload: true }); // HACK: home page will need reloading to refresh data
+							});
+						});
 					}
 				});
 			};

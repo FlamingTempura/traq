@@ -1,9 +1,9 @@
 <md-toolbar>
 	<div class="md-toolbar-tools">
-		<md-button type="button" class="md-icon-button" aria-label="Close" ui-back>
+		<md-button type="button" class="md-icon-button" aria-label="{{ 'CLOSE' | translate }}" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 		</md-button>
-		<h2>Settings</h2>
+		<h2>{{ 'SETTINGS' | translate }}</h2>
 	</div>
 </md-toolbar>
 
@@ -11,20 +11,28 @@
 	<md-list>
 		<md-list-item class="md-2-line">
 			<div class="md-list-item-text">
-				<h3>Sync to Dropbox</h3>
-				<p>Enable this to backup your data to Dropbox.</p>
+				<h3>{{ 'SETTING_DROPBOX' | translate }}</h3>
+				<p>{{ 'SETTING_DROPBOX_DESCRIPTION' | translate }}</p>
 			</div>
 			<md-switch class="md-secondary" ng-model="settings.enableDropbox"></md-switch>
 		</md-list-item>
 		<md-list-item class="md-2-line">
 			<div class="md-list-item-text">
-				<h3>Send statistics</h3>
-				<p>Enable this to send anonymous data about how you use the app to help improve Traq.</p>
+				<h3>{{ 'SETTING_STATISTICS' | translate }}</h3>
+				<p>{{ 'SETTING_STATISTICS_DESCRIPTION' | translate }}</p>
 			</div>
 			<md-switch class="md-secondary" ng-model="settings.enableStats"></md-switch>
 		</md-list-item>
+		<md-list-item>
+			<md-icon md-font-icon="mi mi-24 mi-language"></md-icon>
+			<p>{{ 'LANGUAGE' | translate }}</p>
+			<md-select ng-model="settings.language" aria-label="{{ 'LANGUAGE' | translate }}">
+				<md-option value="en">{{ 'ENGLISH' | translate }}</md-option>
+				<md-option value="es">{{ 'SPANISH' | translate }}</md-option>
+			</md-select>
+		</md-list-item>
 		
-		<md-subheader>Units</md-subheader>
+		<md-subheader>{{ 'SETTING_UNITS' | translate }}</md-subheader>
 		<md-list-item ng-repeat="column in columns">
 			<md-icon md-font-icon="mi mi-24 mi-{{ column.icon }} circle-icon" ng-style="{ color: column.color }"></md-icon>
 			<p>{{ column.name }}</p>
