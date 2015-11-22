@@ -121,7 +121,7 @@ angular.module('traq')
 			units: [{ title: 'UNIT_MINUTES', value: 'UNIT_MINUTES_ABBRV', default: true }]
 		}
 	])
-	.service('presetTraqs', function ($translate) {
+	.service('presetTraqs', function () {
 		return [
 			{
 				id: 'weight',

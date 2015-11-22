@@ -219,6 +219,7 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 					return dbMeasurement.getAll({
 						descending: true,
 						startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : ''),
+						endkey: columnName + ':' + (endDate ? moment(endDate).format('YYYYMMDD[-]HHmmss') : '\uffff'),
 						limit: 1
 					}).then(function (preMeasurements) {
 						return _.extend({}, column, { measurements: preMeasurements.concat(measurements) });

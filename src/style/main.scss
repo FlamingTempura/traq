@@ -142,11 +142,11 @@ svg {
 		display: none;
 	}
 
-	.point {
+	.visiblepoint {
 		fill: #444;
 		stroke-width: 2px;
 	}
-	.clickpoint {
+	.tappoint {
 		fill: red;
 		opacity: 0;
 	}

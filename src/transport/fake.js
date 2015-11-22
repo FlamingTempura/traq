@@ -30,9 +30,9 @@ angular.module('traq').service('fakeTransport', function (dbMeasurement) {
 
 	var generators = {
 		'COLUMN_WEIGHT': rand1(28, 365, 70, 30, 10, 1),
-		'Heart rate': rand1(250, 365, 60, 20, 30, 0),
-		'Hours slept': rand1(280, 365, 6.5, 2, 3, 1),
-		'Height': function () {
+		'COLUMN_HEART_RATE': rand1(250, 365, 60, 20, 30, 0),
+		'COLUMN_HOURS_SLEPT': rand1(280, 365, 6.5, 2, 3, 1),
+		'COLUMN_HEIGHT': function () {
 			return [{
 				timestamp: new Date(),
 				value: 1 + Math.round(Math.random() * 100) / 100
