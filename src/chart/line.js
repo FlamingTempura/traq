@@ -51,7 +51,7 @@ angular.module('traq').config(function (charts, spans) {
 			this.update = function (columns, rows, span) {
 				if (!rows || !width) { return; }
 
-				cht.selectAll('.line,.area, .clickpoint, .gridline').remove();
+				cht.selectAll('.line, .area').remove();
 
 				if (span) {
 					xAxis.ticks(spans[span].ticks || 7).tickFormat(spans[span].tickFormat);
@@ -61,16 +61,6 @@ angular.module('traq').config(function (charts, spans) {
 
 				x.domain([new Date(Date.now() - spans[span].duration), new Date()]);
 
-				cht.selectAll('.x.axis')
-					.call(xAxis);
-
-				cht.selectAll('.x.gridline').data(ys.left.ticks(6)).enter()
-					.append('line')
-					.attr('class', 'x gridline')
-					.attr('x1', 0)
-					.attr('x2', width)
-					.attr('y1', function (d) { return ys.left(d); })
-					.attr('y2', function (d) { return ys.left(d); });
 
 				_.map(['left', 'right'], function (direction) {
 					var y = ys[direction],
@@ -170,6 +160,22 @@ angular.module('traq').config(function (charts, spans) {
 
 					});
 				});
+
+				cht.selectAll('.x.axis')
+					.call(xAxis);
+
+				var grid = cht.selectAll('.x.gridline')
+					.data(ys.left.ticks(6));
+
+				grid.enter()
+					.append('line')
+					.attr('class', 'x gridline')
+					.attr('x1', 0);
+				grid.attr('x2', width)
+					.attr('y1', function (d) { return ys.left(d); })
+					.attr('y2', function (d) { return ys.left(d); });
+
+				grid.exit().remove();
 			};
 
 			this.resize = function (_width, _height) {

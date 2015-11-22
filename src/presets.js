@@ -232,7 +232,7 @@ angular.module('traq')
 				icon: 'airline-seat-individual-suite',
 				charts: [
 					{
-						type: 'line',
+						type: 'bar',
 						requireColumns: ['COLUMN_HOURS_SLEPT'],
 						columns: [{ name: 'COLUMN_HOURS_SLEPT', axis: 'left' }]
 					}

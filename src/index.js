@@ -432,7 +432,7 @@ require('./state/measurements.js');
 
 require('./chart/chart.js');
 require('./chart/line.js');
-//require('./chart/bar.js');
+require('./chart/bar.js');
 
 require('./transport/transport.js');
 require('./transport/fake.js');

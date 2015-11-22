@@ -133,7 +133,8 @@ md-list {
 
 svg {
 	.gridline {
-		stroke: hsl(0, 0, 24%);
+		stroke: hsl(0, 0, 40%);
+		opacity: 0.2;
 		shape-rendering: crispEdges;
 	}
 

@@ -2,155 +2,153 @@
 
 var angular = require('angular'),
 	d3 = require('d3'),
-	_ = require('lodash');
+	_ = require('lodash'),
+	moment = require('moment');
 
-angular.module('traq')
-	.directive('barChart', function () {
-		return {
-			restrict: 'E',
-			replace: true,
-			scope: {
-				traq: '=',
-				chart: '=',
-				rows: '='
-			},
-			template: '<div flex layout="row"><div flex></div></div>',
-			link: function (scope, element) {
-				var chart, columns, rows;
+var margin = { top: 6, right: 28, bottom: 30, left: 36 },
+	barMargin = 4;
 
-				var container = element.children()[0];
+angular.module('traq').config(function (charts, spans) {
+	charts.push({
+		id: 'bar',
+		title: 'Bar chart',
+		Chart: function (svg, rand, tip) {
+			var width, height,
+				defs = svg.select('defs'),
+				cht = svg.select('.cht'),
+				clip = defs.append('clipPath')
+					.attr('id', 'clip' + rand)
+					.append('rect');
 
-				var margin = { top: 20, right: 50, bottom: 30, left: 50 };
-
-				var x = d3.time.scale();
-				var yLeft = d3.scale.linear();
-				var yRight = d3.scale.linear();
-
-				var xAxis = d3.svg.axis()
+			var x = d3.time.scale(),
+				xAxis = d3.svg.axis()
 					.scale(x)
-					.ticks(d3.time.day)
-					.tickFormat(d3.time.format('%a'))
 					.orient('bottom');
 
-				var yAxisLeft = d3.svg.axis()
-					.scale(yLeft)
-					.orient('left');
+			cht.append('g')
+				.attr('class', 'x axis');
 
-				var yAxisRight = d3.svg.axis()
-					.scale(yRight)
-					.orient('right');
+			var ys = {},
+				yAxes = {};
 
-				var svg = d3.select(container).append('svg');
-				var cht = svg.append('g');
+			_.each(['left', 'right'], function (direction) {
+				ys[direction] = d3.scale.linear();
+
+				yAxes[direction] = d3.svg.axis()
+					.scale(ys[direction])
+					.orient(direction)
+					.ticks(6);
 
 				cht.append('g')
-					.attr('class', 'x axis');
-
-				cht.append('g')
-					.attr('class', 'y axis left')
+					.attr('class', 'y axis ' + direction)
 					.append('text')
 					.attr('transform', 'rotate(-90)')
 					.attr('y', 6)
-					.attr('dy', '.71em')
+					.attr('dy', (direction === 'right' ? '-' : '') + '.71em')
 					.style('text-anchor', 'end');
+			});
 
-				cht.append('g')
-					.attr('class', 'y axis right')
-					.append('text')
-					.attr('transform', 'rotate(-90)')
-					.attr('y', 6)
-					.attr('dy', '-.71em')
-					.style('text-anchor', 'end');
+			this.update = function (columns, rows, span) {
+				if (!rows || !width) { return; }
 
-				var resize = function () {
-					var width = container.offsetWidth - margin.left - margin.right,
-						height = container.offsetHeight - margin.top - margin.bottom - 10;
+				cht.selectAll('.line, .area').remove();
 
-					console.log('w', width, 'h', height);
+				if (span) {
+					xAxis.ticks(spans[span].ticks || 7).tickFormat(spans[span].tickFormat);
+				} else {
+					xAxis.ticks(7).tickFormat(d3.time.format('%a'));
+				}
 
-					x.range([0, width]);
-					yLeft.range([height, 0]);
-					yRight.range([height, 0]);
+				x.domain([new Date(Date.now() - spans[span].duration), new Date()]);
 
-					var barPad = 1,
-						barWidth = width / rows.length - barPad;
 
-					svg.attr('width', width + margin.left + margin.right)
-						.attr('height', height + margin.top + margin.bottom);
-
-					cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-					cht.selectAll('.x.axis')
-						.attr('transform', 'translate(0,' + height + ')')
-						.call(xAxis);
-
-					cht.selectAll('.y.axis.right')
-						.attr('transform', 'translate(' + width + ' ,0)')
-						.call(yAxisRight);
-
-					cht.selectAll('.y.axis.left')
-						.call(yAxisLeft);
-
-					cht.selectAll('.line')
-						.remove();
-
-					_.each(columns, function (column) {
-						var y = column.axis === 'left' ? yLeft : yRight;
-
-						cht.selectAll('.bar.r' + column.id)
-							.attr('x', function (d) { return barPad + x(d.date) - barWidth / 2; })
-							.attr('width', barWidth)
-							.attr('y', function (d) { return y(d[column.id]); })
-							.attr('height', function (d) { return height - y(d[column.id]); });
-					});
-				};
-
-				var plot = function () {
-					if (!scope.chart || !scope.traq || !scope.rows) { return; }
-					rows = _.sortBy(scope.rows, 'date');
-					chart = scope.chart;
-					columns = _.chain(scope.traq.columns).map(function (column) {
-						return _.extend({}, column, chart.columns[column.id]);
-					}).where({ show: true }).value();
-
-					var leftColumns = _.where(columns, { axis: 'left' }),
-						rightColumns = _.where(columns, { axis: 'right' }),
-						leftLabel = leftColumns[0] || {},
-						rightLabel = rightColumns[0] || {},
-						allYLeft = _.chain(leftColumns).map(function (column) {
-							return _.pluck(rows, column.id);
+				_.map(['left', 'right'], function (direction) {
+					var y = ys[direction],
+						directionColumns = _.where(columns, { axis: direction }),
+						label = directionColumns[0] || {},
+						directionRows = _.chain(directionColumns).map(function (column) {
+							return _.pluck(rows, column.name);
 						}).flatten().value(),
-						allYRight = _.chain(rightColumns).map(function (column) {
-							return _.pluck(rows, column.id);
-						}).flatten().value();
+						extent = d3.extent(directionRows, function (d) { return d; });
 
-					x.domain(d3.extent(rows, function (d) { return d.date; }));
-					yLeft.domain(d3.extent(allYLeft, function (d) { return d; }));
-					yRight.domain(d3.extent(allYRight, function (d) { return d; }));
+					extent[0] -= (extent[1] - extent[0]) / 5 + extent[0] / 20;
+					extent[1] += (extent[1] - extent[0]) / 5 + extent[0] / 20;
 
-					cht.selectAll('.y.axis.left')
-						.style('visibility', leftColumns.length > 0)
-						.text(leftLabel.name + ' (' + leftLabel.unit + ')');
+					y.domain(extent).nice();
 
-					cht.selectAll('.y.axis.right')
-						.style('visibility', rightColumns.length > 0)
-						.text(rightLabel.name + ' (' + rightLabel.unit + ')');
+					cht.selectAll('.y.axis.' + direction)
+						.style('visibility', directionColumns.length > 0)
+						.text(label.name + ' (' + label.unit + ')')
+						.call(yAxes[direction]);
 
-					_.each(columns, function (column) {
-						cht.selectAll('.bar.r' + column.id)
-							.data(rows)
-							.enter()
-							.append('svg:rect')
-							.attr('class', 'bar r' + column.id)
-							.attr('fill', column.color);
+					_.each(directionColumns, function (column) {
+
+						var bars = cht.selectAll('.bar.b' + column.safeName)
+							.data(_.select(rows, function (row) {
+								return !isNaN(row[column.name]);
+							}));
+
+						bars.enter().append('rect')
+							.attr('class', 'bar b' + column.safeName)
+							.attr('fill', 'url(#grad' + column.safeName + rand + ')')
+							.attr('clip-path', 'url(#clip' + rand + ')')
+							.on('click', function (d) {
+								tip(margin.left + x(d.timestamp), margin.top + y(d[column.name]), moment(d.timestamp).format('DD MMM YYYY [at] hh:mm'), d.value + column.unit);
+							});
+
+						bars.attr('x', function (d) { return x(d.timestamp) + barMargin; })
+							.attr('y', function (d) { return height - y(d[column.name]); })
+							.attr('width', function (d) {
+								var t1 = d.timestamp,
+									t2 = new Date(t1.getTime() + 24 * 60 * 60 * 1000).getTime();
+								return x(t2) - x(t1) - barMargin * 2;
+							})
+							.attr('height', function (d) { return y(d[column.name]); });
+
+						bars.exit().remove();
 
 					});
+				});
 
-					resize();
-				};
+				cht.selectAll('.x.axis')
+					.call(xAxis);
 
-				angular.element(window).on('resize', resize);
-				scope.$watch('traq + chart + rows', plot);
-			}
-		};
+				var grid = cht.selectAll('.x.gridline')
+					.data(ys.left.ticks(6));
+
+				grid.enter()
+					.append('line')
+					.attr('class', 'x gridline')
+					.attr('x1', 0);
+				grid.attr('x2', width)
+					.attr('y1', function (d) { return ys.left(d); })
+					.attr('y2', function (d) { return ys.left(d); });
+
+				grid.exit().remove();
+			};
+
+			this.resize = function (_width, _height) {
+				console.log('resize', _width, _height);
+				width = _width - margin.left - margin.right;
+				height = _height - margin.top - margin.bottom - 10;
+
+				x.range([0, width]);
+				ys.left.range([height, 0]);
+				ys.right.range([height, 0]);
+
+				clip.attr('width', width)
+					.attr('height', height);
+
+				cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+				cht.selectAll('.x.axis')
+					.attr('transform', 'translate(0,' + height + ')');
+
+				cht.selectAll('.y.axis.right')
+					.attr('transform', 'translate(' + width + ' ,0)');
+			};
+
+			// FIXME: destroy event bindings
+		}
 	});
+});
