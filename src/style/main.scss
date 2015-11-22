@@ -415,3 +415,11 @@ md-list-item > p {
 	text-align: center;
 	padding-top: 12px;
 }
+
+md-select:not([disabled]):focus .md-select-value,
+md-select:not([disabled])[aria-expanded="true"] .md-select-value {
+	border-bottom-color: rgb(255,235,59);
+	border-bottom-width: 2px;
+	padding-bottom: 2px;
+	margin-bottom: 1px;	
+}

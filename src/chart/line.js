@@ -15,10 +15,6 @@ angular.module('traq').config(function (charts, colors, spans) {
 	charts.push({
 		id: 'line',
 		title: 'Line chart',
-		options: {
-			smooth: { label: 'Smooth line', type: Boolean },
-			points: { label: 'Draw points', type: Boolean }
-		},
 		Chart: function (element) {
 			var rand = Math.round(Math.random() * 1000000000), // random number to prevent conflicting id's when multiple charts (e.g. when switching state)
 				columns, rows, span, width, height,

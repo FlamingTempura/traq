@@ -1,15 +1,15 @@
 <md-toolbar>
 	<div class="md-toolbar-tools">
-		<md-button ng-if="!isNew" type="button" class="md-icon-button" aria-label="Close" ui-back>
+		<md-button ng-if="!isNew" type="button" class="md-icon-button" aria-label="{{ 'CLOSE' | translate }}" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-close"></md-icon>
 		</md-button>
-		<md-button ng-if="isNew" type="button" class="md-icon-button" aria-label="Back" ui-back>
+		<md-button ng-if="isNew" type="button" class="md-icon-button" aria-label="{{ 'BACK' | translate }}" ui-back>
 			<md-icon md-font-icon="mi mi-24 mi-arrow-back"></md-icon>
 		</md-button>
-		<h2><span ng-if="isNew">Create a traq</span>
-			<span ng-if="!isNew">Edit {{ traq.title }}</span></h2>
+		<h2><span ng-if="isNew">{{ 'TRAQ_CREATE' | translate }}</span>
+			<span ng-if="!isNew" translate="EDIT" translate-values="{  title: '{{ traq.title | translate }}' }"></span></h2>
 		<span flex></span>
-		<md-button type="button" ng-click="save()">Save</md-button>
+		<md-button type="button" ng-click="save()">{{ 'SAVE' | translate }}</md-button>
 	</div>
 </md-toolbar>
 
@@ -17,7 +17,7 @@
 	<form layout="column" ng-submit="save()">
 		<md-content layout-padding layout="column">
 			
-			<h1 class="md-subhead" ng-if="traq.preset">{{ traq.title }}</h1>
+			<h1 class="md-subhead" ng-if="traq.preset">{{ traq.title | translate }}</h1>
 
 			<md-input-container ng-if="!traq.preset">
 				<label>Title</label>
