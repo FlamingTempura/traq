@@ -190,6 +190,18 @@ svg {
 			fill: white;
 		}
 	}
+	.pievalue {
+		fill: none;
+		stroke-linecap: round;
+	}
+	.piebg {
+		fill: none;
+		stroke: #222;
+	}
+	.pietext {
+		text-anchor :middle;
+		font-size: 32px;
+	}
 }
 
 .fixed { position: fixed; }

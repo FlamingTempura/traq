@@ -15,7 +15,8 @@ angular.module('traq').config(function (charts, spans) {
 		Chart: function (svg, rand, tip) {
 			var width, height,
 				defs = svg.select('defs'),
-				cht = svg.select('.cht'),
+				cht = svg.select('.cht')
+					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
 				clip = defs.append('clipPath')
 					.attr('id', 'clip' + rand)
 					.append('rect');
@@ -50,8 +51,6 @@ angular.module('traq').config(function (charts, spans) {
 
 			this.update = function (columns, rows, span) {
 				if (!rows || !width) { return; }
-
-				cht.selectAll('.line, .area').remove();
 
 				if (span) {
 					xAxis.ticks(spans[span].ticks || 7).tickFormat(spans[span].tickFormat);

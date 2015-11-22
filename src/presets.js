@@ -234,7 +234,12 @@ angular.module('traq')
 					{
 						type: 'bar',
 						requireColumns: ['COLUMN_HOURS_SLEPT'],
-						columns: [{ name: 'COLUMN_HOURS_SLEPT', axis: 'left' }]
+						columns: [{
+							name: 'COLUMN_HOURS_SLEPT',
+							axis: 'left',
+							interval: { duration: 'day', aggregate: function (memo, measurement) { return memo + measurement.value; } },
+							goal: 8
+						}]
 					}
 				],
 				insights: [

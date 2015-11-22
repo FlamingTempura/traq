@@ -2,7 +2,8 @@
 
 var angular = require('angular'),
 	_ = require('lodash'),
-	d3 = require('d3');
+	d3 = require('d3'),
+	moment = require('moment');
 
 var tipWidth = 130,
 	tipHeight = 60,
@@ -115,7 +116,18 @@ angular.module('traq')
 					if (!chart || !scope.data) { return; }
 
 					columns = _.map(scope.chart.columns, function (column) {
-						return _.extend({}, column, _.findWhere(scope.data, { name: column.name }));
+						column = _.extend({}, column, _.findWhere(scope.data, { name: column.name }));
+						if (column.interval && column.interval.duration === 'day') {
+							column.measurements = _.chain(column.measurements).groupBy(function (measurement) {
+								return measurement._id.split(':')[1].slice(0, 8);
+							}).map(function (group, date) {
+								return {
+									timestamp: moment(date, 'YYYYMMDD').toDate(),
+									value: _.reduce(group, column.interval.aggregate, 0)
+								};
+							}).value();
+						}
+						return column;
 					});
 
 					rows = _.chain(columns).map(function (column) {

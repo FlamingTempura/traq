@@ -15,7 +15,8 @@ angular.module('traq').config(function (charts, spans) {
 		Chart: function (svg, rand, tip) {
 			var width, height,
 				defs = svg.select('defs'),
-				cht = svg.select('.cht'),
+				cht = svg.select('.cht')
+					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'),
 				clip = defs.append('clipPath')
 					.attr('id', 'clip' + rand)
 					.append('rect');
@@ -189,8 +190,6 @@ angular.module('traq').config(function (charts, spans) {
 
 				clip.attr('width', width)
 					.attr('height', height);
-
-				cht.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 				cht.selectAll('.x.axis')
 					.attr('transform', 'translate(0,' + height + ')');
