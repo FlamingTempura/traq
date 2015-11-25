@@ -78,6 +78,10 @@ var fastclick = function () {
 				e.stopPropagation();
 				element[0].click();
 			});
+			element.bind('touchmove touchend', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+			});
 		}
 	};
 };
@@ -218,8 +222,8 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 					// get the preceding measurement so that the plot will not start part way through the time span
 					return dbMeasurement.getAll({
 						descending: true,
-						startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : ''),
-						endkey: columnName + ':' + (endDate ? moment(endDate).format('YYYYMMDD[-]HHmmss') : '\uffff'),
+						startkey: columnName + ':' + (startDate ? moment(startDate).format('YYYYMMDD[-]HHmmss') : '\uffff'),
+						endkey: columnName + ':' + (endDate ? moment(endDate).format('YYYYMMDD[-]HHmmss') : ''),
 						limit: 1
 					}).then(function (preMeasurements) {
 						return _.extend({}, column, { measurements: preMeasurements.concat(measurements) });
