@@ -281,7 +281,7 @@ angular.module('traq')
 				icon: 'directions-walk',
 				charts: [
 					{
-						type: 'line',
+						type: 'bar',
 						requireColumns: ['COLUMN_RUNNING_STEPS', 'COLUMN_WALKING_STEPS'],
 						columns: [
 							{ name: 'COLUMN_RUNNING_STEPS', axis: 'left' },
