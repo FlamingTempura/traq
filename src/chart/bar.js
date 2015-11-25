@@ -60,13 +60,12 @@ angular.module('traq').config(function (charts, spans) {
 
 				x.domain([new Date(Date.now() - spans[span].duration), new Date()]);
 
-
 				_.map(['left', 'right'], function (direction) {
 					var y = ys[direction],
 						directionColumns = _.where(columns, { axis: direction }),
 						label = directionColumns[0] || {},
 						directionRows = _.chain(directionColumns).map(function (column) {
-							return _.pluck(rows, column.name);
+							return _.pluck(column.measurements, 'value');
 						}).flatten().value(),
 						extent = d3.extent(directionRows, function (d) { return d; });
 
@@ -83,26 +82,25 @@ angular.module('traq').config(function (charts, spans) {
 					_.each(directionColumns, function (column) {
 
 						var bars = cht.selectAll('.bar.b' + column.safeName)
-							.data(_.select(rows, function (row) {
-								return !isNaN(row[column.name]);
-							}));
+							.data(column.measurements);
 
 						bars.enter().append('rect')
 							.attr('class', 'bar b' + column.safeName)
 							.attr('fill', 'url(#grad' + column.safeName + rand + ')')
 							.attr('clip-path', 'url(#clip' + rand + ')')
 							.on('click', function (d) {
-								tip(margin.left + x(d.timestamp), margin.top + y(d[column.name]), moment(d.timestamp).format('DD MMM YYYY [at] hh:mm'), d.value + column.unit);
+								tip(margin.left + x(d.timestamp), margin.top + y(d.value), moment(d.timestamp).format('DD MMM YYYY [at] hh:mm'), d.value + column.unit);
 							});
 
 						bars.attr('x', function (d) { return x(d.timestamp) + barMargin; })
-							.attr('y', function (d) { return height - y(d[column.name]); })
+							.attr('y', function (d) { return height - y(d.value); })
 							.attr('width', function (d) {
+								console.log('aa', d, x(d.timestamp), y(d.value))
 								var t1 = d.timestamp,
 									t2 = new Date(t1.getTime() + 24 * 60 * 60 * 1000).getTime();
 								return x(t2) - x(t1) - barMargin * 2;
 							})
-							.attr('height', function (d) { return y(d[column.name]); });
+							.attr('height', function (d) { return y(d.value); });
 
 						bars.exit().remove();
 
