@@ -49,8 +49,9 @@ angular.module('traq').config(function (charts, spans) {
 					.style('text-anchor', 'end');
 			});
 
-			this.update = function (columns, rows, span) {
-				if (!rows || !width) { return; }
+			this.update = function (columns, span) {
+				console.log('buh', span)
+				if (!columns || !width) { return; }
 
 				cht.selectAll('.line, .area').remove();
 
@@ -62,13 +63,12 @@ angular.module('traq').config(function (charts, spans) {
 
 				x.domain([new Date(Date.now() - spans[span].duration), new Date()]);
 
-
 				_.map(['left', 'right'], function (direction) {
 					var y = ys[direction],
 						directionColumns = _.where(columns, { axis: direction }),
 						label = directionColumns[0] || {},
 						directionRows = _.chain(directionColumns).map(function (column) {
-							return _.pluck(rows, column.name);
+							return _.pluck(column.measurements, 'value');
 						}).flatten().value(),
 						extent = d3.extent(directionRows, function (d) { return d; });
 
@@ -86,23 +86,21 @@ angular.module('traq').config(function (charts, spans) {
 						var area = d3.svg.area()
 								.x(function (d) { return x(d.timestamp); })
 								.y0(height)
-								.y1(function (d) { return y(d[column.name]); }),
+								.y1(function (d) { return y(d.value); }),
 							line = d3.svg.line() // .interpolate('monotone')
 								.x(function (d) { return x(d.timestamp); })
-								.y(function (d) { return y(d[column.name]); });
+								.y(function (d) { return y(d.value); });
 
 						cht.append('path')
-							.datum(_.select(rows, function (row) {
-								return !isNaN(row[column.name]);
-							}))
+							.datum(column.measurements)
 							.attr('class', 'area')
 							.attr('fill', 'url(#grad' + column.safeName + rand + ')')
 							.attr('d', area)
 							.attr('clip-path', 'url(#clip' + rand + ')');
 
 						cht.append('path')
-							.datum(_.select(rows, function (row) {
-								return !row.forecast && !isNaN(row[column.name]);
+							.datum(_.select(column.measurements, function (row) {
+								return !row.forecast;
 							}))
 							.attr('class', 'line')
 							.attr('stroke', 'url(#grad' + column.safeName + rand + ')')
@@ -111,8 +109,8 @@ angular.module('traq').config(function (charts, spans) {
 
 						if (column.forecast && column.forecast.before) {
 							cht.append('path')
-								.datum(_.select(rows, function (row) {
-									return (row.first || row.forecast === 'before') && !isNaN(row[column.name]);
+								.datum(_.select(column.measurements, function (row) {
+									return row.first || row.forecast === 'before';
 								}))
 								.attr('class', 'line forecast')
 								.attr('stroke', 'url(#grad' + column.safeName + rand + ')')
@@ -121,8 +119,8 @@ angular.module('traq').config(function (charts, spans) {
 						}
 						if (column.forecast && column.forecast.after) {
 							cht.append('path')
-								.datum(_.select(rows, function (row) {
-									return (row.last || row.forecast === 'after') && !isNaN(row[column.name]);
+								.datum(_.select(column.measurements, function (row) {
+									return row.last || row.forecast === 'after';
 								}))
 								.attr('class', 'line forecast')
 								.attr('stroke', 'url(#grad' + column.safeName + rand + ')')
@@ -131,8 +129,8 @@ angular.module('traq').config(function (charts, spans) {
 						}
 
 						var pnts = cht.selectAll('.point.p' + column.safeName)
-							.data(_.select(rows, function (row) {
-								return !row.forecast && !isNaN(row[column.name]);
+							.data(_.select(column.measurements, function (row) {
+								return !row.forecast;
 							}));
 
 						var pntEnter = pnts.enter().append('g')
@@ -147,15 +145,15 @@ angular.module('traq').config(function (charts, spans) {
 							.attr('class', 'tappoint')
 							.attr('r', tipClickSize)
 							.on('click', function (d) {
-								tip(margin.left + x(d.timestamp), margin.top + y(d[column.name]), moment(d.timestamp).format('DD MMM YYYY [at] hh:mm'), d.value + column.unit);
+								tip(margin.left + x(d.timestamp), margin.top + y(d.value), moment(d.timestamp).format('DD MMM YYYY [at] hh:mm'), d.value + column.unit);
 							});
 
 						pnts.select('.visiblepoint')
 							.attr('cx', function (d) { return x(d.timestamp); })
-							.attr('cy', function (d) { return y(d[column.name]); });
+							.attr('cy', function (d) { return y(d.value); });
 						pnts.select('.tappoint')
 							.attr('cx', function (d) { return x(d.timestamp); })
-							.attr('cy', function (d) { return y(d[column.name]); });
+							.attr('cy', function (d) { return y(d.value); });
 
 						pnts.exit().remove();
 

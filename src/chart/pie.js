@@ -38,8 +38,8 @@ angular.module('traq').config(function (charts) {
 				cht = svg.select('.cht')
 					.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-			this.update = function (columns, rows) {
-				if (!rows || !width) { return; }
+			this.update = function (columns) {
+				if (!columns || !width) { return; }
 
 				var pies = cht.selectAll('.pie')
 					.data(columns);

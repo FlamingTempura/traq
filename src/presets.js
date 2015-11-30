@@ -119,6 +119,12 @@ angular.module('traq')
 			color: '#ECF0F1',
 			icon: 'directions-bike',
 			units: [{ title: 'UNIT_MINUTES', value: 'UNIT_MINUTES_ABBRV', default: true }]
+		},
+		{
+			name: 'COLUMN_CALORIES_CONSUMED',
+			color: '#ECF0F1',
+			icon: 'local-pizza',
+			units: [{ title: 'UNIT_KILOCALORIES', value: 'UNIT_KILOCALORIES_ABBRV', default: true }]
 		}
 	])
 	.service('presetTraqs', function () {
@@ -337,14 +343,21 @@ angular.module('traq')
 						]
 					}
 				]
-			} //,
-			/*
+			},
 			{
-				id: 'calories',
-				title: 'Calories',
+				id: 'calories-consumed',
+				title: 'Calories consumed',
 				icon: 'local-pizza',
-				category: 'health'
-			}*/
+				charts: [
+					{
+						type: 'bar',
+						requireColumns: ['COLUMN_CALORIES_CONSUMED'],
+						columns: [
+							{ name: 'COLUMN_CALORIES_CONSUMED', axis: 'left' }
+						]
+					}
+				]
+			}
 			// @@FULL_PRESETS
 		];
 	});

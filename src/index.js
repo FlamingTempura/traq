@@ -226,7 +226,10 @@ angular.module('traq', [ngMaterial, ngTranslate, uiRouter]).config(function ($md
 						endkey: columnName + ':' + (endDate ? moment(endDate).format('YYYYMMDD[-]HHmmss') : ''),
 						limit: 1
 					}).then(function (preMeasurements) {
-						return _.extend({}, column, { measurements: preMeasurements.concat(measurements) });
+						var _measurements = _.reject(preMeasurements.concat(measurements), function (measurement) {
+							return isNaN(measurement.value);
+						});
+						return _.extend({}, column, { measurements: _measurements });
 					});
 				});
 			});
